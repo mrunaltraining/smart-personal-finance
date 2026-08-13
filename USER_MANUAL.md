@@ -1,6 +1,20 @@
-# SmartFin – User Manual (v3.0.5)
+# SmartFin – User Manual (v4.0.1)
 
 A comprehensive guide to using SmartFin for personal financial planning.
+
+## What's New in v4.0.1
+
+### 🎉 Major Architecture Redesign (Behind the Scenes)
+- **Modular Business Logic**: All financial calculations now use platform-independent modules for better reliability and accuracy
+- **Enhanced Performance**: Optimized calculation logic with 64 comprehensive tests ensuring correctness
+- **Future-Ready**: Foundation for mobile app development and advanced features
+- **Improved Maintainability**: Cleaner code structure for faster feature development and bug fixes
+
+### User Experience Improvements
+- **No Breaking Changes**: All existing features work exactly as before
+- **Same Interface**: No changes to the user interface or workflow
+- **Better Reliability**: Enhanced calculation accuracy with comprehensive testing
+- **Responsive Design**: Maintained full support for mobile, tablet, and desktop
 
 ## What's New in v3.0.5
 

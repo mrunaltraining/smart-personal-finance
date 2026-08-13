@@ -33,13 +33,16 @@ export const COLOR_NEGATIVE = '#ef4444';
 export const COLOR_WARNING = '#eab308';
 
 // ── Frequency Helpers ────────────────────────────────────────────────────────
-export const FREQ_DIVISORS = { Monthly: 1, Quarterly: 3, 'Semi-Annual': 6, Annual: 12 };
+// Import from new utility module
+import { FrequencyConverter } from '../../../src/core/utils/FrequencyConverter.js';
+
+// Keep backward compatibility - delegate to new utility
+export const FREQ_DIVISORS = FrequencyConverter.FREQ_DIVISORS;
 
 export function toMonthlyAmount(amount, frequency) {
-    return amount / (FREQ_DIVISORS[frequency] || 1);
+    return FrequencyConverter.toMonthly(amount, frequency);
 }
 
 export function getPeriodsPerYear(frequency) {
-    const map = { Monthly: 12, Quarterly: 4, 'Semi-Annual': 2, Annual: 1 };
-    return map[frequency] || 12;
+    return FrequencyConverter.getPeriodsPerYear(frequency);
 }

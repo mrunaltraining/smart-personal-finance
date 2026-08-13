@@ -1,4 +1,5 @@
-// ── SmartFin v3.0 ────────────────────────────────────────────────────────────
+// ── SmartFin v4.0.1 ──────────────────────────────────────────────────────────
+// Major Architecture Redesign: Modular business logic, platform-independent code
 
 import { showAlert, showConfirm, showPrompt, showTypedConfirm, showToast } from './modules/modal.js';
 import { renderDashboard } from './modules/dashboard.js';
@@ -589,13 +590,14 @@ function semanticBadgeStyle(value, paid = false) {
 }
 
 // ── Version Info ──────────────────────────────────────────────────────────────
-const APP_VERSION = { major: 3, minor: 0, build: 10 };
+const APP_VERSION = { major: 4, minor: 0, build: 1 };
 function getAppVersion() {
     return `v${APP_VERSION.major}.${APP_VERSION.minor}.${APP_VERSION.build}`;
 }
 
 // Log version on load
-console.log(`%c🚀 SmartFin ${getAppVersion()} loaded`, 'color: #3b82f6; font-weight: bold; font-size: 14px;');
+console.log(`%c🚀 SmartFin ${getAppVersion()} - Modular Architecture`, 'color: #7c3aed; font-weight: bold; font-size: 14px;');
+console.log('%c✨ New: Platform-independent business logic modules', 'color: #22c55e; font-size: 12px;');
 console.log('If you see errors about "saveData is not defined", please hard refresh (Ctrl+Shift+R)');
 console.log('Current APP_VERSION:', APP_VERSION);
 

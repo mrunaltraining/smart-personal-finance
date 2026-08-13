@@ -2,6 +2,7 @@
 // A deliberately compact, decision-oriented summary of the detailed tabs.
 import { COLOR_POSITIVE, COLOR_NEGATIVE, COLOR_WARNING, toMonthlyAmount } from './constants.js';
 import { iconSvg } from './icons.js';
+import { DateUtils, CurrencyFormatter } from '../../../src/core/index.js';
 
 // Helper to get auto tax deductions (calls the function from app.js)
 function getAutoTaxDeductionsFromAppData(appData) {
@@ -71,17 +72,11 @@ function getAutoTaxDeductionsFromAppData(appData) {
 }
 
 function fmtMoney(value) {
-    try {
-        return new Intl.NumberFormat('en-IN', {
-            style: 'currency', currency: 'INR', maximumFractionDigits: 0
-        }).format(Number(value) || 0);
-    } catch {
-        return '₹0';
-    }
+    return CurrencyFormatter.format(value || 0);
 }
 
 function getMonthKey(date) {
-    return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
+    return DateUtils.getMonthKey(date);
 }
 
 function sumNumbers(values) {

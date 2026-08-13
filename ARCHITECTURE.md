@@ -1,9 +1,10 @@
 # SmartFin – Architecture Document
 
-> Version 2.4.0 | August 2026
+> Version 4.0.1 | August 2026
 
 ## Version History
 
+- **v4.0.1** (Aug 2026): Major architecture redesign with modular business logic - 13 platform-independent modules (2,780 lines), 64 comprehensive tests, enhanced maintainability and testability, foundation for mobile app development
 - **v2.4.0** (Aug 2026): Added Expense Tracking tab with category-wise breakdown, pie charts, budget comparison, mobile-friendly tooltips, responsive design improvements, dashboard layout reorganization
 - **v2.0.4** (Jan 2026): Enhanced dashboard with preparedness metrics, 6-month trend chart, location-based insurance calculations, gifts tracking improvements, PDF export, fixed tax calculations
 - **v2.0.3** (Aug 2025): Streamlined dashboard, unified net worth source

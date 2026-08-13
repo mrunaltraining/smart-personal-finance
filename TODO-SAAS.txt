@@ -1,0 +1,2383 @@
+# Master Prompt for Claude - SaaS Transformation Project
+
+## Role and Context
+Act as a Principal Software Architect + Senior Full-Stack Engineer + Security Engineer + QA Architect.
+
+**Current State:**
+- Existing web application using HTML, CSS, JavaScript, Firebase, GitHub Pages
+- Firebase Authentication with email/password and potentially Google login
+- Working application functionality and business logic
+
+**Target State:**
+- Production-quality, scalable SaaS application
+- Support for both Desktop/Web and Mobile/responsive web
+- Professional architecture with clear separation: frontend, backend, APIs, business logic, database, authentication, payments, integrations
+
+**Critical Approach:**
+Do not blindly rewrite the application. First understand the existing application thoroughly, identify what already works, preserve existing functionality, and then refactor incrementally.
+
+---
+
+## Phase 1: Audit the Existing Application
+
+Before making any code changes, perform a comprehensive analysis:
+
+### 1.1 Repository Analysis
+Analyze the complete repository structure and identify:
+- Current frontend architecture and patterns
+- JavaScript modules and their responsibilities
+- Existing business logic implementation
+- Firebase usage patterns and configuration
+- Authentication flow implementation
+- Firestore/database structure and queries
+- Existing API calls and data fetching
+- State management approach
+- Reusable components and utilities
+- Responsive/mobile behavior implementation
+- Validation logic and error handling
+- Existing test coverage
+- Configuration and secrets management
+
+### 1.2 Security Assessment
+Identify:
+- Code exposing business-critical logic in frontend JavaScript
+- Security vulnerabilities (XSS, injection, authentication bypasses)
+- Hardcoded secrets or sensitive data
+- Insecure data transmission
+- Authorization gaps
+
+### 1.3 Code Quality Assessment
+Identify:
+- Duplicated code patterns
+- Tightly coupled modules
+- Code that should move from frontend to backend
+- Areas requiring unit/integration testing
+- Performance bottlenecks
+- Accessibility issues
+- Mobile/web UI problems
+
+### 1.4 Deliverables
+Before implementing major changes, provide:
+- Architecture assessment document
+- Migration plan with phases
+- Risk analysis
+- Preservation strategy for existing functionality
+
+**Critical Rule:** Do not remove existing functionality unless there is a strong technical reason.
+
+---
+
+## Phase 2: Target Architecture
+
+### 2.1 System Architecture
+Refactor toward a production SaaS architecture with clear separation of concerns:
+
+```
+                    ┌─────────────────────┐
+                    │      Browser        │
+                    │                     │
+                    │ Web / Mobile Web UI │
+                    └──────────┬──────────┘
+                               │
+                         HTTPS / REST
+                               │
+                               ▼
+                    ┌─────────────────────┐
+                    │     Backend API     │
+                    │                     │
+                    │ Authentication      │
+                    │ Authorization       │
+                    │ Business Logic      │
+                    │ Subscription       │
+                    │ Referral System     │
+                    │ Payment Logic       │
+                    │ Validation          │
+                    └──────────┬──────────┘
+                               │
+              ┌────────────────┼────────────────┐
+              ▼                ▼                ▼
+         Firebase DB      Razorpay          Resend
+          / Storage       Payments           Email
+```
+
+### 2.2 Security Principle
+**Treat the frontend as an untrusted client.**
+- Important business logic must reside on the backend
+- Authorization, subscription validation, payment verification must be server-side
+- Secrets must never be exposed to frontend JavaScript
+- All sensitive operations require server-side validation
+
+---
+
+## Phase 3: Frontend Architecture
+
+### 3.1 Technology Strategy
+- Keep existing technology (HTML/CSS/JS) where practical
+- Refactor professionally with clean modularization
+- Only introduce a large frontend framework if there's clear architectural benefit
+- Prefer clean modularization over needless rewrite
+
+### 3.2 Frontend Structure
+Organize frontend code with clear separation:
+```
+frontend/
+├── pages/
+├── components/
+├── services/
+├── api/
+├── auth/
+├── state/
+├── utils/
+├── validation/
+├── styles/
+├── assets/
+└── tests/
+```
+
+### 3.3 Separation of Concerns
+Separate distinct concerns into different modules:
+- UI components and presentation
+- API communication layer
+- Authentication handling
+- State management
+- Business-independent UI utilities
+- Validation logic
+- Formatting utilities
+- Configuration
+
+### 3.4 Security Constraints
+- **Never** put secret keys in frontend code
+- **Never** put proprietary business logic in frontend code
+- All sensitive operations must go through backend APIs
+
+---
+
+## Phase 4: Web + Mobile Experience
+
+### 4.1 Desktop/Web Optimization
+Optimize for large screens with:
+- Desktop navigation patterns
+- Data tables and dashboards
+- Multi-column layouts
+- Keyboard interaction support
+- Full accessibility compliance
+- Efficient use of screen real estate
+
+### 4.2 Mobile Optimization
+Optimize for mobile devices (320px+, 375px, 390px, 414px, common Android/iPhone):
+- Touch-first interaction design
+- Thumb-friendly controls and targets
+- Bottom navigation where appropriate
+- Responsive card layouts
+- Responsive table designs
+- Minimal horizontal scrolling
+- Mobile-appropriate typography and spacing
+- Optimized mobile performance
+
+### 4.3 Responsive Design Principle
+**Do not simply shrink the desktop UI.**
+Use responsive/adaptive layouts where the interaction model should differ between mobile and desktop. Each platform should feel native to its form factor.
+
+---
+
+## Phase 5: Backend Architecture
+
+### 5.1 Technology Choice
+- Use Go for the backend
+- Follow idiomatic Go patterns and best practices
+- Implement production-quality project structure
+
+### 5.2 Backend Structure
+Organize backend code with clear domain boundaries:
+```
+backend/
+├── cmd/
+│   └── server/
+├── internal/
+│   ├── api/
+│   ├── handlers/
+│   ├── middleware/
+│   ├── service/
+│   ├── domain/
+│   ├── repository/
+│   ├── auth/
+│   ├── payment/
+│   ├── subscription/
+│   ├── referral/
+│   ├── email/
+│   └── config/
+├── pkg/
+├── migrations/
+├── tests/
+└── go.mod
+```
+
+### 5.3 Layered Architecture
+Implement clear separation of concerns:
+```
+HTTP Handler
+     ↓
+Service / Use Case
+     ↓
+Repository
+     ↓
+Database
+```
+
+**Critical Rule:** Business logic must not be implemented directly inside HTTP handlers.
+
+---
+
+## Phase 6: API Design
+
+### 6.1 REST API Principles
+Create a clean, well-structured REST API with:
+- Clear versioning: `/api/v1/...`
+- Resource-oriented endpoints
+- Proper HTTP verb usage
+- Consistent naming conventions
+
+### 6.2 API Endpoints
+Implement core endpoints:
+```
+POST   /api/v1/auth/...
+GET    /api/v1/user
+GET    /api/v1/subscription
+POST   /api/v1/subscription/create
+POST   /api/v1/subscription/cancel
+POST   /api/v1/payment/create-order
+POST   /api/v1/payment/verify
+POST   /api/v1/payment/webhook
+GET    /api/v1/referral
+POST   /api/v1/referral/apply
+GET    /api/v1/referral/stats
+```
+
+### 6.3 API Quality Standards
+Implement:
+- Proper HTTP status codes
+- Consistent error response structure
+- Request validation
+- Authentication middleware
+- Authorization middleware
+- Request IDs for tracing
+- Structured logging
+- Timeout handling
+- Idempotency where required
+- Rate limiting for sensitive endpoints
+
+### 6.4 Error Response Format
+Use consistent error responses:
+```json
+{
+  "error": {
+    "code": "SUBSCRIPTION_REQUIRED",
+    "message": "An active subscription is required."
+  },
+  "request_id": "..."
+}
+```
+
+**Security Rule:** Never expose internal errors, stack traces, or secrets to clients.
+
+---
+
+## Phase 7: Authentication
+
+### 7.1 Firebase Authentication Integration
+- Preserve existing Firebase Authentication if technically appropriate
+- Support multiple authentication methods:
+  - Email/password registration
+  - Email/password login
+  - Google login
+  - Logout
+  - Password reset
+  - Email verification (if appropriate)
+
+### 7.2 Token Verification Flow
+Implement secure token verification:
+```
+Browser
+   ↓
+Firebase Authentication
+   ↓
+Firebase ID Token
+   ↓
+Authorization: Bearer <token>
+   ↓
+Go Backend
+   ↓
+Verify Firebase token
+   ↓
+Extract UID
+   ↓
+Authorize request
+```
+
+**Critical Security Rule:** Never trust a UID supplied directly by the frontend. Always verify the Firebase ID token server-side.
+
+---
+
+## Phase 8: Subscription Model
+
+### 8.1 Subscription Plans
+Implement three subscription tiers:
+- **Free:** ₹0
+- **Pro Monthly:** ₹99/month
+- **Pro Annual:** ₹999/year
+
+### 8.2 Server-Side Pricing Control
+Make pricing configuration server-controlled, not client-controlled:
+- Use plan identifiers instead of raw amounts
+- Backend determines actual pricing for each plan
+- Frontend only references plan IDs
+
+### 8.3 Secure Pricing Flow
+**Do not trust amounts from the browser:**
+```json
+// ❌ INSECURE - Never trust this
+{
+  "amount": 99
+}
+
+// ✅ SECURE - Use plan IDs
+{
+  "plan_id": "pro_monthly"
+}
+```
+
+The server resolves the actual amount based on the plan_id.
+
+---
+
+## Phase 9: Subscription State Machine
+
+### 9.1 State Design
+Design subscription states carefully with clear transitions:
+- **FREE** - No active subscription
+- **ACTIVE** - Active paid subscription
+- **PENDING** - Payment in progress
+- **PAST_DUE** - Payment failed, grace period
+- **CANCELLED** - Subscription cancelled
+- **EXPIRED** - Subscription period ended
+- **PAYMENT_FAILED** - Payment processing failed
+
+### 9.2 State Transitions
+Define valid state transitions:
+```
+FREE
+ ↓
+PAYMENT_PENDING
+ ↓
+ACTIVE
+ ↓
+CANCELLED
+ ↓
+EXPIRED
+```
+
+### 9.3 State Security
+Handle payment failure, cancellation, and expiration correctly on the server side.
+
+**Critical Rule:** Never grant premium access merely because the frontend reports successful payment. All state changes must be verified server-side.
+
+---
+
+## Phase 10: Razorpay Integration
+
+### 10.1 Integration Principles
+- Integrate Razorpay according to current official Razorpay documentation
+- Never invent undocumented APIs or fields
+- Follow Razorpay's security requirements exactly
+
+### 10.2 Credential Security
+**Keep all Razorpay secret credentials on the backend only:**
+- Frontend must never receive: Razorpay secret key, webhook secret, server credentials
+- Frontend may receive: Public Razorpay key ID (where required by checkout)
+
+### 10.3 Documentation Compliance
+Always reference the latest official Razorpay documentation at implementation time. If something depends on specific Razorpay account configuration, explicitly identify it as configuration you must provide.
+
+---
+
+## Phase 11: Razorpay Order Creation
+
+### 11.1 Server-Side Order Creation
+All orders must be created from the backend:
+```
+User
+ ↓
+Frontend
+ ↓
+POST /api/v1/payment/create-order
+ ↓
+Backend
+ ↓
+Validate authenticated user
+ ↓
+Validate requested plan
+ ↓
+Resolve price from server configuration
+ ↓
+Create Razorpay Order
+ ↓
+Persist order in database
+ ↓
+Return order_id + required checkout data
+ ↓
+Frontend opens Razorpay Checkout
+```
+
+### 11.2 Order Security
+**The frontend must never determine the authoritative amount.** All pricing must be resolved server-side.
+
+### 11.3 Order Persistence
+Persist relevant server-side fields:
+- internal_order_id
+- user_id
+- plan_id
+- razorpay_order_id
+- amount
+- currency
+- status
+- created_at
+- updated_at
+
+---
+
+## Phase 12: Razorpay Checkout
+
+### 12.1 Checkout Security
+Pass only server-generated parameters to Razorpay checkout:
+- order_id
+- amount
+- currency
+- key_id
+- Other required checkout options
+
+### 12.2 Order Control
+**Do not allow the frontend to create arbitrary orders.** All order creation must go through the backend API with proper validation.
+
+---
+
+## Phase 13: Payment Success Verification
+
+### 13.1 Signature Verification
+Implement secure payment verification using Razorpay's official signature verification mechanism.
+
+### 13.2 Verification Security
+**Never trust payment success from the frontend:**
+```javascript
+// ❌ INSECURE - Never trust this
+payment_success = true
+```
+
+### 13.3 Server-Side Verification
+The backend must verify:
+- razorpay_order_id
+- razorpay_payment_id
+- razorpay_signature
+
+Against the expected order and authenticated user using Razorpay's official verification method.
+
+### 13.4 State Updates
+Only after successful signature verification should the application update subscription/order state.
+
+---
+
+## Phase 14: Razorpay Webhooks
+
+### 14.1 Webhook Requirements
+Implement Razorpay webhook handling with:
+- Webhook signature verification
+- Event validation
+- Idempotent processing
+- Webhook/event ID storage
+- Duplicate subscription activation prevention
+- Retry handling
+- Out-of-order event handling
+- Safe event logging (no secrets)
+- Appropriate HTTP status codes
+
+### 14.2 Idempotent Processing
+Design webhook processing so the same webhook can safely be delivered multiple times:
+```
+Webhook
+   ↓
+Verify Signature
+   ↓
+Check Event ID
+   ↓
+Already processed?
+   ├── Yes → Return success
+   └── No
+        ↓
+Validate event
+        ↓
+Update payment/order
+        ↓
+Update subscription
+        ↓
+Record event
+```
+
+---
+
+## Phase 15: Refunds
+
+### 15.1 Refund Workflow
+Support refund workflow according to Razorpay capabilities and business rules:
+- Refund eligibility determination
+- Refund state management
+- Refund amount calculation
+- Refund request processing
+- Refund completion handling
+- Refund failure handling
+- Reconciliation processes
+
+### 15.2 Refund Security
+**Do not implement arbitrary frontend-controlled refunds.** All refund operations must be server-side with proper authorization and validation.
+
+---
+
+## Phase 16: Cancellation
+
+### 16.1 Cancellation Policy
+Implement subscription cancellation correctly. Define clearly whether cancellation means:
+- Cancel immediately, or
+- Cancel at end of billing period
+
+Prefer cancellation-at-period-end unless business requirements dictate otherwise.
+
+### 16.2 UI Communication
+The UI should clearly show:
+- Current plan
+- Renewal date
+- Cancellation status
+- Next billing date
+
+---
+
+## Phase 17: Legal/SaaS Pages
+
+### 17.1 Required Pages
+Before production launch, create professional pages for:
+- Privacy Policy
+- Terms & Conditions
+- Refund Policy
+- Cancellation Policy
+- Disclaimer
+- About Us
+- Contact Us
+- Pricing
+- Subscription Terms
+
+### 17.2 Page Accessibility
+Make these accessible from:
+- Footer
+- Signup/login where appropriate
+- Checkout where appropriate
+
+### 17.3 Content Requirements
+- Do not fabricate legal claims
+- Clearly mark areas requiring business/legal information
+- Create placeholders: `[COMPANY_NAME]`, `[BUSINESS_ADDRESS]`, `[SUPPORT_EMAIL]`, `[REFUND_PERIOD]`, `[DATA_RETENTION_POLICY]`
+- Tell me which values I must provide
+
+### 17.4 Accurate Descriptions
+Ensure legal pages accurately describe:
+- Subscription billing
+- Cancellation policies
+- Refund processes
+- Data handling
+- Authentication
+- Payment processing
+- Third-party services
+- Cookies (where applicable)
+
+---
+
+## Phase 18: Referral System
+
+### 18.1 Referral Structure
+Implement a referral system for marketing:
+- Every eligible user should have a unique referral code (e.g., `MRUNAL8X2`)
+- Referral URL format: `https://app.example.com/signup?ref=MRUNAL8X2`
+
+### 18.2 Referral Requirements
+- Unique referral codes
+- Referral attribution tracking
+- Self-referral prevention
+- Abuse prevention
+- Referral signup tracking
+- Referral conversion tracking
+- Referral status monitoring
+- Duplicate reward prevention
+- Configurable reward rules
+
+### 18.3 Referral Flow
+Design the system so rewards can be configured later:
+```
+Referral
+   ↓
+Signup
+   ↓
+Email/account verification
+   ↓
+First successful paid subscription
+   ↓
+Referral conversion
+   ↓
+Reward
+```
+
+**Critical Rule:** Do not immediately grant rewards merely for opening a referral URL.
+
+---
+
+## Phase 19: Referral Data Model
+
+### 19.1 Database Structure
+Design appropriate database structures:
+- users
+- subscriptions
+- orders
+- payments
+- referrals
+- referral_conversions
+- referral_rewards
+- webhook_events
+
+### 19.2 Data Integrity
+Add appropriate indexes and uniqueness constraints to prevent:
+- Duplicate referral codes
+- Duplicate payments
+- Duplicate webhook processing
+- Duplicate rewards
+- Duplicate subscription activation
+
+---
+
+## Phase 20: Firebase vs Supabase
+
+### 20.1 Firebase Evaluation
+First evaluate whether Firebase is sufficient for:
+- Authentication
+- Database
+- Subscription state
+- Orders
+- Payments
+- Referrals
+- Transactional requirements
+- Querying
+- Indexes
+- Security
+- Free-tier requirements
+
+### 20.2 Migration Decision
+- Prefer keeping Firebase if it satisfies the requirements
+- Only recommend Supabase if there's a concrete technical reason Firebase cannot support the required functionality efficiently or securely
+- Do not migrate databases unnecessarily
+
+---
+
+## Phase 21: Resend Email Integration
+
+### 21.1 Email Service Integration
+- Integrate email through the backend
+- Never expose the Resend API key to frontend JavaScript
+- Create email abstractions for different email types
+
+### 21.2 Email Interface
+Create email service abstraction:
+```go
+type EmailService interface {
+    SendWelcomeEmail(...)
+    SendPaymentConfirmation(...)
+    SendSubscriptionActivated(...)
+    SendSubscriptionCancelled(...)
+    SendReferralNotification(...)
+}
+```
+
+### 21.3 Email Templates
+Support templates for:
+- Welcome emails
+- Email verification (if needed)
+- Payment confirmation
+- Subscription activation
+- Subscription cancellation
+- Payment failure
+- Refund notifications
+- Referral events
+
+### 21.4 Asynchronous Processing
+Use asynchronous processing where appropriate so email failures don't break critical payment transactions.
+
+---
+
+## Phase 22: Security Requirements
+
+### 22.1 Security Review
+Perform a comprehensive security review covering:
+- No secrets in frontend code
+- No secrets committed to Git
+- Environment-based configuration
+- Firebase token verification
+- Authorization on every protected API
+- Server-side subscription validation
+- Server-side pricing
+- Razorpay signature verification
+- Razorpay webhook verification
+- Idempotency implementation
+- Rate limiting
+- Input validation
+- Output encoding (where applicable)
+- CORS configuration
+- CSRF considerations (where applicable)
+- Secure headers
+- HTTPS enforcement
+- Secure cookies (if cookies are used)
+- No sensitive information in logs
+- No stack traces exposed to clients
+- Database access control
+- User/tenant isolation
+
+### 22.2 Security Testing
+Run dependency/security audit as part of CI pipeline.
+
+---
+
+## Phase 23: Testing Strategy
+
+### 23.1 Unit Tests
+Create comprehensive unit tests for:
+- Business rules
+- Subscription state transitions
+- Pricing logic
+- Authorization logic
+- Referral logic
+- Referral rewards
+- Payment signature verification
+- Validation logic
+- Error handling
+- Edge cases
+
+Use table-driven Go tests where appropriate:
+```go
+func TestSubscriptionTransition(t *testing.T) {
+    tests := []struct {
+        name    string
+        current Status
+        event   Event
+        want    Status
+        wantErr bool
+    }{
+        // test cases
+    }
+
+    for _, tt := range tests {
+        t.Run(tt.name, func(t *testing.T) {
+            // test implementation
+        })
+    }
+}
+```
+
+### 23.2 Integration Tests
+Test the full stack:
+```
+HTTP API
+ ↓
+Authentication
+ ↓
+Service
+ ↓
+Repository
+ ↓
+Database
+```
+
+Test scenarios:
+- Successful requests
+- Invalid requests
+- Unauthorized requests
+- Forbidden requests
+- Missing resources
+- Database failures
+- Duplicate requests
+- Payment failures
+- Webhook retries
+- Subscription expiration
+- Referral abuse cases
+
+Use test doubles/mocks where appropriate, but do not over-mock. Use realistic integration tests for important flows.
+
+---
+
+## Phase 24: Payment Testing
+
+### 24.1 Payment Success Tests
+Test successful payment flow:
+- Create order → Checkout → Payment → Signature verification → Subscription ACTIVE
+
+### 24.2 Payment Failure Tests
+Test payment failure scenarios:
+- Create order → Payment failure → Subscription remains inactive
+
+### 24.3 Security Tests
+Test security scenarios:
+- Invalid signature → Webhook/payment → Invalid signature → Reject → No subscription activation
+- Duplicate webhook → Process → Same webhook again → No duplicate side effect
+- Wrong order → Payment for order A → User/order B → Reject
+- Wrong amount → Expected ₹99 → Received unexpected amount → Reject/reconcile
+
+---
+
+## Phase 25: CI/CD Pipeline
+
+### 25.1 GitHub Actions Setup
+Set up GitHub Actions for automated testing and deployment.
+
+### 25.2 Pull Request Pipeline
+Every pull request should automatically run:
+```
+lint
+ ↓
+format check
+ ↓
+unit tests
+ ↓
+integration tests
+ ↓
+security/dependency scan
+ ↓
+build
+```
+
+### 25.3 Production Pipeline
+Every merge to production branch should run the same checks before deployment.
+
+### 25.4 Quality Gates
+Do not allow production deployment if required tests fail.
+
+### 25.5 Go Commands
+Use standard Go commands:
+```bash
+go test ./...
+go vet ./...
+gofmt
+```
+
+Include appropriate frontend lint/test/build commands.
+
+---
+
+## Phase 26: Test Coverage
+
+### 26.1 Coverage Targets
+Establish meaningful coverage targets. Do not chase coverage numbers artificially.
+
+### 26.2 Priority Coverage
+Prioritize high coverage for:
+- Payment logic
+- Subscription logic
+- Authorization logic
+- Referral logic
+- Business logic
+- Validation logic
+- Error handling
+
+### 26.3 Coverage Reporting
+Report coverage in CI pipeline.
+
+---
+
+## Phase 27: Database Design
+
+### 27.1 Schema Design
+Design a clean schema covering:
+- users
+- subscriptions
+- plans
+- orders
+- payments
+- refunds
+- webhook_events
+- referrals
+- referral_conversions
+- referral_rewards
+
+### 27.2 Data Integrity
+- Use immutable identifiers
+- Use timestamps consistently
+- Use server-side timestamps
+- Do not trust client timestamps for security/business decisions
+
+---
+
+## Phase 28: Observability
+
+### 28.1 Logging Requirements
+Add comprehensive logging:
+- Structured logging
+- Request IDs
+- Error IDs
+- Payment transaction IDs
+- Subscription IDs
+- Webhook IDs
+- Latency measurements
+- Important business metrics
+
+### 28.2 Logging Security
+Never log:
+- Passwords
+- Tokens
+- API secrets
+- Payment secrets
+- Sensitive personal information (unless necessary)
+
+---
+
+## Phase 29: Error Handling
+
+### 29.1 Error Classification
+Create a consistent error model differentiating:
+- Validation errors
+- Authentication errors
+- Authorization errors
+- Not found errors
+- Conflict errors
+- Payment errors
+- External service errors
+- Database errors
+- Internal errors
+
+### 29.2 Error Response Format
+Use consistent error responses:
+```json
+{
+  "error": {
+    "code": "PAYMENT_VERIFICATION_FAILED",
+    "message": "Payment verification failed.",
+    "request_id": "req_123"
+  }
+}
+```
+
+### 29.3 Error Logging
+Internally log the actual cause while providing safe error messages to clients.
+
+---
+
+## Phase 30: Configuration Management
+
+### 30.1 Environment Variables
+Use environment variables/secrets for configuration:
+```
+FIREBASE_PROJECT_ID
+FIREBASE_SERVICE_ACCOUNT
+RAZORPAY_KEY_ID
+RAZORPAY_KEY_SECRET
+RAZORPAY_WEBHOOK_SECRET
+RESEND_API_KEY
+RESEND_FROM_EMAIL
+APP_BASE_URL
+```
+
+### 30.2 Security Practices
+- Never commit real credentials
+- Create `.env.example` with placeholders only
+- Use different configurations for development/staging/production
+
+---
+
+## Phase 31: Local Development
+
+### 31.1 Development Setup
+Make the project easy to run locally. Document:
+- Frontend setup
+- Backend setup
+- Firebase setup
+- Environment variables
+- Database setup
+- Test setup
+- Razorpay test mode
+- Webhook local testing
+- Production deployment
+
+### 31.2 Test Mode Usage
+Use Razorpay test/sandbox mode wherever supported during development.
+
+---
+
+## Phase 32: API Documentation
+
+### 32.1 OpenAPI Specification
+Create API documentation using OpenAPI/Swagger. Document:
+- Endpoints
+- HTTP methods
+- Authentication requirements
+- Request schemas
+- Response schemas
+- Error schemas
+- Examples
+
+### 32.2 API Contract
+The API contract should be clear enough for another engineer to implement a client.
+
+---
+
+## Phase 33: Performance Optimization
+
+### 33.1 Frontend Performance
+Optimize both web and mobile:
+- Lazy loading
+- Code splitting (where useful)
+- Minimize bundle size
+- Optimize images
+- Avoid unnecessary API calls
+- Debounce expensive operations
+- Caching strategies
+- Pagination
+- Efficient Firebase queries
+
+### 33.2 Backend Performance
+- Connection management
+- Timeouts
+- Pagination
+- Database indexes
+- Caching (where justified)
+- Efficient database queries
+- Bounded concurrency
+
+### 33.3 Performance Principle
+Do not introduce premature complexity. Optimize based on actual performance requirements.
+
+---
+
+## Phase 34: UX Requirements
+
+### 34.1 SaaS Experience
+Create a polished SaaS experience including:
+- Loading states
+- Skeleton screens (where useful)
+- Empty states
+- Error states
+- Success feedback
+- Retry functionality
+- Offline/network failure handling (where appropriate)
+- Responsive navigation
+- Accessible forms
+- Clear subscription status
+- Clear payment status
+
+### 34.2 Information Preservation
+Do not remove information merely to make the UI look cleaner. If information is redundant, reorganize it intelligently.
+
+---
+
+## Phase 35: Pricing UI
+
+### 35.1 Pricing Page Design
+Create a professional pricing page:
+```
+FREE
+₹0
+
+PRO MONTHLY
+₹99/month
+
+PRO ANNUAL
+₹999/year
+```
+
+### 35.2 Pricing Communication
+Clearly communicate:
+- Features included
+- Limitations
+- Billing frequency
+- Cancellation policy
+- Refund terms
+- Renewal information
+- Taxes (if applicable)
+- Payment provider (where appropriate)
+
+### 35.3 Pricing Accuracy
+Do not claim that annual billing is a discount unless the displayed pricing actually represents one.
+
+---
+
+## Phase 36: Production Readiness Checklist
+
+### 36.1 Security Checklist
+- No secrets in frontend
+- No secrets in Git
+- Firebase authentication verified server-side
+- Authorization implemented server-side
+- Payment signatures verified
+- Webhooks verified
+- Rate limiting implemented
+- Input validation implemented
+- CORS configured
+- Sensitive logs removed
+
+### 36.2 Payment Checklist
+- Razorpay test integration
+- Order creation
+- Checkout
+- Success handling
+- Failure handling
+- Signature verification
+- Webhooks
+- Idempotency
+- Refund handling
+- Cancellation
+- Subscription state
+- Reconciliation
+
+### 36.3 SaaS Checklist
+- Free plan functionality
+- ₹99 monthly plan
+- ₹999 annual plan
+- Subscription status display
+- Expiry handling
+- Cancellation process
+- Referral code system
+- Referral tracking
+- Referral abuse prevention
+
+### 36.4 Legal Checklist
+- Privacy Policy
+- Terms & Conditions
+- Refund Policy
+- Cancellation Policy
+- Disclaimer
+- About Us
+- Contact Us
+- Pricing/subscription terms
+
+### 36.5 Testing Checklist
+- Unit tests
+- Integration tests
+- API tests
+- Payment tests
+- Webhook tests
+- Error handling tests
+- Regression tests
+- CI pipeline
+- Security/dependency scanning
+
+---
+
+## Phase 37: Development Workflow
+
+### 37.1 Development Process
+After every significant change:
+1. Run tests
+2. Fix failures
+3. Run lint/format
+4. Run build
+5. Check frontend responsiveness
+6. Check security implications
+7. Verify existing functionality
+8. Update documentation if required
+
+### 37.2 Commit Strategy
+Do not make a large number of unrelated changes in one step. Prefer small, reviewable commits.
+
+### 37.3 Commit Organization
+Organize work into logical commits:
+```
+refactor: separate frontend services
+feat: add backend API foundation
+feat: add subscription model
+feat: integrate razorpay order creation
+feat: add payment verification
+feat: add razorpay webhook processing
+feat: add referral system
+feat: add resend email service
+test: add subscription unit tests
+test: add payment integration tests
+ci: add automated test pipeline
+docs: add production setup documentation
+```
+
+---
+
+## Phase 38: Existing Code Preservation
+
+### 38.1 Code Analysis
+Do not assume the current implementation is wrong. Before modifying:
+- Understand the existing code
+- Preserve working behavior
+- Identify dependencies
+- Identify hidden assumptions
+- Identify existing Firebase collections
+- Identify existing authentication behavior
+
+### 38.2 Migration Strategy
+When refactoring, maintain backward compatibility where practical. If a migration is necessary, explain:
+```
+Current
+→ Migration
+→ Target
+```
+
+---
+
+## Phase 39: Phased Implementation Approach
+
+### 39.1 Phase 1 — Audit
+Analyze the complete existing application. Do not make destructive changes. Produce:
+1. Current architecture
+2. Problems identified
+3. Security risks
+4. Frontend/backend separation opportunities
+5. Database assessment
+6. Authentication assessment
+7. Payment integration design
+8. Testing gaps
+9. Recommended target architecture
+10. Migration plan
+
+### 39.2 Phase 2 — Foundation
+Implement:
+- Project structure
+- Backend foundation
+- API structure
+- Configuration management
+- Authentication middleware
+- Error handling
+- Logging
+- Testing framework
+- CI pipeline
+
+### 39.3 Phase 3 — Business Logic
+Move appropriate business-critical logic to backend. Implement:
+- Services
+- Repositories
+- Subscription model
+- Authorization
+- API endpoints
+
+### 39.4 Phase 4 — Payments
+Implement Razorpay:
+- Order creation
+- Checkout integration
+- Signature verification
+- Payment state management
+- Webhook verification
+- Idempotency
+- Refunds
+- Cancellation
+- Subscription lifecycle
+
+### 39.5 Phase 5 — Referral
+Implement referral codes and tracking system.
+
+### 39.6 Phase 6 — Email
+Integrate Resend through backend.
+
+### 39.7 Phase 7 — UI/UX
+Professionally redesign/refactor both desktop and mobile while preserving all existing functionality.
+
+### 39.8 Phase 8 — Testing
+Build comprehensive unit/integration/API/payment tests.
+
+### 39.9 Phase 9 — CI/CD
+Ensure tests run automatically for local changes, pull requests, merges, and production deployment.
+
+### 39.10 Phase 10 — Production Readiness
+Perform final reviews:
+- Security review
+- Performance review
+- Test review
+- API review
+- Payment review
+- Responsive UI review
+- Legal page review
+- Deployment review
+
+---
+
+## Phase 40: Razorpay Documentation Compliance
+
+### 40.1 Documentation Requirements
+For Razorpay integration:
+- Use the latest official Razorpay documentation available at implementation time
+- Do not invent API fields, webhook events, signature algorithms, subscription APIs, refund APIs, checkout parameters, or required legal text
+
+### 40.2 Configuration Requirements
+If something depends on Razorpay account configuration, explicitly identify it as configuration you must provide.
+
+### 40.3 Credential Management
+- You will create the Razorpay account and provide required credentials/configuration later
+- Use test credentials during development
+
+---
+
+## Phase 41: Final Deliverables
+
+### 41.1 Architecture Documentation
+At the end, provide:
+1. Architecture diagram
+2. Folder structure
+3. Database schema
+4. API specification
+5. Authentication flow
+6. Subscription state machine
+7. Razorpay payment flow
+8. Webhook flow
+9. Referral flow
+10. Email architecture
+11. Security checklist
+12. Testing strategy
+13. CI/CD workflow
+14. Environment variable documentation
+15. Deployment instructions
+16. Migration instructions
+17. Production launch checklist
+18. List of remaining manual configuration steps
+19. List of Razorpay credentials/configuration required from you
+20. List of legal/business information required from you
+
+### 41.2 Critical Success Criteria
+Most importantly:
+- Do not sacrifice existing functionality while redesigning the architecture
+- Do not expose secrets
+- Do not trust the frontend for authorization, pricing, subscription status, or payment verification
+- Do not declare the application production-ready until the complete payment, authentication, authorization, testing, and security flows have been validated
+
+---
+
+## Phase 42: Long-Term Architecture Quality
+
+### 42.1 Scalable Design
+The resulting codebase must be designed as a long-lived, modular, scalable SaaS product. Do not optimize only for getting the first version working.
+
+### 42.2 Maintainability
+The architecture must make it easy to:
+- Add features
+- Change business rules
+- Add payment providers later
+- Add database providers later
+- Add new subscription plans
+- Add new APIs
+- Modify UI independently
+- Add new integrations
+- Replace infrastructure components
+- Test individual modules
+- Deploy independently where appropriate
+
+### 42.3 Code Quality Principles
+Avoid:
+- Giant files and functions
+- Circular dependencies
+- Tightly coupled modules
+- Business logic inside HTTP handlers
+- Database logic inside UI code
+- Payment logic scattered across the application
+- Duplicated validation
+- Duplicated API calls
+- Hard-coded configuration
+- Magic numbers
+- Global mutable state (unless justified)
+
+Prefer small, cohesive modules with clear ownership and interfaces.
+
+---
+
+## Phase 43: Backend Modularization
+
+### 43.1 Domain-Oriented Structure
+The Go backend should be structured around clear domain boundaries:
+```
+backend/
+├── cmd/
+│   └── server/
+│       └── main.go
+│
+├── internal/
+│   ├── config/
+│   │
+│   ├── http/
+│   │   ├── handlers/
+│   │   ├── middleware/
+│   │   ├── router/
+│   │   └── response/
+│   │
+│   ├── auth/
+│   │   ├── domain/
+│   │   ├── service/
+│   │   └── repository/
+│   │
+│   ├── user/
+│   │   ├── domain/
+│   │   ├── service/
+│   │   └── repository/
+│   │
+│   ├── subscription/
+│   │   ├── domain/
+│   │   ├── service/
+│   │   └── repository/
+│   │
+│   ├── payment/
+│   │   ├── domain/
+│   │   ├── service/
+│   │   ├── razorpay/
+│   │   └── repository/
+│   │
+│   ├── referral/
+│   │   ├── domain/
+│   │   ├── service/
+│   │   └── repository/
+│   │
+│   ├── email/
+│   │   ├── service/
+│   │   └── resend/
+│   │
+│   ├── database/
+│   │
+│   └── observability/
+│
+├── api/
+│   └── openapi.yaml
+│
+├── migrations/
+│
+├── tests/
+│   ├── integration/
+│   └── e2e/
+│
+├── Dockerfile
+├── go.mod
+└── README.md
+```
+
+### 43.2 Structure Flexibility
+Adjust the structure if the existing application or chosen framework makes another structure more appropriate. Do not follow this structure mechanically. The important requirement is clear separation of responsibilities and dependency direction.
+
+---
+
+## Phase 44: Domain-Oriented Design
+
+### 44.1 Independence Principle
+Keep domain concepts independent from infrastructure:
+```
+HTTP
+ ↓
+Handler
+ ↓
+Application Service
+ ↓
+Domain Logic
+ ↓
+Repository Interface
+ ↓
+Firebase Implementation
+```
+
+### 44.2 Interface Abstraction
+The domain/service layer should not directly depend on HTTP. The business logic should not know whether the database is Firebase, Supabase, or another provider.
+
+### 44.3 Repository Pattern
+Example repository interface:
+```go
+type SubscriptionRepository interface {
+    GetByUserID(ctx context.Context, userID string) (*Subscription, error)
+    Save(ctx context.Context, subscription *Subscription) error
+}
+```
+
+Then provide `FirebaseSubscriptionRepository` behind the interface. This allows the persistence layer to be replaced later without rewriting business logic.
+
+---
+
+## Phase 45: Dependency Injection
+
+### 45.1 Service Composition
+Use dependency injection for important services:
+```go
+type Application struct {
+    Users         UserService
+    Subscriptions SubscriptionService
+    Payments      PaymentService
+    Referrals     ReferralService
+    Email         EmailService
+}
+```
+
+### 45.2 Injection Pattern
+Inject implementations from main. Avoid hidden global dependencies. This makes unit testing straightforward.
+
+---
+
+## Phase 46: Interface Design
+
+### 46.1 Strategic Interfaces
+Use interfaces where they provide real architectural value. Good candidates:
+- PaymentProvider
+- EmailProvider
+- UserRepository
+- SubscriptionRepository
+- OrderRepository
+- ReferralRepository
+- Clock
+- IDGenerator
+
+### 46.2 Payment Provider Example
+```go
+type PaymentProvider interface {
+    CreateOrder(ctx context.Context, req CreateOrderRequest) (*Order, error)
+    VerifyPayment(req PaymentVerificationRequest) error
+    ProcessWebhook(ctx context.Context, payload []byte, signature string) error
+    Refund(ctx context.Context, paymentID string, amount int64) error
+}
+```
+
+This allows Razorpay to be replaced later without rewriting subscription business logic.
+
+### 46.3 Interface Principle
+Do not create interfaces for every trivial struct just to increase abstraction.
+
+---
+
+## Phase 47: API Specification Management
+
+### 47.1 OpenAPI Specification
+Create and maintain an OpenAPI specification at `api/openapi.yaml`.
+
+### 47.2 Specification Content
+The OpenAPI specification must describe:
+- Endpoints
+- HTTP methods
+- Authentication requirements
+- Request schemas
+- Response schemas
+- Error schemas
+- Status codes
+- Pagination
+- Query parameters
+- Path parameters
+- Examples
+
+### 47.3 API Example
+```yaml
+paths:
+  /api/v1/subscriptions:
+    get:
+      summary: Get current subscription
+```
+
+---
+
+## Phase 48: OpenAPI as Source of Truth
+
+### 48.1 API Development Process
+Treat OpenAPI as part of the engineering process. When an API changes:
+```
+Code change
+     ↓
+OpenAPI update
+     ↓
+Tests update
+     ↓
+CI validation
+```
+
+### 48.2 Divergence Prevention
+Do not allow API implementation and API specification to silently diverge.
+
+### 48.3 Code Generation
+Where practical, generate:
+- API documentation
+- Request/response models
+- Validation
+- Client types
+
+Evaluate code generation carefully rather than introducing unnecessary complexity.
+
+---
+
+## Phase 49: API Versioning
+
+### 49.1 Versioning Strategy
+All public APIs should be versioned using `/api/v1/...`.
+
+### 49.2 Breaking Changes
+Do not casually break existing API contracts. For breaking changes:
+```
+/api/v1/...
+/api/v2/...
+```
+
+### 49.3 Deprecation Documentation
+Document:
+- Deprecated endpoints
+- Migration period
+- Replacement endpoint
+- Removal date
+
+---
+
+## Phase 50: Documentation Strategy
+
+### 50.1 Existing Documentation
+Inspect the existing repository for:
+- README
+- Architecture documentation
+- API documentation
+- Comments
+- Configuration documentation
+- Firebase schema documentation
+- Setup instructions
+- Deployment documentation
+- Feature documentation
+
+### 50.2 Documentation Revamp
+If existing documentation is incomplete or outdated, revamp it rather than creating disconnected duplicate documentation.
+
+### 50.3 Documentation Structure
+Create a maintainable documentation structure:
+```
+docs/
+├── architecture/
+│   ├── overview.md
+│   ├── frontend.md
+│   ├── backend.md
+│   ├── authentication.md
+│   ├── payments.md
+│   ├── subscriptions.md
+│   ├── referrals.md
+│   └── database.md
+│
+├── api/
+│   └── openapi.yaml
+│
+├── development/
+│   ├── local-setup.md
+│   ├── testing.md
+│   └── debugging.md
+│
+├── deployment/
+│   ├── environments.md
+│   ├── ci-cd.md
+│   └── rollback.md
+│
+├── operations/
+│   ├── monitoring.md
+│   ├── incident-response.md
+│   └── troubleshooting.md
+│
+└── releases/
+    └── release-process.md
+```
+
+---
+
+## Phase 51: Documentation Maintenance
+
+### 51.1 Documentation as Code
+Documentation must be treated as part of the codebase. For every significant architectural change:
+```
+Code
++
+Tests
++
+OpenAPI
++
+Documentation
+```
+
+### 51.2 Currency Maintenance
+Do not let documentation become stale. Update documentation alongside code changes.
+
+---
+
+## Phase 52: Future Development Context
+
+### 52.1 Development Guide
+Design the repository so that future AI-assisted development is safe and understandable. Create a concise repository-level development guide such as `AGENTS.md` or an equivalent project instruction file.
+
+### 52.2 Guide Contents
+It should contain:
+- Architecture overview
+- Module boundaries
+- Dependency rules
+- Coding standards
+- Testing commands
+- Build commands
+- Deployment commands
+- API conventions
+- Database conventions
+- Security rules
+- Payment rules
+- Release process
+- Important business rules
+- Things that must never be changed without migration
+
+### 52.3 Module Documentation
+Also create module-level documentation where useful.
+
+### 52.4 Development Goals
+The goal is that a future developer or AI coding assistant can understand:
+- "What does this application do?"
+- "Where does this business logic belong?"
+- "Which modules can depend on which?"
+- "How do I safely change this feature?"
+- "What tests must I run?"
+- "How do I deploy it?"
+- "How do I release it?"
+
+Without having to reverse-engineer the entire repository.
+
+---
+
+## Phase 53: Architecture Decision Records
+
+### 53.1 ADR Usage
+For important architectural decisions, use Architecture Decision Records (ADRs).
+
+### 53.2 ADR Structure
+Example:
+```
+docs/architecture/decisions/
+├── 0001-use-firebase.md
+├── 0002-use-go-backend.md
+├── 0003-use-razorpay.md
+├── 0004-use-api-versioning.md
+└── 0005-subscription-state-machine.md
+```
+
+### 53.3 ADR Content
+Each ADR should explain:
+- Context
+- Decision
+- Alternatives considered
+- Consequences
+
+### 53.4 ADR Scope
+Do not create ADRs for trivial implementation details.
+
+---
+
+## Phase 54: GitHub Integration
+
+### 54.1 GitHub as Source of Truth
+Use GitHub for source control, pull requests, CI/CD, and project management. Design the project around GitHub.
+
+### 54.2 GitHub Features
+Use:
+- GitHub repository
+- GitHub Issues
+- GitHub Projects
+- Pull Requests
+- GitHub Actions
+- Releases
+- Tags
+- Environments
+- Secrets/Variables
+
+### 54.3 Branching Strategy
+Where appropriate, use:
+```
+main
+develop
+feature/*
+fix/*
+hotfix/*
+```
+
+However, don't introduce a complicated Git branching strategy unless it provides real value. Prefer a simple workflow that works well for a small SaaS team.
+
+---
+
+## Phase 55: Pull Request Workflow
+
+### 55.1 PR Process
+Every change should preferably go through:
+```
+Issue
+ ↓
+Branch
+ ↓
+Implementation
+ ↓
+Unit Tests
+ ↓
+Integration Tests
+ ↓
+Pull Request
+ ↓
+CI
+ ↓
+Code Review
+ ↓
+Merge
+ ↓
+Deployment
+```
+
+### 55.2 Branch Protection
+Configure branch protection where available. Production branch should not allow accidental direct pushes.
+
+---
+
+## Phase 56: CI Pipeline Implementation
+
+### 56.1 GitHub Actions Workflows
+Create GitHub Actions workflows:
+```
+.github/
+└── workflows/
+    ├── frontend-ci.yml
+    ├── backend-ci.yml
+    ├── integration-tests.yml
+    ├── security.yml
+    └── deploy.yml
+```
+
+Adjust this if fewer workflows provide a cleaner architecture.
+
+### 56.2 Backend CI
+Run:
+```bash
+gofmt
+go vet
+go test
+go test -race
+coverage
+dependency/security checks
+build
+```
+
+### 56.3 Frontend CI
+Run:
+```
+format/lint
+unit tests
+build
+dependency audit
+```
+
+### 56.4 API Validation
+Validate:
+- OpenAPI specification
+- API contract
+- Generated artifacts (if used)
+
+---
+
+## Phase 57: CI Quality Gates
+
+### 57.1 PR Requirements
+A PR must not merge if required checks fail. CI should detect:
+- Compilation errors
+- Test failures
+- Race conditions (where applicable)
+- Lint failures
+- API specification errors
+- Dependency vulnerabilities (where configured)
+- Frontend build failures
+
+### 57.2 CI Performance
+Do not make CI so slow that developers start bypassing it. Optimize the pipeline for fast feedback.
+
+---
+
+## Phase 58: Continuous Deployment
+
+### 58.1 Deployment Pipeline
+Use GitHub Actions for deployment. Recommended environments:
+- Development
+- Staging
+- Production
+
+### 58.2 Deployment Flow
+```
+PR
+ ↓
+CI
+ ↓
+Merge
+ ↓
+Staging
+ ↓
+Validation
+ ↓
+Production
+```
+
+### 58.3 Staging Strategy
+If staging infrastructure is too expensive initially, design the pipeline so it can be added later without redesigning deployment.
+
+---
+
+## Phase 59: Secrets Management
+
+### 59.1 Secret Storage
+Store deployment and service secrets using:
+- GitHub Actions Secrets
+- GitHub Environment Secrets
+
+### 59.2 Git Security
+Never commit:
+- `.env` files
+- Service account JSON
+- Razorpay secret
+- Razorpay webhook secret
+- Resend API key
+- Firebase private credentials
+
+### 59.3 Example Files
+Commit only:
+- `.env.example` (with placeholders)
+
+---
+
+## Phase 60: Environment Separation
+
+### 60.1 Environment Strategy
+Clearly separate:
+- Development
+- Staging
+- Production
+
+### 60.2 Resource Separation
+Use separate:
+- Firebase projects/databases (where practical)
+- Razorpay test/live credentials
+- Resend configuration
+- Domains
+- API endpoints
+- Secrets
+
+### 60.3 Safety Rule
+Never accidentally connect development to production payment infrastructure.
+
+---
+
+## Phase 61: Deployment Architecture
+
+### 61.1 Deployment Design
+Design deployment so the system can evolve:
+```
+                       GitHub
+                          │
+                          ▼
+                    GitHub Actions
+                          │
+              ┌───────────┴───────────┐
+              ▼                       ▼
+        Frontend Build          Backend Build
+              │                       │
+              ▼                       ▼
+        GitHub Pages             Container
+                                      │
+                                      ▼
+                                 Cloud Run
+                                      │
+                     ┌────────────────┼──────────────┐
+                     ▼                ▼              ▼
+                  Firebase        Razorpay        Resend
+```
+
+### 61.2 Platform Selection
+Choose the actual backend hosting platform based on:
+- Cost
+- Firebase integration
+- Go support
+- Scalability
+- Operational simplicity
+
+### 61.3 Infrastructure Principle
+Do not add Kubernetes unless there is a genuine requirement.
+
+---
+
+## Phase 62: Deployment Versioning
+
+### 62.1 Semantic Versioning
+Use Semantic Versioning: `MAJOR.MINOR.PATCH`
+
+Examples:
+- `v1.0.0`
+- `v1.1.0`
+- `v1.1.1`
+- `v2.0.0`
+
+### 62.2 Version Interpretation
+**MAJOR** - Breaking changes (`v1.x.x → v2.0.0`):
+- Breaking API contract
+- Incompatible database migration
+- Removal of supported functionality
+- Major architectural/product change that breaks compatibility
+
+**MINOR** - Backward-compatible features (`v1.1.0 → v1.2.0`):
+- New feature
+- New API endpoint
+- Referral system
+- New subscription capability
+- New UI functionality
+
+**PATCH** - Backward-compatible fixes (`v1.2.0 → v1.2.1`):
+- Bug fixes
+- Security fixes
+- Minor performance fixes
+- Documentation fixes (where appropriate)
+
+---
+
+## Phase 63: Release Process
+
+### 63.1 Release Workflow
+Create a documented release process:
+```
+Feature development
+      ↓
+PR
+      ↓
+CI
+      ↓
+Merge
+      ↓
+Staging
+      ↓
+Validation
+      ↓
+Version bump
+      ↓
+Git tag
+      ↓
+GitHub Release
+      ↓
+Production deployment
+      ↓
+Smoke tests
+      ↓
+Monitor
+```
+
+### 63.2 Git Tags
+Use Git tags such as:
+- `v1.0.0`
+- `v1.1.0`
+- `v1.1.1`
+
+---
+
+## Phase 64: Automated Release Notes
+
+### 64.1 Commit Convention
+Use conventional commit-style messages where practical:
+- `feat:`
+- `fix:`
+- `refactor:`
+- `docs:`
+- `test:`
+- `chore:`
+- `perf:`
+- `security:`
+
+### 64.2 Release Notes Content
+Generate or assist with release notes from Git history. Release notes should contain:
+- Added
+- Changed
+- Fixed
+- Security
+- Breaking Changes
+- Migration Notes
+
+---
+
+## Phase 65: Database Migration Safety
+
+### 65.1 Migration Process
+Any database/schema change must be treated carefully. Before a production migration:
+```
+Schema change
+ ↓
+Migration plan
+ ↓
+Backward compatibility analysis
+ ↓
+Backup
+ ↓
+Migration
+ ↓
+Validation
+```
+
+### 65.2 Migration Safety
+Avoid destructive migrations in the same release that introduces dependent application changes unless the migration is proven safe.
+
+### 65.3 Migration Patterns
+Prefer expand/contract migration patterns for important changes.
+
+---
+
+## Phase 66: Rollback Strategy
+
+### 66.1 Rollback Planning
+Every production deployment must have a rollback strategy. Document:
+- Application rollback
+- Database rollback
+- Configuration rollback
+- Payment integration rollback
+
+### 66.2 Database Rollback Caution
+Do not assume database rollback is always safe. Prefer forward-compatible migrations where possible.
+
+---
+
+## Phase 67: Release Health Checks
+
+### 67.1 Post-Deployment Verification
+After deployment, automatically verify:
+- Frontend loads
+- Backend health endpoint
+- API responds
+- Authentication works
+- Database connectivity
+- Critical API path
+- Subscription lookup
+- Payment integration configuration
+- Logs/errors
+
+### 67.2 Testing Constraints
+Do not perform real payments in production smoke tests. Use appropriate test/synthetic checks.
+
+---
+
+## Phase 68: Health Endpoints
+
+### 68.1 Health Check Implementation
+Implement:
+```
+GET /health
+```
+
+And, if useful:
+```
+GET /ready
+```
+
+### 68.2 Health Check Separation
+Separate:
+- Liveness
+- Readiness
+
+Where the deployment platform benefits from it.
+
+### 68.3 Health Check Security
+Do not expose sensitive internal information in health endpoints.
+
+---
+
+## Phase 69: Maintenance Strategy
+
+### 69.1 Regular Maintenance
+Design for long-term maintenance. Create a regular maintenance process for:
+- Dependency updates
+- Security patches
+- Go version upgrades
+- Frontend dependency upgrades
+- Firebase SDK updates
+- Razorpay integration changes
+- Resend API changes
+- Browser compatibility
+- Performance optimization
+- Database cleanup
+- Monitoring
+- Backups
+- Documentation updates
+
+### 69.2 Automation
+Use automated dependency update tooling where appropriate.
+
+---
+
+## Phase 70: Technical Debt Management
+
+### 70.1 Debt Tracking
+Track technical debt explicitly in GitHub Issues/Projects. Do not hide known limitations in code comments.
+
+### 70.2 Debt Documentation
+For significant technical debt, create an issue containing:
+- Problem
+- Impact
+- Risk
+- Proposed solution
+- Priority
+
+---
+
+## Phase 71: Production Monitoring
+
+### 71.1 Observability Design
+Design for basic observability from the beginning. Track:
+- API latency
+- HTTP error rate
+- 5xx rate
+- Authentication failures
+- Payment failures
+- Webhook failures
+- Subscription activation failures
+- Email failures
+- Database errors
+
+### 71.2 Monitoring Implementation
+Create useful dashboards/alerts when the chosen infrastructure supports them.
+
+---
+
+## Phase 72: Backup and Recovery
+
+### 72.1 Backup Strategy
+Document:
+- Firebase backup strategy
+- Database recovery procedures
+- Configuration recovery
+- GitHub repository recovery
+- Production rollback procedures
+- Secrets recovery process
+
+### 72.2 Backup Principle
+Do not assume GitHub alone is a backup of runtime data.
+
+---
+
+## Phase 73: Change Management
+
+### 73.1 Change Process
+For every meaningful feature:
+```
+Requirement
+ ↓
+GitHub Issue
+ ↓
+Architecture impact
+ ↓
+Implementation
+ ↓
+Tests
+ ↓
+Documentation
+ ↓
+PR
+ ↓
+CI
+ ↓
+Review
+ ↓
+Merge
+ ↓
+Release
+```
+
+### 73.2 Engineering Workflow
+This should become the normal engineering workflow.
+
+---
+
+## Phase 74: AI-Assisted Development Safety
+
+### 74.1 Repository Context
+Because future development may involve AI coding assistants, ensure the repository contains enough context to prevent unsafe modifications.
+
+### 74.2 Documentation Maintenance
+Maintain:
+- `README.md`
+- `AGENTS.md`
+- `docs/architecture/`
+- `docs/api/`
+- `docs/development/`
+- `docs/deployment/`
+- `docs/operations/`
+
+### 74.3 Safety Guidelines
+The repository documentation should explicitly identify:
+
+**Never do without review:**
+- Change payment verification
+- Change subscription state transitions
+- Change authentication
+- Change authorization
+- Change database schema
+- Change pricing
+- Change referral reward logic
+- Change production infrastructure
+- Modify secrets/configuration
+- Remove security controls
+
+**Always test after changing:**
+- Subscription logic
+- Payment logic
+- Authentication
+- Authorization
+- Database repository
+- Referral logic
+- Public APIs
+
+---
+
+## Phase 75: Definition of Done
+
+### 75.1 Completion Criteria
+A feature is not complete merely because the code works locally. A feature is complete when applicable:
+```
+Implementation
++
+Unit tests
++
+Integration tests
++
+API/OpenAPI update
++
+Documentation
++
+Security review
++
+Error handling
++
+Responsive UI
++
+CI passing
++
+Deployment verified
+```
+
+---
+
+## Phase 76: Final Engineering Principles
+
+### 76.1 Optimization Goals
+Optimize for:
+- Maintainability
+- Security
+- Testability
+- Scalability
+- Observability
+- Backward compatibility
+- Developer productivity
+
+### 76.2 Implementation Balance
+Do not optimize for the shortest implementation. Avoid over-engineering. Use the simplest architecture that can comfortably support the expected SaaS scale.
+
+### 76.3 Final Quality Standard
+The final repository should feel like a professionally maintained production SaaS codebase, not a prototype that happens to work.
+
+---
+
+## Summary
+
+This master prompt provides a comprehensive framework for transforming an existing web application into a production-quality SaaS platform. The phased approach ensures:
+
+1. **Preservation of existing functionality** through thorough auditing
+2. **Security-first design** with proper separation of concerns
+3. **Scalable architecture** that can grow with the business
+4. **Professional engineering practices** including testing, CI/CD, and documentation
+5. **Long-term maintainability** through clean code and proper documentation
+
+Follow this framework systematically, adapting specific implementations based on the actual existing codebase while maintaining the core principles of security, scalability, and professional software engineering.

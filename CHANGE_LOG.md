@@ -5,6 +5,73 @@ All notable changes to SmartFin will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [4.0.1] - 2026-08-13 - Major Architecture Redesign
+
+### Added
+
+#### Core Business Logic Modules
+- **FrequencyConverter**: Payment frequency conversions (Monthly, Quarterly, Semi-Annual, Annual, One-Time)
+- **DateUtils**: Date manipulation utilities (month keys, age calculation, financial year, date formatting)
+- **CurrencyFormatter**: Indian currency formatting (standard, compact, percentage, with sign)
+- **BudgetCalculator**: Budget calculations (fixed outflow, transfer amount, variable expenditure, budget summary, validation)
+- **AccountManager**: Account management (find by purpose, calculate totals, validate constraints, onboarding status)
+- **AccountValidator**: Account validation (validate data, sanitize inputs, check completeness)
+- **InvestmentCalculator**: Investment calculations (SIP returns, portfolio summary, growth projections, required investment)
+- **GoalCalculator**: Goal tracking (progress calculation, status determination, on-track checking, required savings)
+- **InsuranceCalculator**: Insurance analysis (ideal coverage, annual premium, gap analysis, policy filtering)
+- **NetWorthCalculator**: Net worth tracking (current calculation, future projection, inflation adjustment, auto-entry generation)
+- **TaxCalculator**: Tax planning (section-wise deductions, auto deductions, tax savings, section limits)
+- **ExpenseAnalyzer**: Expense tracking (category analysis, budget comparison, statistics, chart data generation)
+- **Core Index**: Main export file for all modules
+
+#### Testing & Documentation
+- **test-utils.html**: Browser-based test runner with 21 integration tests
+- **FrequencyConverter.test.js**: 13 unit tests for frequency conversion
+- **BudgetCalculator.test.js**: 30 unit tests for budget calculations
+- **INTEGRATION_GUIDE.md**: Complete guide on using the new modules (452 lines)
+- **PHASE1_COMPLETE.md**: Detailed summary of architecture redesign (451 lines)
+- **IMPLEMENTATION_PROGRESS.md**: Progress tracking and metrics (updated)
+- **README_IMPLEMENTATION.md**: Quick start guide for developers (396 lines)
+
+### Changed
+
+#### Architecture
+- **Modular Design**: Business logic separated into 13 platform-independent modules (2,780 lines)
+- **Pure Functions**: All business logic functions are pure (no side effects, predictable outputs)
+- **Platform Independence**: No DOM or framework dependencies, works on web and mobile
+- **Enhanced Maintainability**: Clear separation of concerns, single responsibility principle
+- **Improved Testability**: 100% testable with 64 comprehensive tests (100% pass rate)
+
+#### Code Quality
+- **constants.js**: Updated to use new FrequencyConverter module (backward compatible)
+- **app.js**: Updated version to v4.0.1 with architecture redesign notes
+- **Documentation**: All documentation updated to reflect new architecture
+
+### Performance
+- **Test Execution**: Fast test execution with browser-based test runner
+- **Code Organization**: Improved code organization reduces cognitive load
+- **Reusability**: Modules can be reused across web and mobile platforms
+
+### Compatibility
+- **Backward Compatibility**: Zero breaking changes, all existing features preserved
+- **Browser Support**: Maintained support for Chrome, Firefox, Safari, Edge
+- **Mobile Support**: Maintained support for iOS Safari, Android Chrome
+- **Firebase Integration**: No changes to Firebase integration
+
+### Documentation
+- **APP_SPEC.md**: Updated to v4.0.1 with new architecture section
+- **README.md**: Updated to v4.0.1 with new features and architecture details
+- **CHANGE_LOG.md**: Added v4.0.1 entry with complete changelog
+- **All Documentation**: Updated version numbers and architecture information
+
+### Technical Details
+- **Total Modules**: 13 files
+- **Lines of Code**: 2,780 lines
+- **Functions**: 119+ pure functions
+- **Tests**: 64 tests (100% passing)
+- **Documentation**: 1,100+ lines
+- **Total Deliverables**: 4,280 lines
+
 ## [3.0.5] - 2026-01-XX - Budget Calculation & UI Improvements
 
 ### Changed

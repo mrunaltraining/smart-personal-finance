@@ -1,4 +1,4 @@
-# SmartFin – Developer Guide (v3.0.5)
+# SmartFin – Developer Guide (v4.0.1)
 
 > Local development, testing, and deployment instructions.
 
@@ -6,9 +6,9 @@
 
 **IMPORTANT**: After making any code changes, update all documentation to keep it in sync:
 
-1. **Check APP_VERSION**: Current version is in `assets/js/app.js` line 572:
+1. **Check APP_VERSION**: Current version is in `assets/js/app.js` line 593:
    ```javascript
-   const APP_VERSION = { major: 3, minor: 0, build: 0 };
+   const APP_VERSION = { major: 4, minor: 0, build: 1 };
    ```
 
 2. **Update version numbers** in these files to match APP_VERSION:

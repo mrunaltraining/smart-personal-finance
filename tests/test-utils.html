@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SmartFin Core Modules Tests (v4.0.1)</title>
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            max-width: 800px;
+            margin: 50px auto;
+            padding: 20px;
+            background: #f8f9fa;
+        }
+        h1 {
+            color: #7c3aed;
+        }
+        .test-section {
+            background: white;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 8px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+        .test-result {
+            padding: 10px;
+            margin: 5px 0;
+            border-radius: 4px;
+            font-family: monospace;
+        }
+        .pass {
+            background: #d1fae5;
+            color: #065f46;
+        }
+        .fail {
+            background: #fee2e2;
+            color: #991b1b;
+        }
+        .summary {
+            font-size: 18px;
+            font-weight: bold;
+            margin-top: 20px;
+            padding: 15px;
+            background: #ede9fe;
+            color: #5b21b6;
+            border-radius: 8px;
+        }
+    </style>
+</head>
+<body>
+    <h1>SmartFin Core Modules Tests (v4.0.1)</h1>
+    <div id="test-results"></div>
+
+    <script type="module">
+        import { FrequencyConverter } from '../src/core/utils/FrequencyConverter.js';
+        import { DateUtils } from '../src/core/utils/DateUtils.js';
+        import { CurrencyFormatter } from '../src/core/utils/CurrencyFormatter.js';
+        import { Logger } from '../src/core/utils/Logger.js';
+        import { BudgetCalculator } from '../src/core/budget/BudgetCalculator.js';
+        import { DashboardCalculator } from '../src/core/dashboard/DashboardCalculator.js';
+
+        const resultsDiv = document.getElementById('test-results');
+        let totalTests = 0;
+        let passedTests = 0;
+
+        function addTestResult(name, passed, message = '') {
+            totalTests++;
+            if (passed) passedTests++;
+            
+            const div = document.createElement('div');
+            div.className = `test-result ${passed ? 'pass' : 'fail'}`;
+            div.textContent = `${passed ? '✓' : '✗'} ${name}${message ? ': ' + message : ''}`;
+            resultsDiv.appendChild(div);
+        }
+
+        function addSection(title) {
+            const section = document.createElement('div');
+            section.className = 'test-section';
+            section.innerHTML = `<h2>${title}</h2>`;
+            resultsDiv.appendChild(section);
+            return section;
+        }
+
+        // FrequencyConverter Tests
+        const freqSection = addSection('FrequencyConverter Tests');
+        resultsDiv.appendChild(freqSection);
+
+        addTestResult('toMonthly(12000, "Monthly")', 
+            FrequencyConverter.toMonthly(12000, 'Monthly') === 12000,
+            `Result: ${FrequencyConverter.toMonthly(12000, 'Monthly')}`);
+
+        addTestResult('toMonthly(6000, "Quarterly")', 
+            FrequencyConverter.toMonthly(6000, 'Quarterly') === 2000,
+            `Result: ${FrequencyConverter.toMonthly(6000, 'Quarterly')}`);
+
+        addTestResult('toMonthly(120000, "Annual")', 
+            FrequencyConverter.toMonthly(120000, 'Annual') === 10000,
+            `Result: ${FrequencyConverter.toMonthly(120000, 'Annual')}`);
+
+        addTestResult('toMonthly(5000, "One-Time")', 
+            FrequencyConverter.toMonthly(5000, 'One-Time') === 0,
+            `Result: ${FrequencyConverter.toMonthly(5000, 'One-Time')}`);
+
+        addTestResult('getPeriodsPerYear("Monthly")', 
+            FrequencyConverter.getPeriodsPerYear('Monthly') === 12,
+            `Result: ${FrequencyConverter.getPeriodsPerYear('Monthly')}`);
+
+        // DateUtils Tests
+        const dateSection = addSection('DateUtils Tests');
+        resultsDiv.appendChild(dateSection);
+
+        const today = new Date();
+        const monthKey = DateUtils.getMonthKey(today);
+        addTestResult('getMonthKey(today)', 
+            /^\d{4}-\d{2}$/.test(monthKey),
+            `Result: ${monthKey}`);
+
+        const age = DateUtils.calculateAge('1990-01-01');
+        addTestResult('calculateAge("1990-01-01")', 
+            age >= 30 && age <= 40,
+            `Result: ${age} years`);
+
+        const nextMonth = DateUtils.getNextMonthKey('2026-08');
+        addTestResult('getNextMonthKey("2026-08")', 
+            nextMonth === '2026-09',
+            `Result: ${nextMonth}`);
+
+        const prevMonth = DateUtils.getPreviousMonthKey('2026-08');
+        addTestResult('getPreviousMonthKey("2026-08")', 
+            prevMonth === '2026-07',
+            `Result: ${prevMonth}`);
+
+        // CurrencyFormatter Tests
+        const currencySection = addSection('CurrencyFormatter Tests');
+        resultsDiv.appendChild(currencySection);
+
+        const formatted1 = CurrencyFormatter.format(50000);
+        addTestResult('format(50000)', 
+            formatted1 === '₹50,000',
+            `Result: ${formatted1}`);
+
+        const formatted2 = CurrencyFormatter.format(1500000, { compact: true });
+        addTestResult('format(1500000, {compact: true})', 
+            formatted2 === '₹15.00L',
+            `Result: ${formatted2}`);
+
+        const formatted3 = CurrencyFormatter.format(15000000, { compact: true });
+        addTestResult('format(15000000, {compact: true})', 
+            formatted3 === '₹1.50Cr',
+            `Result: ${formatted3}`);
+
+        const parsed = CurrencyFormatter.parse('₹50,000');
+        addTestResult('parse("₹50,000")', 
+            parsed === 50000,
+            `Result: ${parsed}`);
+
+        const percentage = CurrencyFormatter.formatPercentage(0.15);
+        addTestResult('formatPercentage(0.15)', 
+            percentage === '15.00%',
+            `Result: ${percentage}`);
+
+        // BudgetCalculator Tests
+        const budgetSection = addSection('BudgetCalculator Tests');
+        resultsDiv.appendChild(budgetSection);
+
+        const outflows1 = [
+            { name: 'Rent', amount: 15000, frequency: 'Monthly', type: 'Expenditure' },
+            { name: 'Insurance', amount: 2000, frequency: 'Monthly', type: 'Insurance' }
+        ];
+        const fixedOutflow1 = BudgetCalculator.calculateFixedMonthlyOutflow(outflows1);
+        addTestResult('calculateFixedMonthlyOutflow: Monthly outflows', 
+            fixedOutflow1.total === 17000,
+            `Result: ₹${fixedOutflow1.total.toLocaleString('en-IN')}`);
+
+        const outflows2 = [
+            { name: 'Monthly', amount: 12000, frequency: 'Monthly', type: 'Expenditure' },
+            { name: 'Quarterly', amount: 6000, frequency: 'Quarterly', type: 'Savings' },
+            { name: 'Annual', amount: 12000, frequency: 'Annual', type: 'Insurance' }
+        ];
+        const fixedOutflow2 = BudgetCalculator.calculateFixedMonthlyOutflow(outflows2);
+        addTestResult('calculateFixedMonthlyOutflow: Mixed frequencies', 
+            fixedOutflow2.total === 15000,
+            `Result: ₹${fixedOutflow2.total.toLocaleString('en-IN')}`);
+
+        const transfer1 = BudgetCalculator.calculateTransferAmount(100000, 60000);
+        addTestResult('calculateTransferAmount(100000, 60000)', 
+            transfer1 === 40000,
+            `Result: ₹${transfer1.toLocaleString('en-IN')}`);
+
+        // Logger Tests
+        const loggerSection = addSection('Logger Tests');
+        resultsDiv.appendChild(loggerSection);
+
+        addTestResult('Logger: setLogLevel', 
+            Logger.setLogLevel(Logger.LOG_LEVELS.DEBUG) === undefined,
+            'Result: LogLevel set successfully');
+
+        addTestResult('Logger: info method exists', 
+            typeof Logger.info === 'function',
+            'Result: Logger.info is a function');
+
+        addTestResult('Logger: createScoped returns object', 
+            typeof Logger.createScoped('TEST') === 'object',
+            'Result: Scoped logger created');
+
+        // DashboardCalculator Tests
+        const dashboardSection = addSection('DashboardCalculator Tests');
+        resultsDiv.appendChild(dashboardSection);
+
+        const emptyDashboard = DashboardCalculator.getEmptyDashboard();
+        addTestResult('getEmptyDashboard returns structure', 
+            emptyDashboard && emptyDashboard.budget && emptyDashboard.accounts,
+            'Result: Empty dashboard structure returned');
+
+        const budgetSummary = DashboardCalculator.calculateBudgetSummary({
+            monthData: { _calculatedTotalIncome: 100000, _calculatedTotalOutflow: 60000 }
+        });
+        addTestResult('calculateBudgetSummary', 
+            budgetSummary.income === 100000 && budgetSummary.expenses === 60000,
+            'Result: Budget summary calculated');
+
+        const healthScore = DashboardCalculator.calculateFinancialHealthScore({
+            monthData: { _calculatedTotalIncome: 100000, _calculatedSpendable: 40000 }
+        });
+        addTestResult('calculateFinancialHealthScore', 
+            typeof healthScore.score === 'number' && healthScore.score >= 0 && healthScore.score <= 100,
+            'Result: Health score calculated');
+
+        const varExp = BudgetCalculator.calculateVariableExpenditure(50000, 30000);
+        addTestResult('calculateVariableExpenditure(50000, 30000)', 
+            varExp === 20000,
+            `Result: ₹${varExp.toLocaleString('en-IN')}`);
+
+        const budgetStatus1 = BudgetCalculator.getBudgetStatus(10000, 100000, 50000);
+        addTestResult('getBudgetStatus: Surplus', 
+            budgetStatus1.type === 'positive',
+            `Result: ${budgetStatus1.message}`);
+
+        const budgetStatus2 = BudgetCalculator.getBudgetStatus(-5000, 100000, 50000);
+        addTestResult('getBudgetStatus: Deficit', 
+            budgetStatus2.type === 'negative',
+            `Result: ${budgetStatus2.message}`);
+
+        const accounts = {
+            salary: { id: '1', balance: 100000 },
+            expenditure: { id: '2', balance: 50000 }
+        };
+        const monthData = {
+            inflow: { primaryIncome: 100000 }
+        };
+        const validation = BudgetCalculator.validateTransferPrerequisites(accounts, monthData);
+        addTestResult('validateTransferPrerequisites: Valid', 
+            validation.isValid === true,
+            `Result: ${validation.isValid ? 'Valid' : validation.errors.join(', ')}`);
+
+        // Summary
+        const summary = document.createElement('div');
+        summary.className = 'summary';
+        summary.textContent = `Test Summary: ${passedTests}/${totalTests} tests passed`;
+        resultsDiv.appendChild(summary);
+
+        console.log(`✓ All tests completed: ${passedTests}/${totalTests} passed`);
+    </script>
+</body>
+</html>
