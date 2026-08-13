@@ -1,0 +1,291 @@
+================================================================================
+  SmartFin - Improvement TODO List
+  Last Updated: August 5, 2026
+  Version: 2.1.0
+================================================================================
+
+
+[P1] HIGH PRIORITY - Dashboard Enhancements
+================================================================================
+
+[x] Add Alerts & Notifications Section (COMPLETED v2.1.0)
+    - Over-budget category warnings
+    - Upcoming bill due dates
+    - Goals behind schedule alerts
+    - Low emergency fund warnings
+    - Insurance renewal reminders
+    - Credit card payment reminders
+
+[x] Add Quick Actions Panel (COMPLETED v2.1.0)
+    - Quick navigation to Budget, Investments, Expenses, Goals, Net Worth, Tax Planning
+    - Responsive grid layout
+    - Hover effects and smooth transitions
+
+[x] Add Financial Health Score (COMPLETED v2.1.0)
+    - Calculate overall wellness score (0-100)
+    - Emergency fund coverage (25%)
+    - Debt-to-income ratio (20%)
+    - Savings rate (20%)
+    - Insurance coverage (15%)
+    - Goal progress (10%)
+    - Investment activity (10%)
+    - Visual circular progress indicator
+    - Detailed breakdown with component scores
+
+[x] Add Cash Flow Summary (COMPLETED v2.1.0)
+    - Total Income with breakdown
+    - Total Expenses with breakdown
+    - Net Cash Flow (positive/negative)
+    - Savings Rate (% of income saved)
+
+[x] Add Budget vs Actual Comparison (COMPLETED v2.1.0)
+    - Budget surplus/deficit display
+    - Budgeted vs spent comparison
+    - Overall budget adherence score
+    - Visual progress indicators
+
+
+[P2] MEDIUM PRIORITY - Enhanced Analytics
+================================================================================
+
+[x] Add Quick Insights/Recommendations (COMPLETED v2.1.0)
+    - AI-like suggestions based on data
+    - Positive reinforcement for good habits
+    - Actionable improvement suggestions
+    - Emergency fund building tips
+    - Insurance optimization recommendations
+    - Investment encouragement
+    - Goal progress insights
+    - Debt optimization warnings
+
+[ ] Add Spending Category Breakdown
+    - Mini pie chart showing expense categories
+    - Click to see detailed breakdown
+    - Compare to budget limits
+    - Category-wise spending trends
+
+[ ] Add Upcoming Expenses Timeline
+    - Show next 30 days expenses
+    - EMI due dates
+    - Insurance premiums
+    - Recurring subscriptions
+    - Goal target dates
+    - Tax deadlines
+
+[ ] Add Net Worth Trend Chart
+    - 6-month net worth trend line chart
+    - Month-over-month change
+    - Year-to-date growth
+    - Visual progress tracking
+
+[ ] Add Goal Timeline Visualization
+    - Horizontal timeline with milestones
+    - Progress indicators
+    - Time remaining for each goal
+    - Priority ranking
+
+
+[P3] NICE TO HAVE - Advanced Features
+================================================================================
+
+[ ] Add Year-to-Date Summary
+    - Total income YTD
+    - Total expenses YTD
+    - Total savings YTD
+    - Net worth change YTD
+    - Comparison to previous year
+
+[ ] Add Investment Performance
+    - Portfolio return % (YTD)
+    - Best performing investment
+    - Worst performing investment
+    - Asset allocation breakdown
+
+[ ] Add Debt Analysis
+    - Total debt outstanding
+    - Debt-to-income ratio
+    - Monthly debt payments
+    - Debt payoff timeline
+    - Interest paid YTD
+
+[ ] Add Recent Activity Feed
+    - Last 5 transactions
+    - Recent goal updates
+    - Recent investment additions
+    - Recent budget changes
+
+[ ] Add Calendar View
+    - Mini calendar showing financial dates
+    - Income dates (salary)
+    - Bill due dates
+    - EMI dates
+    - Goal milestones
+
+[ ] Add PWA support (manifest.json + service worker)
+    - App already has mobile-web-app-capable meta tags
+    - Add manifest.json for installability
+    - Add service worker to cache HTML/CSS/JS for offline use
+    - Enable Firestore offline persistence
+
+[ ] Add email verification on registration
+    - Call user.sendEmailVerification() after account creation
+    - Show banner until email is verified
+
+[ ] Add re-authentication dialog before account deletion
+    - Currently tells user to "log out and back in"
+    - Prompt for password inline instead
+
+[ ] Improve accessibility (ARIA roles, focus management)
+    - Add role="tab", aria-selected, tabindex to tab buttons
+    - Move focus to panel content on tab switch
+    - Add skip-to-content link
+    - Add focus-visible styles for keyboard navigation
+
+[ ] Update cache-busting strategy
+    - Current: static ?v=3 on script tags (manually updated)
+    - Use build number from APP_VERSION: ?v=${build}
+
+[ ] Add SIP calculator / what-if analysis tool
+    - Project investment growth with compound interest
+    - "What if I invest X more per month?" scenarios
+
+[ ] Add session timeout for shared devices
+    - Firebase tokens auto-refresh indefinitely
+    - Add configurable idle timeout (e.g., 30 min)
+
+[ ] Firestore document size monitoring
+    - Single document per user can grow large over years
+    - Add check/warning when approaching 1MB limit
+    - Plan: migrate monthly budget data to sub-collection if needed
+
+
+[FUTURE ENHANCEMENTS - Consider for v2.1+]
+================================================================================
+
+[ ] Add dark/light theme toggle with manual override
+    - Currently auto-detects system preference
+    - Add manual toggle button in settings
+    - Persist user preference in localStorage
+
+[ ] Add data visualization improvements
+    - More chart types (line charts for trends)
+    - Interactive charts with drill-down
+    - Year-over-year comparison views
+
+[ ] Add goal milestone tracking
+    - Break goals into milestones
+    - Progress visualization per milestone
+    - Celebrations on milestone completion
+
+[ ] Add expense categorization with tags
+    - Tag-based filtering in budget
+    - Custom category creation
+    - Category-based spending analysis
+
+[ ] Add recurring expense automation
+    - Auto-add recurring expenses each month
+    - Configurable recurrence patterns
+    - Skip/modify individual instances
+
+[ ] Add multi-currency support
+    - Select base currency during setup
+    - Real-time exchange rate integration
+    - Currency conversion in reports
+
+[ ] Add collaboration features
+    - Share dashboard with family members
+    - Read-only access for family
+    - Shared goals tracking
+
+[ ] Add advanced reporting
+    - Custom date range reports
+    - Export to multiple formats (PDF, Excel, CSV)
+    - Email scheduled reports
+
+[ ] Add investment portfolio tracking
+    - Stock/mutual fund integration
+    - Real-time NAV updates
+    - Portfolio performance analytics
+
+[ ] Add tax filing preparation
+    - Generate tax-ready reports
+    - Section 80C/80D summaries
+    - Form 26AS integration
+
+[ ] Add predictive analytics
+    - Predict next month's expenses
+    - Forecast goal completion dates
+    - Predict cash flow gaps
+    - Suggest optimal transfer amounts
+
+[ ] Add what-if scenarios
+    - "What if I save ₹10,000 more?"
+    - "What if I lose my job?"
+    - "What if I take this loan?"
+    - Impact on goals and timeline
+
+
+================================================================================
+  Project Status Summary
+================================================================================
+
+  Version: 2.1.0
+  Last Updated: August 5, 2026
+  
+  P0 (Critical):     0/0 remaining (100% complete)
+  P1 (High):         0/5 remaining (100% complete) ✅
+  P2 (Medium):      4/5 remaining (20% complete)
+  P3 (Nice to Have):  15/15 remaining (0% complete)
+  
+  Overall:          19/25 remaining (24% complete overall)
+  
+  Test Suite:       Tax calculation tests added (20+ test cases)
+  
+  Recently Completed (v2.0.10 - v2.1.0):
+    v2.0.10:
+    - Dashboard mobile-responsive bar chart (hide numbers on mobile)
+    - Added credit card usage and expenditure account balance to "This Month"
+    - Combined Accounts & Net Worth into single card
+    - Combined Goals & Investment Planning into single card
+    - Added navigation links to Budget, Fixed Outflow, Net Worth, Goals tabs
+    - Removed "Purpose:" label from Accounts tab
+    - Display actual user location in insurance text
+    - Enhanced Gifts tracking with date/month display
+    - Comprehensive tax planning with banner for investment scope
+    - Added LICENSE file (Personal Use Only) and .codeowners
+    - Added comprehensive tax calculation test suite
+    
+    v2.0.11:
+    - Added "Other" option to location dropdown for custom cities
+    - Custom cities assumed non-metro for insurance calculations
+    - Improved dashboard card distribution across screen sizes
+    - Added comprehensive development process documentation in APP_SPEC.md
+    
+    v2.0.12:
+    - Changed dashboard layout to 2x2 grid (2 rows, 2 columns)
+    - Updated responsive breakpoints for better tablet/mobile support
+    
+    v2.1.0 (MAJOR RELEASE):
+    - ✅ P1.1: Alerts & Notifications Section with real-time financial alerts
+    - ✅ P1.2: Quick Actions Panel for one-click navigation
+    - ✅ P1.3: Financial Health Score (0-100) with detailed breakdown
+    - ✅ P1.4: Cash Flow Summary with income/expense tracking
+    - ✅ P1.5: Budget vs Actual Comparison with adherence tracking
+    - ✅ P2.5: Insights & Recommendations with AI-like suggestions
+    - All features use existing data - no duplicates, ensuring consistency
+    - Fully responsive design for all screen sizes
+    - Enhanced user experience with actionable insights
+  
+  Next Priorities:
+    - P2 items: Enhanced analytics (spending breakdown, timeline, trends, goals visualization)
+    - P3 items: Advanced features and existing nice-to-have items
+    - Future enhancements for v2.2+
+
+================================================================================
+  Priority Key:
+    P0 = Critical (data loss/security risk, fix ASAP)
+    P1 = High (significant UX impact, do next)
+    P2 = Medium (code health, performance, enhanced features)
+    P3 = Nice to have (polish, future features)
+
+================================================================================

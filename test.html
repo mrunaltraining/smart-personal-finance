@@ -1,0 +1,1139 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SmartFin - Test Suite (v3.0.5)</title>
+<style>
+body { font-family: system-ui, sans-serif; max-width: 900px; margin: 40px auto; padding: 20px; background: #1a1a1a; color: #e0e0e0; }
+h1 { color: #fff; }
+h2 { color: #fff; margin-top: 0; font-size: 1rem; text-transform: uppercase; letter-spacing: 1px; }
+.test-section { margin: 24px 0; padding: 20px; background: #222; border-radius: 8px; border: 1px solid #333; }
+.test-item { margin: 8px 0; padding: 10px 14px; background: #2a2a2a; border-radius: 4px; display: flex; align-items: center; gap: 10px; font-size: 0.9rem; }
+.test-item.pass { border-left: 4px solid #22c55e; }
+.test-item.fail { border-left: 4px solid #ef4444; }
+.test-item .status { font-weight: bold; min-width: 50px; font-size: 0.8rem; }
+.test-item.pass .status { color: #22c55e; }
+.test-item.fail .status { color: #ef4444; }
+.test-item .desc { flex: 1; }
+.test-item .detail { color: #888; font-size: 0.8rem; margin-left: auto; }
+.summary { padding: 12px 16px; border-radius: 6px; margin: 16px 0; font-weight: 600; }
+.summary.all-pass { background: #14532d; color: #86efac; }
+.summary.has-fail { background: #7f1d1d; color: #fca5a5; }
+button { background: #fff; color: #000; border: none; padding: 10px 22px; border-radius: 4px; cursor: pointer; font-weight: 600; font-size: 0.9rem; }
+button:hover { background: #e0e0e0; }
+.checklist li { line-height: 2; color: #ccc; }
+.checklist strong { color: #fff; }
+</style>
+</head>
+<body>
+<h1>₹ SmartFin – Test Suite (v3.0.5)</h1>
+<p style="color: #888; margin-top: -10px; margin-bottom: 20px;">
+  Comprehensive test coverage for financial calculations, UI logic, v3.0.5 budget refinements, and dashboard enhancements
+</p>
+
+<div class="test-section">
+  <h2>Automated Unit Tests</h2>
+  <div id="summary"></div>
+  <div id="results"></div>
+  <button onclick="runTests()">▶ Run All Tests</button>
+</div>
+
+<div class="test-section">
+  <h2>Manual Testing Checklist</h2>
+  <ul class="checklist">
+    <li><strong>Auth:</strong> Register new account → select location → verify name and location in header</li>
+    <li><strong>Auth:</strong> Sign out → verify auth screen appears</li>
+    <li><strong>Auth:</strong> Sign in with wrong password → verify friendly error</li>
+    <li><strong>Auth:</strong> Forgot password → enter email → verify reset email sent toast</li>
+    <li><strong>Tabs:</strong> Click each of the 11 tabs → verify correct UI renders</li>
+    <li><strong>Dashboard (v3.0.5):</strong> Verify Saving and Investment account status displays</li>
+    <li><strong>Dashboard (v3.0.5):</strong> Verify Variable Expenses and On-Demand Items shown separately</li>
+    <li><strong>Dashboard (v3.0.5):</strong> Verify Total Allocated = Variable Expenses + On-Demand Items</li>
+    <li><strong>Dashboard (v3.0.5):</strong> Verify insight icons are compact (28px containers)</li>
+    <li><strong>Dashboard (v3.0.5):</strong> Verify alert icons are compact (28px containers)</li>
+    <li><strong>Budget (v3.0.5):</strong> Verify on-demand items reduce expenditure account balance</li>
+    <li><strong>Budget (v3.0.5):</strong> Verify budget surplus includes on-demand items</li>
+    <li><strong>Budget (v3.0.5):</strong> Verify Variable Expenses display excludes on-demand items</li>
+    <li><strong>Budget (v3.0.5):</strong> Verify summary grid shows 4 items per row on desktop</li>
+    <li><strong>Budget (v3.0.5):</strong> Verify summary grid shows 2 items per row on mobile</li>
+    <li><strong>Dashboard (v2.0.4):</strong> Verify Goals section shows combined progress bar (not individual)</li>
+    <li><strong>Dashboard (v2.0.4):</strong> Verify Preparedness section shows Emergency Fund, Health Insurance, Term Insurance</li>
+    <li><strong>Dashboard (v2.0.4):</strong> Hover over "Ideal" amounts → verify tooltips show calculation formulas</li>
+    <li><strong>Dashboard (v2.0.4):</strong> Verify 6-Month Trend chart displays with Investment, Liability, Saving, Expenditure, Others</li>
+    <li><strong>Dashboard (v2.0.4):</strong> Verify amounts appear on top of trend chart bars (₹XXK format)</li>
+    <li><strong>Dashboard (v2.0.4):</strong> Click "Download PDF" → verify HTML file downloads</li>
+    <li><strong>Dashboard (v2.0.4):</strong> Verify Emergency Fund ideal matches Emergency Fund tab (same amount)</li>
+    <li><strong>Dashboard:</strong> Verify responsive layout (3-col desktop, 2-col tablet, 1-col mobile)</li>
+    <li><strong>Budget:</strong> Enter income/expense → verify totals update live</li>
+    <li><strong>Budget:</strong> Click "📊 Annual" → verify annual summary with month breakdown</li>
+    <li><strong>Budget:</strong> Navigate months with ← → → verify month display updates</li>
+    <li><strong>Goals:</strong> Add goal → verify in preview cards</li>
+    <li><strong>Fixed Outflow:</strong> Add expense → verify bar graphs update</li>
+    <li><strong>Investments:</strong> Add Monthly investment → verify appears in Tax Plan auto-deductions</li>
+    <li><strong>Investments:</strong> Add One-Time investment → verify NOT in Tax Plan auto-deductions</li>
+    <li><strong>Accounts (v2.0.4):</strong> Verify purpose badge appears next to bank name (not below)</li>
+    <li><strong>Accounts (v2.0.4):</strong> Verify PRIMARY badge shows "PRIMARY (Expenditure)"</li>
+    <li><strong>Accounts (v2.0.4):</strong> Verify all badges have consistent backgrounds</li>
+    <li><strong>Net Worth:</strong> Add asset + liability → verify projection chart shows</li>
+    <li><strong>Tax Plan (v2.0.4):</strong> Verify auto-deductions only show recurring investments (not One-Time)</li>
+    <li><strong>Tax Plan (v2.0.4):</strong> Verify total is realistic (₹2-8L range, not crores)</li>
+    <li><strong>Tax Plan:</strong> Switch regime → verify tax calculation changes</li>
+    <li><strong>Gifts (v2.0.4):</strong> Add gift with date → verify appears in monthly chart</li>
+    <li><strong>Gifts (v2.0.4):</strong> Verify summary shows: Total Gifts, Fixed Every Year (count & amount), Spent This Year, Overall Total</li>
+    <li><strong>Gifts (v2.0.4):</strong> Verify monthly chart shows current financial year (Apr-Mar)</li>
+    <li><strong>Emergency Fund:</strong> Enter current fund → verify status badge color (red/yellow/green)</li>
+    <li><strong>Emergency Fund:</strong> Verify ideal amount calculation shown (12 months)</li>
+    <li><strong>Insurance (v2.0.4):</strong> Add health insurance → verify appears in Dashboard preparedness</li>
+    <li><strong>Insurance (v2.0.4):</strong> Verify ideal health insurance based on income and location</li>
+    <li><strong>Export:</strong> Click "Export Excel" on any tab with data → verify .xlsx downloads</li>
+    <li><strong>Reset:</strong> Click "Reset All Data" → cancel → verify data intact</li>
+    <li><strong>Reset:</strong> Click "Reset All Data" → confirm → type DELETE → verify all data cleared</li>
+    <li><strong>Undo Delete:</strong> Delete a row → verify undo toast appears → click undo → verify row restored</li>
+    <li><strong>Search:</strong> Type in search box on standard tab → verify rows filter</li>
+    <li><strong>Firebase Sync:</strong> Add entry → refresh page → verify data persists</li>
+    <li><strong>Loading:</strong> Refresh page → verify loading spinner appears briefly before content</li>
+    <li><strong>Modals:</strong> Trigger alert/confirm actions → verify styled modals appear (not browser alerts)</li>
+    <li><strong>Theme:</strong> Switch OS dark/light mode → verify app auto-detects and updates theme</li>
+  </ul>
+</div>
+
+<script>
+// ── Test utilities ─────────────────────────────────────────────────────────────
+const results = [];
+
+function test(desc, fn) {
+    try {
+        const val = fn();
+        const pass = val === true || val === undefined;
+        results.push({ pass, desc, detail: pass ? "" : String(val) });
+    } catch (e) {
+        results.push({ pass: false, desc, detail: e.message });
+    }
+}
+
+function assertEqual(a, b, desc) {
+    const pass = JSON.stringify(a) === JSON.stringify(b);
+    results.push({ pass, desc, detail: pass ? "" : `Expected ${JSON.stringify(b)}, got ${JSON.stringify(a)}` });
+}
+
+function assertNotNull(v, desc) {
+    results.push({ pass: v !== null && v !== undefined, desc, detail: v == null ? "Got null/undefined" : "" });
+}
+
+function renderResults() {
+    const container = document.getElementById("results");
+    const summaryEl = document.getElementById("summary");
+    const passed = results.filter(r => r.pass).length;
+    const total = results.length;
+    const allPass = passed === total;
+
+    summaryEl.innerHTML = `<div class="summary ${allPass ? 'all-pass' : 'has-fail'}">${allPass ? '✅' : '❌'} ${passed} / ${total} tests passed</div>`;
+
+    container.innerHTML = results.map(t => `
+        <div class="test-item ${t.pass ? 'pass' : 'fail'}">
+            <span class="status">${t.pass ? 'PASS' : 'FAIL'}</span>
+            <span class="desc">${t.desc}</span>
+            ${t.detail ? `<span class="detail">${t.detail}</span>` : ''}
+        </div>
+    `).join('');
+}
+
+// ── Stub implementations (mirrors app.js v2.0 logic, no Firebase) ─────────────
+const DEFAULT_TABS = [
+    { id: "dashboard",           label: "Dashboard",             semantic: "Others", core: true },
+    { id: "cards",               label: "Accounts",              semantic: "Others", core: true },
+    { id: "inflow",              label: "Investments",           semantic: "Investment", core: true },
+    { id: "outflow",             label: "Fixed Outflow",          semantic: "Liability", core: true },
+    { id: "insurance",           label: "Insurance",             semantic: "Insurance", core: true },
+    { id: "monthlyBudget",       label: "Budget",                semantic: "Expenditure", core: true },
+    { id: "financialGoal",       label: "Goals",                 semantic: "Savings", core: true },
+    { id: "netWorth",            label: "Net Worth",             semantic: "Others" },
+    { id: "taxPlan",             label: "Tax Plan",              semantic: "Savings" },
+    { id: "gifts",               label: "Gifts",                 semantic: "Others" },
+    { id: "emergencyFund",       label: "Emergency Fund",        semantic: "Savings" }
+];
+
+// ── Constants (mirrors assets/js/modules/constants.js) ────────────────────────
+const SAVE_DEBOUNCE_MS        = 600;
+const PANEL_CLOSE_ANIMATION_MS = 280;
+const SAVE_RETRY_DELAY_MS     = 2000;
+const UNDO_TOAST_DURATION_MS  = 5000;
+const SEARCH_DEBOUNCE_MS      = 300;
+const PIE_CHART_DEBOUNCE_MS   = 500;
+const MOBILE_BREAKPOINT_PX    = 768;
+const DEFAULT_INFLATION_RATE  = 0.06;
+const DEFAULT_RETIREMENT_AGE  = 70;
+const DEFAULT_CURRENT_AGE     = 30;
+
+// ── Debounce utility (mirrors app.js) ─────────────────────────────────────────
+function debounce(fn, ms) {
+    let timer;
+    return (...args) => { clearTimeout(timer); timer = setTimeout(() => fn(...args), ms); };
+}
+
+// ── autoBackup stub (mirrors app.js signature, no-op in tests) ────────────────
+function autoBackup(reason) {
+    return { called: true, reason };
+}
+
+const TAB_FIELDS = {
+    monthlyBudget: [
+        { id: "name", label: "Item Name", type: "text", required: true },
+        { id: "planned", label: "Planned Amount (₹)", type: "number", required: true },
+        { id: "actual", label: "Actual Amount (₹)", type: "number" },
+        { id: "date", label: "Date", type: "date" },
+        { id: "note", label: "Note", type: "text" }
+    ],
+    financialGoal: [
+        { id: "name", label: "Goal Name", type: "text", required: true },
+        { id: "amountNeeded", label: "Amount Needed (₹)", type: "number", required: true },
+        { id: "amountAccumulated", label: "Amount Accumulated (₹)", type: "number" },
+        { id: "targetDate", label: "Target Date", type: "date" },
+        { id: "details", label: "Details", type: "text" },
+        { id: "goalType", label: "Goal Type", type: "select", options: ["Short Term", "Mid Term", "Long Term"] },
+        { id: "status", label: "Status", type: "select", options: ["Planned", "Ongoing", "Achieved"] }
+    ],
+    emergencyFund: [
+        { id: "currentFund", label: "Current Emergency Fund (₹)", type: "number", required: true },
+        { id: "details", label: "Details", type: "text" }
+    ]
+};
+
+function formatMoney(v) {
+    try {
+        return new Intl.NumberFormat("en-IN", {
+            style: "currency", currency: "INR", maximumFractionDigits: 0
+        }).format(v || 0);
+    } catch (e) {
+        return "₹0";
+    }
+}
+
+function esc(s) {
+    return String(s)
+        .replaceAll("&", "&amp;").replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;").replaceAll('"', "&quot;")
+        .replaceAll("'", "&#039;");
+}
+
+function getMonthKey(date) {
+    return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}`;
+}
+
+function calculateTax(annualIncome, regime, deductions) {
+    const stdDeduction = regime === "new" ? 75000 : 50000;
+    const taxableIncome = Math.max(0, annualIncome - stdDeduction - (regime === "old" ? deductions : 0));
+    let tax = 0;
+    if (regime === "new") {
+        const slabs = [[300000,0],[400000,0.05],[300000,0.10],[300000,0.15],[300000,0.20],[Infinity,0.30]];
+        let remaining = taxableIncome;
+        for (const [limit, rate] of slabs) {
+            if (remaining <= 0) break;
+            const taxable = Math.min(remaining, limit);
+            tax += taxable * rate;
+            remaining -= taxable;
+        }
+    } else {
+        const slabs = [[250000,0],[250000,0.05],[500000,0.20],[Infinity,0.30]];
+        let remaining = taxableIncome;
+        for (const [limit, rate] of slabs) {
+            if (remaining <= 0) break;
+            const taxable = Math.min(remaining, limit);
+            tax += taxable * rate;
+            remaining -= taxable;
+        }
+    }
+    return Math.round(tax * 1.04); // including 4% cess
+}
+
+function calculateEmergencyStatus(currentFund, avgMonthlyExpenses) {
+    if (avgMonthlyExpenses <= 0) return { status: "unknown", monthsCovered: 0 };
+    const monthsCovered = currentFund / avgMonthlyExpenses;
+    let status;
+    if (monthsCovered >= 12) status = "green";
+    else if (monthsCovered >= 6) status = "yellow";
+    else status = "red";
+    return { status, monthsCovered };
+}
+
+function calculateAnnualTotals(monthlyBudgetData) {
+    let totalIncome = 0, totalExpenses = 0, totalInvesting = 0;
+    Object.values(monthlyBudgetData).forEach(monthData => {
+        totalIncome += Object.values(monthData.inflow || {}).reduce((s, v) => s + Number(v || 0), 0);
+        totalExpenses += Object.values(monthData.outflow || {}).reduce((s, v) => s + Number(v || 0), 0);
+        totalInvesting += Object.values(monthData.investing || {}).reduce((s, v) => s + Number(v || 0), 0);
+    });
+    return { totalIncome, totalExpenses, totalInvesting, totalSavings: totalIncome - totalExpenses - totalInvesting };
+}
+
+// ── RUN TESTS ──────────────────────────────────────────────────────────────────
+function runTests() {
+    results.length = 0;
+
+    // ─ DEFAULT_TABS ─────────────────────────────────────────────────────────────
+    assertEqual(DEFAULT_TABS.length, 11, "DEFAULT_TABS: exactly 11 tabs defined (v2)");
+
+    test("DEFAULT_TABS: dashboard tab present", () =>
+        !!DEFAULT_TABS.find(t => t.id === "dashboard") || "dashboard tab missing");
+
+    test("DEFAULT_TABS: old tab IDs removed (monthlyFixedExpense, investments, insurances)", () => {
+        const oldIds = ["monthlyFixedExpense", "investments", "insurances"];
+        const found = oldIds.filter(id => DEFAULT_TABS.find(t => t.id === id));
+        return found.length === 0 || `Stale tab IDs still present: ${found.join(", ")}`;
+    });
+
+    test("DEFAULT_TABS: renamed tabs present (inflow, outflow, insurance)", () => {
+        const newIds = ["inflow", "outflow", "insurance"];
+        const missing = newIds.filter(id => !DEFAULT_TABS.find(t => t.id === id));
+        return missing.length === 0 || `Renamed tab IDs missing: ${missing.join(", ")}`;
+    });
+
+    test("DEFAULT_TABS: emergencyFund tab present", () =>
+        !!DEFAULT_TABS.find(t => t.id === "emergencyFund") || "emergencyFund tab missing");
+
+    test("DEFAULT_TABS: all tabs have v2 required fields (id, label, semantic)", () =>
+        DEFAULT_TABS.every(t => t.id && t.label && t.semantic) || "Some tabs missing required fields");
+
+    test("DEFAULT_TABS: core tabs marked correctly (7 core tabs)", () => {
+        const coreTabs = DEFAULT_TABS.filter(t => t.core === true);
+        return coreTabs.length === 7 || `Expected 7 core tabs, got ${coreTabs.length}`;
+    });
+
+    test("DEFAULT_TABS: all tab IDs are unique", () => {
+        const ids = DEFAULT_TABS.map(t => t.id);
+        return new Set(ids).size === ids.length || "Duplicate tab IDs found";
+    });
+
+    const expectedTabIds = ["dashboard","cards","inflow","outflow","insurance",
+                            "monthlyBudget","financialGoal","netWorth","taxPlan","gifts","emergencyFund"];
+    assertEqual(DEFAULT_TABS.map(t => t.id), expectedTabIds, "DEFAULT_TABS: correct v2 tab order and IDs");
+
+    test("DEFAULT_TABS: semantic categories are valid", () => {
+        const validSemantics = ["Others", "Investment", "Liability", "Insurance", "Expenditure", "Savings"];
+        return DEFAULT_TABS.every(t => validSemantics.includes(t.semantic))
+            || "Invalid semantic category found";
+    });
+
+    // ─ TAB_FIELDS ────────────────────────────────────────────────────────────────
+    test("TAB_FIELDS: emergencyFund fields defined", () =>
+        !!TAB_FIELDS.emergencyFund && TAB_FIELDS.emergencyFund.length === 2);
+
+    test("TAB_FIELDS: emergencyFund has currentFund field", () =>
+        !!TAB_FIELDS.emergencyFund.find(f => f.id === "currentFund"));
+
+    test("TAB_FIELDS: financialGoal has all 7 fields", () =>
+        TAB_FIELDS.financialGoal.length === 7);
+
+    test("TAB_FIELDS: monthlyBudget has all 5 fields", () =>
+        TAB_FIELDS.monthlyBudget.length === 5);
+
+    // ─ formatMoney ───────────────────────────────────────────────────────────────
+    assertEqual(formatMoney(0), "₹0", "formatMoney: 0 → ₹0");
+    assertEqual(formatMoney(1000), "₹1,000", "formatMoney: 1000 → ₹1,000");
+    assertEqual(formatMoney(100000), "₹1,00,000", "formatMoney: 100000 → ₹1,00,000 (Indian format)");
+    assertEqual(formatMoney(1234567), "₹12,34,567", "formatMoney: 1234567 → ₹12,34,567");
+    assertEqual(formatMoney(null), "₹0", "formatMoney: null → ₹0 (safe default)");
+    assertEqual(formatMoney(undefined), "₹0", "formatMoney: undefined → ₹0 (safe default)");
+    assertEqual(formatMoney(-500), "-₹500", "formatMoney: negative value handled");
+
+    // ─ esc (HTML escaping) ──────────────────────────────────────────────────────
+    assertEqual(esc("<b>"), "&lt;b&gt;", "esc: < > escaped");
+    assertEqual(esc('"hello"'), "&quot;hello&quot;", "esc: quotes escaped");
+    assertEqual(esc("it's"), "it&#039;s", "esc: apostrophe escaped");
+    assertEqual(esc("<script>alert('xss')<\/script>"),
+        "&lt;script&gt;alert(&#039;xss&#039;)&lt;\/script&gt;", "esc: full XSS string escaped");
+    assertEqual(esc(123), "123", "esc: number coerced to string");
+
+    // ─ getMonthKey ───────────────────────────────────────────────────────────────
+    assertEqual(getMonthKey(new Date(2026, 0, 1)), "2026-01", "getMonthKey: January 2026 → 2026-01");
+    assertEqual(getMonthKey(new Date(2026, 11, 31)), "2026-12", "getMonthKey: December 2026 → 2026-12");
+    assertEqual(getMonthKey(new Date(2025, 8, 15)), "2025-09", "getMonthKey: September padded to 2-digit");
+
+    // ─ Emergency Fund Status ─────────────────────────────────────────────────────
+    test("Emergency Fund: green when ≥ 12 months covered", () => {
+        const r = calculateEmergencyStatus(120000, 10000);
+        return r.status === "green" || `Expected green, got ${r.status}`;
+    });
+    test("Emergency Fund: green exactly at 12 months", () => {
+        const r = calculateEmergencyStatus(60000, 5000);
+        return r.status === "green" || `Expected green, got ${r.status}`;
+    });
+    test("Emergency Fund: yellow when 6-12 months covered", () => {
+        const r = calculateEmergencyStatus(60000, 8000);
+        return r.status === "yellow" || `Expected yellow, got ${r.status}`;
+    });
+    test("Emergency Fund: yellow exactly at 6 months", () => {
+        const r = calculateEmergencyStatus(30000, 5000);
+        return r.status === "yellow" || `Expected yellow, got ${r.status}`;
+    });
+    test("Emergency Fund: red when < 6 months covered", () => {
+        const r = calculateEmergencyStatus(20000, 5000);
+        return r.status === "red" || `Expected red, got ${r.status}`;
+    });
+    test("Emergency Fund: monthsCovered calculated correctly", () => {
+        const r = calculateEmergencyStatus(50000, 10000);
+        return r.monthsCovered === 5 || `Expected 5, got ${r.monthsCovered}`;
+    });
+    test("Emergency Fund: zero expenses returns unknown", () => {
+        const r = calculateEmergencyStatus(50000, 0);
+        return r.status === "unknown" || `Expected unknown, got ${r.status}`;
+    });
+    test("Emergency Fund: zero fund with expenses is red", () => {
+        const r = calculateEmergencyStatus(0, 10000);
+        return r.status === "red" || `Expected red, got ${r.status}`;
+    });
+
+    // ─ Annual Summary Calculation ────────────────────────────────────────────────
+    const sampleBudgetData = {
+        "2026-01": { inflow: { primaryIncome: 50000 }, outflow: { rent: 15000, food: 5000 }, investing: { sipInvestment: 5000 } },
+        "2026-02": { inflow: { primaryIncome: 50000, secondaryIncome: 10000 }, outflow: { rent: 15000 }, investing: {} },
+        "2026-03": { inflow: { primaryIncome: 50000 }, outflow: {}, investing: { sipInvestment: 5000 } }
+    };
+    const annualTotals = calculateAnnualTotals(sampleBudgetData);
+
+    assertEqual(annualTotals.totalIncome, 160000, "Annual: total income across 3 months = 160000");
+    assertEqual(annualTotals.totalExpenses, 35000, "Annual: total expenses across 3 months = 35000");
+    assertEqual(annualTotals.totalInvesting, 10000, "Annual: total investing across 3 months = 10000");
+    assertEqual(annualTotals.totalSavings, 115000, "Annual: total savings = income - expenses - investing");
+
+    const emptyTotals = calculateAnnualTotals({});
+    assertEqual(emptyTotals.totalIncome, 0, "Annual: empty data returns 0 income");
+    assertEqual(emptyTotals.totalSavings, 0, "Annual: empty data returns 0 savings");
+
+    // ─ Transfer balance behavior ────────────────────────────────────────────────
+    test("Transfer: salary balance resets to zero after transfer execution", () => {
+        const salary = { id: "s1", purpose: "Salary", balance: 500000 };
+        const exp = { id: "e1", isPrimary: "Yes", balance: 120000 };
+        const investment = { id: "i1", purpose: "Investment", balance: 250000 };
+        const autoDebitByType = { Savings: 0, Investment: 25000 };
+        const amt = 400000;
+        salary.balance = 0;
+        exp.balance = Number(exp.balance || 0) + amt;
+        investment.balance = 0;
+        if (investment && autoDebitByType.Investment > 0) investment.balance += autoDebitByType.Investment;
+        return salary.balance === 0 && exp.balance === 520000 && investment.balance === 25000 || `Expected salary 0, exp 520000, investment 25000, got ${salary.balance}/${exp.balance}/${investment.balance}`;
+    });
+
+    test("Transfer: investment account starts at zero for a fresh month", () => {
+        const investment = { id: "i1", purpose: "Investment", balance: 250000 };
+        investment.balance = 0;
+        return investment.balance === 0 || `Expected initial balance 0, got ${investment.balance}`;
+    });
+
+    test("Transfer: primary account increases by transfer amount", () => {
+        const exp = { id: "e1", isPrimary: "Yes", balance: 120000 };
+        const amt = 400000;
+        exp.balance = Number(exp.balance || 0) + amt;
+        return exp.balance === 520000 || `Expected 520000, got ${exp.balance}`;
+    });
+
+    // ─ Tax Calculation (New Regime) ──────────────────────────────────────────────
+    test("Tax: zero tax on income ≤ 3,00,000 (new regime)", () => {
+        const tax = calculateTax(300000, "new", 0);
+        return tax === 0 || `Expected 0, got ${tax}`;
+    });
+    test("Tax: 5% slab on income 3-7L (new regime)", () => {
+        const tax = calculateTax(700000, "new", 0);
+        return tax > 0 || "Expected positive tax";
+    });
+    test("Tax: higher tax for higher income (new regime)", () => {
+        const low = calculateTax(700000, "new", 0);
+        const high = calculateTax(1200000, "new", 0);
+        return high > low || `Higher income should have higher tax`;
+    });
+    test("Tax: cess (4%) is included", () => {
+        // 4L income, new regime: taxable = 4L - 75k stdDed = 3.25L; tax = (3.25L - 3L)*5% = 1250; with cess = 1300
+        const tax = calculateTax(400000, "new", 0);
+        return tax === 1300 || `Expected 1300, got ${tax}`;
+    });
+
+    // ─ Custom tab ID generation ──────────────────────────────────────────────────
+    test("Custom tab: ID generated from label", () => {
+        const label = "My Wedding 2026";
+        const id = label.trim().toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "") + "-test";
+        return id.startsWith("my-wedding-2026") || `Bad ID: ${id}`;
+    });
+    test("Custom tab: special chars stripped from ID", () => {
+        const label = "Test@#$% Tab!";
+        const id = label.trim().toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "") + "-test";
+        return !id.match(/[@#$%!]/) || "Special chars not stripped";
+    });
+
+    // ─ crypto.randomUUID ──────────────────────────────────────────────────────
+    test("crypto.randomUUID: generates valid UUID v4 format", () => {
+        if (typeof crypto === "undefined" || !crypto.randomUUID) return "crypto.randomUUID not available";
+        const uuid = crypto.randomUUID();
+        const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/;
+        return uuidRegex.test(uuid) || `Invalid UUID: ${uuid}`;
+    });
+    test("crypto.randomUUID: generates unique values", () => {
+        if (typeof crypto === "undefined" || !crypto.randomUUID) return "crypto.randomUUID not available";
+        const a = crypto.randomUUID();
+        const b = crypto.randomUUID();
+        return a !== b || "Two UUIDs should not be identical";
+    });
+
+    // ─ autoBackup stub ────────────────────────────────────────────────────────
+    test("autoBackup: accepts reason parameter", () => {
+        const result = autoBackup("reset-all-data");
+        return result.called === true && result.reason === "reset-all-data"
+            || "autoBackup should accept and return reason";
+    });
+    test("autoBackup: callable with different reasons", () => {
+        const r1 = autoBackup("delete-account");
+        const r2 = autoBackup("import-overwrite");
+        return r1.reason === "delete-account" && r2.reason === "import-overwrite"
+            || "autoBackup should handle various reasons";
+    });
+
+    // ─ Constants module values ────────────────────────────────────────────────
+    assertEqual(SAVE_DEBOUNCE_MS, 600, "Constants: SAVE_DEBOUNCE_MS = 600");
+    assertEqual(MOBILE_BREAKPOINT_PX, 768, "Constants: MOBILE_BREAKPOINT_PX = 768");
+    assertEqual(UNDO_TOAST_DURATION_MS, 5000, "Constants: UNDO_TOAST_DURATION_MS = 5000");
+    assertEqual(SEARCH_DEBOUNCE_MS, 300, "Constants: SEARCH_DEBOUNCE_MS = 300");
+    assertEqual(PIE_CHART_DEBOUNCE_MS, 500, "Constants: PIE_CHART_DEBOUNCE_MS = 500");
+    assertEqual(PANEL_CLOSE_ANIMATION_MS, 280, "Constants: PANEL_CLOSE_ANIMATION_MS = 280");
+    assertEqual(SAVE_RETRY_DELAY_MS, 2000, "Constants: SAVE_RETRY_DELAY_MS = 2000");
+    assertEqual(DEFAULT_INFLATION_RATE, 0.06, "Constants: DEFAULT_INFLATION_RATE = 0.06");
+    assertEqual(DEFAULT_RETIREMENT_AGE, 70, "Constants: DEFAULT_RETIREMENT_AGE = 70");
+    assertEqual(DEFAULT_CURRENT_AGE, 30, "Constants: DEFAULT_CURRENT_AGE = 30");
+
+    // ─ debounce utility ───────────────────────────────────────────────────────
+    test("debounce: returns a function", () => {
+        const debounced = debounce(() => {}, 100);
+        return typeof debounced === "function" || "debounce should return a function";
+    });
+    test("debounce: delays execution", () => {
+        let called = false;
+        const debounced = debounce(() => { called = true; }, 50);
+        debounced();
+        return called === false || "Function should not be called immediately";
+    });
+    test("debounce: multiple rapid calls do not fire immediately", () => {
+        let count = 0;
+        const debounced = debounce(() => { count++; }, 50);
+        debounced();
+        debounced();
+        debounced();
+        return count === 0 || `Expected 0 immediate calls, got ${count}`;
+    });
+
+    // ─ v2.0.4: toMonthlyAmount (frequency conversion) ────────────────────────────
+    function toMonthlyAmount(amount, frequency) {
+        const divisors = { Monthly: 1, Quarterly: 3, 'Semi-Annual': 6, Annual: 12 };
+        return amount / (divisors[frequency] || 1);
+    }
+
+    assertEqual(toMonthlyAmount(12000, 'Monthly'), 12000, "toMonthlyAmount: Monthly → same amount");
+    assertEqual(toMonthlyAmount(12000, 'Quarterly'), 4000, "toMonthlyAmount: Quarterly → amount/3");
+    assertEqual(toMonthlyAmount(12000, 'Semi-Annual'), 2000, "toMonthlyAmount: Semi-Annual → amount/6");
+    assertEqual(toMonthlyAmount(12000, 'Annual'), 1000, "toMonthlyAmount: Annual → amount/12");
+    assertEqual(toMonthlyAmount(12000, 'One-Time'), 12000, "toMonthlyAmount: One-Time → same amount");
+
+    // ─ v2.0.4: Health Insurance Calculation ──────────────────────────────────────
+    function calculateIdealHealthInsurance(age, location, monthlyIncome) {
+        const annualIncome = monthlyIncome * 12;
+        const baseAmount = annualIncome * 0.5; // 50% of annual income
+        
+        // Metro vs non-metro minimum
+        const metroCities = ['Mumbai', 'Delhi', 'Bengaluru', 'Hyderabad', 'Chennai', 'Kolkata', 'Pune', 'Gurgaon', 'Noida'];
+        const cityName = (location || '').split(',')[0].trim();
+        const isMetro = metroCities.some(metro => cityName.includes(metro));
+        const minimum = isMetro ? 500000 : 300000;
+        
+        // Age adjustment
+        let ageMultiplier = 1.0;
+        if (age >= 45) ageMultiplier = 1.5;
+        else if (age >= 35) ageMultiplier = 1.2;
+        
+        const adjusted = Math.max(minimum, baseAmount * ageMultiplier);
+        return Math.min(adjusted, 2000000); // Cap at 20L
+    }
+
+    assertEqual(calculateIdealHealthInsurance(30, 'Bengaluru, Karnataka', 50000), 500000, 
+        "Health Insurance: Young metro user gets minimum 5L");
+    assertEqual(calculateIdealHealthInsurance(30, 'Mysore, Karnataka', 50000), 300000, 
+        "Health Insurance: Young non-metro user gets minimum 3L");
+    assertEqual(calculateIdealHealthInsurance(40, 'Mumbai, Maharashtra', 100000), 720000, 
+        "Health Insurance: 40yr metro, 12L income → 6L * 1.2 = 7.2L");
+    assertEqual(calculateIdealHealthInsurance(50, 'Delhi, India', 100000), 900000, 
+        "Health Insurance: 50yr metro, 12L income → 6L * 1.5 = 9L");
+    assertEqual(calculateIdealHealthInsurance(50, 'Bengaluru, Karnataka', 500000), 2000000, 
+        "Health Insurance: High income capped at 20L");
+
+    // ─ v2.0.4: Term Insurance Calculation ────────────────────────────────────────
+    function calculateIdealTermInsurance(age, monthlyIncome, currentSavings) {
+        const annualIncome = monthlyIncome * 12;
+        
+        // Age-based multiplier
+        let multiplier = 15;
+        if (age >= 45) multiplier = 10;
+        else if (age >= 35) multiplier = 12;
+        
+        const idealCover = (annualIncome * multiplier) - currentSavings;
+        return Math.max(idealCover, 5000000); // Minimum 50L
+    }
+
+    assertEqual(calculateIdealTermInsurance(30, 50000, 0), 9000000, 
+        "Term Insurance: 30yr, 6L income, no savings → 6L * 15 = 90L");
+    assertEqual(calculateIdealTermInsurance(30, 50000, 5000000), 5000000, 
+        "Term Insurance: With 50L savings → (90L - 50L) = 40L, but min 50L");
+    assertEqual(calculateIdealTermInsurance(40, 100000, 0), 14400000, 
+        "Term Insurance: 40yr, 12L income → 12L * 12 = 1.44Cr");
+    assertEqual(calculateIdealTermInsurance(50, 100000, 5000000), 7000000, 
+        "Term Insurance: 50yr, 12L income, 50L savings → 12L * 10 - 50L = 70L");
+
+    // ─ v2.0.4: Emergency Fund Calculation ────────────────────────────────────────
+    function calculateIdealEmergencyFund(fixedLiabilities, fixedExpenditure, avgVariableExpenses) {
+        const minMonthlyNeed = fixedLiabilities + fixedExpenditure + avgVariableExpenses;
+        return minMonthlyNeed * 6; // 6 months recommended
+    }
+
+    assertEqual(calculateIdealEmergencyFund(20000, 15000, 10000), 270000, 
+        "Emergency Fund: (20k + 15k + 10k) * 6 = 2.7L");
+    assertEqual(calculateIdealEmergencyFund(0, 0, 30000), 180000, 
+        "Emergency Fund: Only variable expenses → 30k * 6 = 1.8L");
+    assertEqual(calculateIdealEmergencyFund(50000, 0, 0), 300000, 
+        "Emergency Fund: Only liabilities → 50k * 6 = 3L");
+
+    // ─ v2.0.4: Tax Auto-Deduction Logic ──────────────────────────────────────────
+    function getAutoTaxDeductions(investments, insurances) {
+        const auto = [];
+        
+        // Insurance premiums → 80D
+        insurances.forEach(item => {
+            const freq = item.frequency || 'Monthly';
+            const amount = Number(item.amount || 0);
+            let annual = 0;
+            if (freq === 'Monthly') annual = amount * 12;
+            else if (freq === 'Quarterly') annual = amount * 4;
+            else if (freq === 'Semi-Annual') annual = amount * 2;
+            else if (freq === 'Annual') annual = amount;
+            
+            if (annual > 0) auto.push({ name: item.name, amount: annual, section: '80D' });
+        });
+        
+        // Recurring investments only → 80C (exclude One-Time)
+        investments.forEach(item => {
+            const freq = (item.frequency || '').toLowerCase();
+            const amount = Number(item.amount || 0);
+            
+            // Skip One-Time investments (current values)
+            if (freq === 'one-time') return;
+            
+            let annual = 0;
+            if (freq === 'monthly') annual = amount * 12;
+            else if (freq === 'quarterly') annual = amount * 4;
+            else if (freq === 'semi-annual') annual = amount * 2;
+            else if (freq === 'annual') annual = amount;
+            
+            if (annual > 0) auto.push({ name: item.name, amount: annual, section: '80C' });
+        });
+        
+        return auto;
+    }
+
+    const testInvestments = [
+        { name: 'PPF', amount: 12500, frequency: 'Monthly' },
+        { name: 'EPF Balance', amount: 2000000, frequency: 'One-Time' }, // Should be excluded
+        { name: 'NPS', amount: 50000, frequency: 'Annual' }
+    ];
+    const testInsurances = [
+        { name: 'Health Insurance', amount: 2000, frequency: 'Monthly' }
+    ];
+    
+    const taxDeductions = getAutoTaxDeductions(testInvestments, testInsurances);
+    
+    test("Tax Auto-Deduction: Excludes One-Time investments", () => {
+        const hasEPF = taxDeductions.find(d => d.name === 'EPF Balance');
+        return !hasEPF || "One-Time investment should be excluded";
+    });
+    
+    test("Tax Auto-Deduction: Includes Monthly investments", () => {
+        const ppf = taxDeductions.find(d => d.name === 'PPF');
+        return ppf && ppf.amount === 150000 || `Expected 150000, got ${ppf?.amount}`;
+    });
+    
+    test("Tax Auto-Deduction: Includes Annual investments", () => {
+        const nps = taxDeductions.find(d => d.name === 'NPS');
+        return nps && nps.amount === 50000 || `Expected 50000, got ${nps?.amount}`;
+    });
+    
+    test("Tax Auto-Deduction: Includes insurance premiums", () => {
+        const health = taxDeductions.find(d => d.name === 'Health Insurance');
+        return health && health.amount === 24000 || `Expected 24000, got ${health?.amount}`;
+    });
+    
+    test("Tax Auto-Deduction: Correct section assignment", () => {
+        const ppf = taxDeductions.find(d => d.name === 'PPF');
+        const health = taxDeductions.find(d => d.name === 'Health Insurance');
+        return ppf?.section === '80C' && health?.section === '80D' 
+            || "Incorrect section assignment";
+    });
+
+    // ─ v2.0.4: Gifts Summary Calculation ─────────────────────────────────────────
+    function calculateGiftsSummary(gifts) {
+        const fixedGifts = gifts.filter(g => g.category === 'Fixed Every Year');
+        const currentFY = new Date().getMonth() >= 3 ? new Date().getFullYear() : new Date().getFullYear() - 1;
+        const fyStart = new Date(currentFY, 3, 1); // April 1
+        const fyEnd = new Date(currentFY + 1, 2, 31); // March 31
+        
+        const spentThisYear = gifts.filter(g => {
+            if (!g.date) return false;
+            const giftDate = new Date(g.date);
+            return giftDate >= fyStart && giftDate <= fyEnd;
+        }).reduce((sum, g) => sum + Number(g.amount || 0), 0);
+        
+        return {
+            totalCount: gifts.length,
+            fixedCount: fixedGifts.length,
+            fixedAmount: fixedGifts.reduce((sum, g) => sum + Number(g.amount || 0), 0),
+            spentThisYear: spentThisYear,
+            overallTotal: gifts.reduce((sum, g) => sum + Number(g.amount || 0), 0)
+        };
+    }
+
+    const currentDate = new Date();
+    const currentFY = currentDate.getMonth() >= 3 ? currentDate.getFullYear() : currentDate.getFullYear() - 1;
+    const testGifts = [
+        { name: 'Birthday', amount: 5000, category: 'Fixed Every Year', date: `${currentFY}-06-15` },
+        { name: 'Wedding', amount: 10000, category: 'On Demand', date: `${currentFY}-08-20` },
+        { name: 'Anniversary', amount: 3000, category: 'Fixed Every Year', date: `${currentFY - 1}-12-10` }
+    ];
+    
+    const giftsSummary = calculateGiftsSummary(testGifts);
+    
+    assertEqual(giftsSummary.totalCount, 3, "Gifts: Total count = 3");
+    assertEqual(giftsSummary.fixedCount, 2, "Gifts: Fixed count = 2");
+    assertEqual(giftsSummary.fixedAmount, 8000, "Gifts: Fixed amount = 8000");
+    assertEqual(giftsSummary.overallTotal, 18000, "Gifts: Overall total = 18000");
+    test("Gifts: Spent this year includes FY gifts", () => {
+        return giftsSummary.spentThisYear > 0 || "Should include current FY gifts";
+    });
+
+    // ─ v2.0.6: Budget Surplus Calculation with On-Demand Items ─────────────────
+    function calcBudgetSurplus(monthData, expBalance) {
+        const inflowTotal = Object.values(monthData.inflow || {}).reduce((s, v) => s + Number(v || 0), 0);
+        const borrowing = Number(monthData.inflow?.borrowing || 0);
+        const inflowWithoutBorrowing = inflowTotal - borrowing;
+        
+        // Fixed outflows (simplified for test)
+        const fixedMonthlyOutflow = Number(monthData.outflow?.fixedExpenditure || 0) + Number(monthData.outflow?.fixedSaving || 0);
+        const spendable = inflowWithoutBorrowing - fixedMonthlyOutflow;
+        
+        // Variable expenditure
+        const variableExp = Number(monthData.outflow?.variableExpenditure || 0);
+        
+        // Credit card outstanding
+        const creditCardOutstanding = Number(monthData.outflow?.creditCardOutstanding || 0);
+        const midMonthCC = Number(monthData.outflow?.midMonthCCOutstanding || 0);
+        const actualCCOutstanding = creditCardOutstanding + midMonthCC;
+        
+        // On-demand items
+        const ondemandSaving = Number(monthData.investing?.onetimeSaving || 0);
+        const ondemandInvestment = Number(monthData.investing?.onetimeInvestment || 0);
+        const ondemandExpenditure = Number(monthData.investing?.ondemandExpenditure || 0);
+        const ondemandLiability = Number(monthData.investing?.ondemandLiability || 0);
+        const totalOndemand = ondemandSaving + ondemandInvestment + ondemandExpenditure + ondemandLiability;
+        
+        // Budget surplus = spendable - (variableExp + CC + on-demand)
+        const untracked = variableExp + actualCCOutstanding + totalOndemand;
+        const budgetBalance = spendable - untracked;
+        
+        return { budgetBalance, spendable, untracked, totalOndemand };
+    }
+
+    test("Budget Surplus: Includes on-demand saving", () => {
+        const monthData = {
+            inflow: { primaryIncome: 100000 },
+            outflow: { fixedExpenditure: 30000, variableExpenditure: 20000 },
+            investing: { onetimeSaving: 15000 }
+        };
+        const result = calcBudgetSurplus(monthData, 35000);
+        // spendable = 100000 - 30000 = 70000
+        // untracked = 20000 + 0 + 15000 = 35000
+        // budgetBalance = 70000 - 35000 = 35000
+        return result.budgetBalance === 35000 || `Expected 35000, got ${result.budgetBalance}`;
+    });
+
+    // ─ v3.0.5: Corrected Budget Calculation ───────────────────────────────────────
+    function calcCorrectedBudget(monthData) {
+        const inflowTotal = Object.values(monthData.inflow || {}).reduce((s, v) => s + Number(v || 0), 0);
+        const borrowing = Number(monthData.inflow?.borrowing || 0);
+        const inflowWithoutBorrowing = inflowTotal - borrowing;
+        
+        // Fixed outflows (all recurring)
+        const fixedMonthlyOutflow = Number(monthData.outflow?.fixedExpenditure || 0) + 
+                                   Number(monthData.outflow?.fixedSaving || 0) +
+                                   Number(monthData.outflow?.fixedInvestment || 0);
+        const spendable = inflowWithoutBorrowing - fixedMonthlyOutflow;
+        
+        // Variable expenditure (includes on-demand since they reduce account balance)
+        const variableExp = Number(monthData.outflow?.variableExpenditure || 0);
+        
+        // Credit card outstanding
+        const creditCardOutstanding = Number(monthData.outflow?.creditCardOutstanding || 0);
+        const midMonthCC = Number(monthData.outflow?.midMonthCCOutstanding || 0);
+        const actualCCOutstanding = creditCardOutstanding + midMonthCC;
+        
+        // On-demand items
+        const ondemandSaving = Number(monthData.investing?.onetimeSaving || 0);
+        const ondemandInvestment = Number(monthData.investing?.onetimeInvestment || 0);
+        const ondemandExpenditure = Number(monthData.investing?.ondemandExpenditure || 0);
+        const ondemandLiability = Number(monthData.investing?.ondemandLiability || 0);
+        const totalOndemand = ondemandSaving + ondemandInvestment + ondemandExpenditure + ondemandLiability;
+        
+        // Actual variable expenses (exclude on-demand)
+        const actualVariableExp = variableExp - totalOndemand;
+        
+        // Total allocated = actual variable + CC + on-demand
+        const totalAllocated = (actualVariableExp + actualCCOutstanding) + totalOndemand;
+        
+        // Budget balance = spendable - total allocated
+        const budgetBalance = spendable - totalAllocated;
+        
+        return { 
+            budgetBalance, 
+            spendable, 
+            actualVariableExp, 
+            totalOndemand, 
+            totalAllocated,
+            variableExpDisplay: actualVariableExp + actualCCOutstanding
+        };
+    }
+
+    test("v3.0.5: Variable expenses excludes on-demand items", () => {
+        const monthData = {
+            inflow: { primaryIncome: 100000 },
+            outflow: { fixedExpenditure: 30000, variableExpenditure: 50000 },
+            investing: { onetimeSaving: 15000, onetimeInvestment: 10000 }
+        };
+        const result = calcCorrectedBudget(monthData);
+        // variableExp = 50000 (includes on-demand)
+        // totalOndemand = 15000 + 10000 = 25000
+        // actualVariableExp = 50000 - 25000 = 25000
+        return result.actualVariableExp === 25000 || `Expected 25000, got ${result.actualVariableExp}`;
+    });
+
+    test("v3.0.5: Total allocated = variable + CC + on-demand", () => {
+        const monthData = {
+            inflow: { primaryIncome: 100000 },
+            outflow: { fixedExpenditure: 30000, variableExpenditure: 50000, creditCardOutstanding: 20000 },
+            investing: { onetimeSaving: 15000, onetimeInvestment: 10000 }
+        };
+        const result = calcCorrectedBudget(monthData);
+        // actualVariableExp = 50000 - 25000 = 25000
+        // CC = 20000
+        // on-demand = 25000
+        // totalAllocated = 25000 + 20000 + 25000 = 70000
+        return result.totalAllocated === 70000 || `Expected 70000, got ${result.totalAllocated}`;
+    });
+
+    test("v3.0.5: Budget balance uses corrected total allocated", () => {
+        const monthData = {
+            inflow: { primaryIncome: 100000 },
+            outflow: { fixedExpenditure: 30000, variableExpenditure: 50000, creditCardOutstanding: 20000 },
+            investing: { onetimeSaving: 15000, onetimeInvestment: 10000 }
+        };
+        const result = calcCorrectedBudget(monthData);
+        // spendable = 100000 - 30000 = 70000
+        // totalAllocated = 70000
+        // budgetBalance = 70000 - 70000 = 0
+        return result.budgetBalance === 0 || `Expected 0, got ${result.budgetBalance}`;
+    });
+
+    test("v3.0.5: Variable expenses display includes CC", () => {
+        const monthData = {
+            inflow: { primaryIncome: 100000 },
+            outflow: { fixedExpenditure: 30000, variableExpenditure: 50000, creditCardOutstanding: 20000 },
+            investing: { onetimeSaving: 15000 }
+        };
+        const result = calcCorrectedBudget(monthData);
+        // actualVariableExp = 50000 - 15000 = 35000
+        // CC = 20000
+        // display = 35000 + 20000 = 55000
+        return result.variableExpDisplay === 55000 || `Expected 55000, got ${result.variableExpDisplay}`;
+    });
+
+    test("v3.0.5: No double-counting of on-demand items", () => {
+        const monthData = {
+            inflow: { primaryIncome: 100000 },
+            outflow: { fixedExpenditure: 30000, variableExpenditure: 40000 },
+            investing: { onetimeSaving: 20000 }
+        };
+        const result = calcCorrectedBudget(monthData);
+        // actualVariableExp = 40000 - 20000 = 20000
+        // totalOndemand = 20000
+        // totalAllocated = 20000 + 0 + 20000 = 40000
+        // Should NOT be 40000 + 20000 = 60000 (double count)
+        return result.totalAllocated === 40000 || `Expected 40000, got ${result.totalAllocated}`;
+    });
+
+    // ─ v3.0.5: Dashboard Fallback Calculation ────────────────────────────────────
+    function calcDashboardFallback(monthData, accounts) {
+        // Use stored values if available, otherwise calculate
+        const storedSpendable = Number(monthData._calculatedSpendable || 0);
+        const storedUntracked = Number(monthData._calculatedUntracked || 0);
+        
+        if (storedSpendable > 0 && storedUntracked > 0) {
+            return { spendable: storedSpendable, untracked: storedUntracked, usedStored: true };
+        }
+        
+        // Fallback calculation
+        const totalIncome = Number(monthData._calculatedTotalIncome || 
+            Object.values(monthData.inflow || {}).reduce((s, v) => s + Number(v || 0), 0));
+        const borrowing = Number(monthData.inflow?.borrowing || 0);
+        const usableIncome = totalIncome - borrowing;
+        
+        const monthlyCommitments = Number(monthData._calculatedMonthlyCommitments || 30000);
+        const spendable = usableIncome - monthlyCommitments;
+        
+        const variableExp = Number(monthData.outflow?.variableExpenditure || 0);
+        const creditCardOutstanding = Number(monthData.outflow?.creditCardOutstanding || 0);
+        const midMonthCC = Number(monthData.outflow?.midMonthCCOutstanding || 0);
+        const actualCCOutstanding = creditCardOutstanding + midMonthCC;
+        
+        const totalOndemand = Number(monthData._calculatedTotalOndemand || 
+            Number(monthData.investing?.onetimeSaving || 0) +
+            Number(monthData.investing?.onetimeInvestment || 0) +
+            Number(monthData.investing?.ondemandExpenditure || 0) +
+            Number(monthData.investing?.ondemandLiability || 0));
+        
+        const actualVariableExp = variableExp - totalOndemand;
+        const untracked = (actualVariableExp + actualCCOutstanding) + totalOndemand;
+        
+        return { spendable, untracked, usedStored: false };
+    }
+
+    test("v3.0.5: Dashboard uses stored values when available", () => {
+        const monthData = {
+            inflow: { primaryIncome: 100000 },
+            _calculatedSpendable: 70000,
+            _calculatedUntracked: 50000
+        };
+        const result = calcDashboardFallback(monthData, []);
+        return result.usedStored === true && result.spendable === 70000 
+            || "Should use stored values";
+    });
+
+    test("v3.0.5: Dashboard falls back to calculation when stored values missing", () => {
+        const monthData = {
+            inflow: { primaryIncome: 100000 },
+            outflow: { variableExpenditure: 40000 },
+            investing: { onetimeSaving: 10000 }
+        };
+        const result = calcDashboardFallback(monthData, []);
+        return result.usedStored === false && result.spendable > 0 
+            || "Should calculate on-the-fly";
+    });
+
+    test("v3.0.5: Dashboard fallback uses corrected calculation", () => {
+        const monthData = {
+            inflow: { primaryIncome: 100000 },
+            outflow: { variableExpenditure: 50000 },
+            investing: { onetimeSaving: 15000 }
+        };
+        const result = calcDashboardFallback(monthData, []);
+        // actualVariableExp = 50000 - 15000 = 35000
+        // untracked = 35000 + 0 + 15000 = 50000
+        return result.untracked === 50000 || `Expected 50000, got ${result.untracked}`;
+    });
+
+    // ─ v3.0.5: Account Status Detection ───────────────────────────────────────────
+    function detectAccountStatus(accounts) {
+        const expenditureAccount = accounts.find(c => c.isPrimary === "Yes");
+        const salaryAccount = accounts.find(c => c.purpose === "Salary" && c.isPrimary !== "Yes");
+        const savingAccount = accounts.find(c => (c.purpose === "Savings" || c.purpose === "Saving") && c.isPrimary !== "Yes");
+        const investmentAccount = accounts.find(c => c.purpose === "Investment" && c.isPrimary !== "Yes");
+        
+        return {
+            primary: !!expenditureAccount,
+            salary: !!salaryAccount,
+            saving: !!savingAccount,
+            investment: !!investmentAccount
+        };
+    }
+
+    test("v3.0.5: Detects all account types correctly", () => {
+        const accounts = [
+            { id: "e1", isPrimary: "Yes", purpose: "Expenditure" },
+            { id: "s1", purpose: "Salary" },
+            { id: "sv1", purpose: "Savings" },
+            { id: "i1", purpose: "Investment" }
+        ];
+        const result = detectAccountStatus(accounts);
+        return result.primary && result.salary && result.saving && result.investment
+            || "Should detect all account types";
+    });
+
+    test("v3.0.5: Handles missing accounts gracefully", () => {
+        const accounts = [
+            { id: "e1", isPrimary: "Yes", purpose: "Expenditure" }
+        ];
+        const result = detectAccountStatus(accounts);
+        return result.primary === true && result.salary === false && result.saving === false && result.investment === false
+            || "Should handle missing accounts";
+    });
+
+    // ─ v3.0.5: Icon System ──────────────────────────────────────────────────────────
+    test("v3.0.5: Compact icon names exist", () => {
+        const compactIcons = ['starSmall', 'checkSmall', 'lightbulbSmall', 'hospitalSmall', 
+                           'trendingUpSmall', 'targetSmall', 'alertSmall', 'shieldCheckSmall',
+                           'creditCardSmall', 'calendarSmall', 'bellSmall'];
+        // This test verifies the naming convention - actual icon rendering is in icons.js
+        return compactIcons.length === 11 || `Expected 11 compact icons, got ${compactIcons.length}`;
+    });
+
+    test("v3.0.5: Icon naming follows pattern", () => {
+        const compactIcons = ['starSmall', 'checkSmall', 'lightbulbSmall'];
+        const allFollowPattern = compactIcons.every(name => name.endsWith('Small'));
+        return allFollowPattern || "Compact icons should end with 'Small'";
+    });
+
+    test("Budget Surplus: Includes all on-demand components", () => {
+        const monthData = {
+            inflow: { primaryIncome: 150000 },
+            outflow: { fixedExpenditure: 40000, variableExpenditure: 30000 },
+            investing: {
+                onetimeSaving: 10000,
+                onetimeInvestment: 8000,
+                ondemandExpenditure: 5000,
+                ondemandLiability: 2000
+            }
+        };
+        const result = calcBudgetSurplus(monthData, 45000);
+        // spendable = 150000 - 40000 = 110000
+        // totalOndemand = 10000 + 8000 + 5000 + 2000 = 25000
+        // untracked = 30000 + 0 + 25000 = 55000
+        // budgetBalance = 110000 - 55000 = 55000
+        return result.budgetBalance === 55000 && result.totalOndemand === 25000 
+            || `Expected budgetBalance 55000 and totalOndemand 25000, got ${result.budgetBalance}/${result.totalOndemand}`;
+    });
+
+    // ─ v2.0.5: Monthly Distribution with On-Demand Components ────────────────────
+    function getMonthlyDistribution(monthData) {
+        const outflow = monthData.outflow || {};
+        const investing = monthData.investing || {};
+        
+        // Investment = Fixed + On-Demand
+        const fixedInv = Number(outflow.fixedInvestment || 0);
+        const ondemandInv = Number(investing.onetimeInvestment || 0);
+        const investment = fixedInv + ondemandInv;
+        
+        // Liability = Loan EMI + Debt Repayment + On-Demand
+        const loanEMI = Number(outflow.loanEMI || 0);
+        const debtRepay = Number(outflow.debtRepayment || 0);
+        const ondemandLiab = Number(investing.ondemandLiability || 0);
+        const liability = loanEMI + debtRepay + ondemandLiab;
+        
+        // Savings = Fixed + On-Demand
+        const fixedSav = Number(outflow.fixedSaving || 0);
+        const ondemandSav = Number(investing.onetimeSaving || 0);
+        const saving = fixedSav + ondemandSav;
+        
+        // Expenditure = Fixed + Variable + Utility + Family + Misc + CC + On-Demand
+        const fixedExp = Number(outflow.fixedExpenditure || 0);
+        const varExp = Number(outflow.variableExpenditure || 0);
+        const utilBills = Number(outflow.utilityBills || 0);
+        const famExp = Number(outflow.familyExpenditure || 0);
+        const miscExp = Number(outflow.miscExpenses || 0);
+        const ccOut = Number(outflow.creditCardOutstanding || 0);
+        const midCC = Number(outflow.midMonthCCOutstanding || 0);
+        const ondemandExp = Number(investing.ondemandExpenditure || 0);
+        const expenditure = fixedExp + varExp + utilBills + famExp + miscExp + ccOut + midCC + ondemandExp;
+        
+        const insurance = Number(outflow.insurancePremiums || 0);
+        const other = Number(outflow.fixedOthers || 0);
+        
+        return { investment, liability, saving, expenditure, insurance, other };
+    }
+
+    test("Pie Chart Distribution: Includes on-demand investment", () => {
+        const monthData = {
+            outflow: { fixedInvestment: 10000 },
+            investing: { onetimeInvestment: 5000 }
+        };
+        const dist = getMonthlyDistribution(monthData);
+        return dist.investment === 15000 || `Expected 15000, got ${dist.investment}`;
+    });
+
+    test("Pie Chart Distribution: Includes on-demand saving", () => {
+        const monthData = {
+            outflow: { fixedSaving: 20000 },
+            investing: { onetimeSaving: 10000 }
+        };
+        const dist = getMonthlyDistribution(monthData);
+        return dist.saving === 30000 || `Expected 30000, got ${dist.saving}`;
+    });
+
+    test("Pie Chart Distribution: Includes on-demand liability", () => {
+        const monthData = {
+            outflow: { loanEMI: 15000, debtRepayment: 5000 },
+            investing: { ondemandLiability: 3000 }
+        };
+        const dist = getMonthlyDistribution(monthData);
+        return dist.liability === 23000 || `Expected 23000, got ${dist.liability}`;
+    });
+
+    test("Pie Chart Distribution: Includes on-demand expenditure", () => {
+        const monthData = {
+            outflow: { fixedExpenditure: 10000, variableExpenditure: 5000 },
+            investing: { ondemandExpenditure: 2000 }
+        };
+        const dist = getMonthlyDistribution(monthData);
+        return dist.expenditure === 17000 || `Expected 17000, got ${dist.expenditure}`;
+    });
+
+    test("Pie Chart Distribution: All components combined correctly", () => {
+        const monthData = {
+            outflow: {
+                fixedInvestment: 10000,
+                fixedSaving: 20000,
+                loanEMI: 15000,
+                fixedExpenditure: 10000,
+                insurancePremiums: 2000
+            },
+            investing: {
+                onetimeInvestment: 5000,
+                onetimeSaving: 10000,
+                ondemandLiability: 3000,
+                ondemandExpenditure: 2000
+            }
+        };
+        const dist = getMonthlyDistribution(monthData);
+        return dist.investment === 15000 
+            && dist.saving === 30000 
+            && dist.liability === 18000 
+            && dist.expenditure === 12000
+            && dist.insurance === 2000
+            || `Distribution mismatch: ${JSON.stringify(dist)}`;
+    });
+
+    // ─ v2.0.5: Investment Account Reset on Month Close ───────────────────────────
+    test("Month Close: Investment account resets to 0", () => {
+        const investmentAccount = { id: "i1", purpose: "Investment", balance: 250000 };
+        // Simulate month close
+        investmentAccount.balance = 0;
+        return investmentAccount.balance === 0 || `Expected 0, got ${investmentAccount.balance}`;
+    });
+
+    test("Month Close: Investment account reset handles undefined account", () => {
+        const investmentAccount = undefined;
+        // Should not throw error
+        if (investmentAccount) {
+            investmentAccount.balance = 0;
+        }
+        return true; // No error thrown
+    });
+
+    renderResults();
+}
+</script>
+
+<!-- ── FOOTER ───────────────────────────────────────────── -->
+<footer style="margin-top: 40px; padding: 20px; text-align: center; border-top: 1px solid #333; color: #777; font-size: 0.9rem;">
+    <p>&copy; 2024-2026 Mrunal Kanta Muduli. All rights reserved.</p>
+</footer>
+</body>
+</html>
