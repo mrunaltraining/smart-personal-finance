@@ -146,8 +146,68 @@
     - Plan: migrate monthly budget data to sub-collection if needed
 
 
-[FUTURE ENHANCEMENTS - Consider for v4.1+]
+[FUTURE ENHANCEMENTS - v4.1+]
 ================================================================================
+
+[HIGH PRIORITY FUTURE ENHANCEMENTS]
+
+[ ] CSV/Bank Statement Import
+    - Support CSV import from expense page
+    - Auto-detect and parse: date, merchant, amount, type (debit/credit)
+    - Support formats: credit card statement, debit card statement, wallet statement, UPI app export
+    - Preserve debit/credit semantics (debit = expense, credit = income)
+    - Allow editing category/fields after import
+    - Prevent interference with manual entries (both can coexist)
+    - Show import summary with count of added/skipped transactions
+
+[ ] Document Upload & Receipt Management
+    - Accept receipts, invoices, statements, images, PDFs, spreadsheets
+    - Max 20 MB per file
+    - Store original file bytes securely (Firebase Storage or equivalent)
+    - Extract merchant, date, amount from documents (with optional OCR)
+    - Link documents to transactions/expenses
+    - Create document vault view with list of stored files
+    - Mark status: queued, stored, review
+
+[ ] Automatic Recurring Payment Detection
+    - Analyze transaction history to detect recurring patterns
+    - Merchant normalization (trim, lowercase, remove punctuation)
+    - Cadence detection: weekly, biweekly, monthly, quarterly, annual
+    - Confidence scoring based on pattern stability
+    - Distinguish subscriptions from recurring bills
+    - Show user suggestions with accept/ignore flow
+    - Calculate estimated monthly/annual commitments
+    - Allow dismissing false positives
+    - Persist dismissed patterns across sessions
+
+[ ] Tags & Rules System
+    - Create custom tags (independent from categories)
+    - Tag multiple transactions for flexible organization
+    - Create categorization rules: "When [merchant contains X] then [assign category Y]"
+    - Auto-apply rules to imports
+    - Edit/delete rules with management UI
+    - Tag management: add/remove/rename tags in Settings
+    - Filter transactions by tags
+
+[ ] Google Drive Integration & Automation
+    - Dedicated "Ledgerly Financial Inbox" folder in Google Drive
+    - Daily 8:00 AM automated sync of inbox files
+    - Process CSV statements, receipts, invoices, spreadsheets
+    - Extract transactions from Drive files
+    - Preserve file metadata (file ID, modified time)
+    - Track processed files to prevent re-import
+    - Sync status display in Settings
+    - Manual sync trigger option
+
+[ ] Duplicate Detection System
+    - Transaction fingerprinting: date + merchant + amount + account hash
+    - Pre-import duplicate check (prevent insertion of duplicates)
+    - Cross-source detection: manual vs CSV vs document vs Drive
+    - Clear duplicate reporting with count/list
+    - Handle edge cases: same amount different dates, slight amount variations
+    - Configurable tolerance for amount matching
+
+[MEDIUM PRIORITY FUTURE ENHANCEMENTS]
 
 [ ] Add dark/light theme toggle with manual override
     - Currently auto-detects system preference
@@ -163,11 +223,6 @@
     - Break goals into milestones
     - Progress visualization per milestone
     - Celebrations on milestone completion
-
-[ ] Add expense categorization with tags
-    - Tag-based filtering in budget
-    - Custom category creation
-    - Category-based spending analysis
 
 [ ] Add recurring expense automation
     - Auto-add recurring expenses each month

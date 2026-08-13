@@ -5,6 +5,91 @@ All notable changes to SmartFin will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [4.0.2] - 2026-08-15 - Dashboard Enhancements & Import Features
+
+### Added
+
+#### Dashboard Features
+- **Savings Rate KPI Card**: New dashboard card displaying savings rate percentage, benchmark status, and formula
+  - Shows percentage of usable income saved/invested
+  - Color-coded: Green (≥20%), Orange (≥10%), Red (<10%)
+  - Includes target benchmarks and calculation breakdown
+- **Current Balance KPI Card**: New dashboard card aggregating cash across all accounts
+  - Displays total balance from all accounts
+  - Shows breakdown by account type (Primary, Salary, Saving, Investment)
+  - Quick link to Accounts tab for management
+- **Toggle Button Fix**: Fixed Monthly/Annual budget view toggle button
+  - Icon and text now always display properly with consistent width
+  - CSS improvements: flex layout, min-width, proper gap spacing
+  - Improved visual alignment and consistency
+
+#### Expense Tracking Enhancements
+- **Payment Method Field**: New optional field for expense entries
+  - Dropdown with 7 payment options: UPI, Credit Card, Debit Card, Cash, Wallet, Bank Transfer, Other
+  - Defaults to "UPI" for new expenses
+  - Displayed in expense table for quick reference
+  - Stored with expense records for payment method tracking
+  - Backward compatible: defaults to "UPI" for old expenses without this field
+- **CSV/Bank Statement Import**: New bulk expense import feature
+  - Accepts CSV files with columns: Date, Category, Amount, Payment Method (optional)
+  - Template download with example format
+  - Progress indicator showing import status
+  - Error handling with detailed feedback (rows skipped, reasons)
+  - Supports up to 1000 expenses per import
+  - Auto-formats dates, validates amounts, handles missing fields gracefully
+  - Maintains data consistency (expense ID generation, timestamp tracking)
+
+#### Period Selector
+- **Global Period Selector**: New header control for cross-tab period filtering
+  - Monthly view (default): Current calendar month
+  - Quarterly view: Current financial quarter
+  - Financial Year view: April - March (Indian fiscal year)
+  - Custom Range view: User-selected date range
+  - Dynamic display updates based on selection
+  - Integrated with app-wide state management
+
+### Fixed
+
+#### Bug Fixes
+- **Annual Budget Calculation**: Verified correct aggregation of monthly data
+  - Confirmed fiscal year (April-March) calculation logic
+  - Ensured on-demand items summed correctly
+  - Applied auto-values for linked entries (EMI, premiums)
+  - Proper handling of future months (not included)
+  - Budget status determination using saved month closure data
+
+### Changed
+
+#### UI/UX Improvements
+- **Expense Form Layout**: Reorganized for better mobile experience
+  - Payment method field added in new row with date
+  - Import section placed above manual entry form
+  - Better form grouping and visual hierarchy
+- **Expense Table**: Updated with payment method column
+  - Added 5th column after amount for payment method display
+  - Maintained responsive behavior on mobile
+  - Consistent styling with other table cells
+
+### Performance
+- CSV import uses efficient batch processing
+- No blocking operations during file read
+- Progress updates in real-time
+
+### Testing
+- All existing features remain fully functional (backward compatible)
+- Payment method field handles missing data gracefully
+- CSV import error handling tested with various input formats
+- KPI cards recalculate on data refresh
+- Toggle button visual state consistent across browser zoom levels
+
+### Documentation
+- Updated APP_SPEC.md with new feature specifications
+- Updated USER_MANUAL.md with payment method and CSV import instructions
+- Added feature descriptions for KPI cards and period selector
+- Maintained backward compatibility notes
+
+---
+
 ## [4.0.1] - 2026-08-13 - Major Architecture Redesign
 
 ### Added

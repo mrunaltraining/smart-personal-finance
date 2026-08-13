@@ -2,6 +2,7 @@
 // A deliberately compact, decision-oriented summary of the detailed tabs.
 import { COLOR_POSITIVE, COLOR_NEGATIVE, COLOR_WARNING, toMonthlyAmount } from './constants.js';
 import { iconSvg } from './icons.js';
+import { getMonthlyBudgetDistribution } from './budget-distribution.js';
 import { DateUtils, CurrencyFormatter } from '../../../src/core/index.js';
 
 // Helper to get auto tax deductions (calls the function from app.js)
@@ -97,6 +98,40 @@ function formatGoalDate(value) {
     return Number.isNaN(date.getTime())
         ? 'No target date'
         : date.toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' });
+}
+
+function getFinancialYearMonthKeys(date = new Date()) {
+    const startYear = date.getMonth() >= 3 ? date.getFullYear() : date.getFullYear() - 1;
+    return Array.from({ length: 12 }, (_, index) => getMonthKey(new Date(startYear, 3 + index, 1)));
+}
+
+function getFinancialYearTotals(appData, date = new Date()) {
+    return getFinancialYearMonthKeys(date).reduce((totals, monthKey) => {
+        const distribution = getMonthlyBudgetDistribution((appData.monthlyBudgetData || {})[monthKey] || {});
+        Object.keys(totals).forEach(key => { totals[key] += Number(distribution[key] || 0); });
+        return totals;
+    }, { income: 0, expenditure: 0, saving: 0, investment: 0, liability: 0 });
+}
+
+function groupExpenses(expenses, field) {
+    return expenses.reduce((groups, expense) => {
+        const label = expense[field] || (field === 'paymentMethod' ? 'Not specified' : 'Other');
+        groups[label] = (groups[label] || 0) + Number(expense.amount || 0);
+        return groups;
+    }, {});
+}
+
+function renderDistributionRows(groups, limit = 5) {
+    const entries = Object.entries(groups).sort(([, a], [, b]) => b - a).slice(0, limit);
+    const total = entries.reduce((sum, [, amount]) => sum + amount, 0);
+    if (!entries.length || total <= 0) return '<p class="dash-empty-state">No expense entries recorded this month.</p>';
+    return entries.map(([label, amount]) => `
+        <div class="dash-distribution-row">
+            <span class="dash-distribution-label">${escapeHtml(label)}</span>
+            <span class="dash-distribution-value">${fmtMoney(amount)}</span>
+            <span class="dash-distribution-track"><span style="width:${Math.max(3, (amount / total) * 100)}%"></span></span>
+        </div>
+    `).join('');
 }
 
 function calculateIdealHealthInsurance(age, location, monthlyIncome) {
@@ -271,12 +306,8 @@ Note: Only includes liabilities & expenditures, NOT savings/investments`;
     // 3. Savings Rate (20 points) - Actual savings made (not just available)
     let savingsScore = 0;
     if (usableIncome > 0) {
-        // Calculate actual savings rate using actual savings and investments made
-        const fixedSaving = Number(monthData.outflow?.fixedSaving || 0);
-        const onetimeSaving = Number(monthData.investing?.onetimeSaving || 0);
-        const fixedInvestment = Number(monthData.outflow?.fixedInvestment || 0);
-        const onetimeInvestment = Number(monthData.investing?.onetimeInvestment || 0);
-        const totalActualSavings = fixedSaving + onetimeSaving + fixedInvestment + onetimeInvestment;
+        // The Budget page's Savings category is the actual saved amount.
+        const totalActualSavings = getMonthlyBudgetDistribution(monthData).saving;
         const savingsRate = Math.max(0, totalActualSavings / usableIncome);
         
         // Excellent: >30%, Good: 20-30%, Fair: 10-20%, Poor: <10%
@@ -291,22 +322,14 @@ Note: Only includes liabilities & expenditures, NOT savings/investments`;
         }
     }
     score += savingsScore;
-    const fixedSaving = Number(monthData.outflow?.fixedSaving || 0);
-    const onetimeSaving = Number(monthData.investing?.onetimeSaving || 0);
-    const fixedInvestment = Number(monthData.outflow?.fixedInvestment || 0);
-    const onetimeInvestment = Number(monthData.investing?.onetimeInvestment || 0);
-    const totalActualSavings = fixedSaving + onetimeSaving + fixedInvestment + onetimeInvestment;
+    const { saving: totalActualSavings } = getMonthlyBudgetDistribution(monthData);
     const savingsRate = usableIncome > 0 ? Math.max(0, totalActualSavings / usableIncome) : 0;
     const savingsTooltip = `Savings Rate (20 points max)
 Actual Savings: ₹${Math.round(totalActualSavings).toLocaleString('en-IN')}
 Usable Income: ₹${Math.round(usableIncome).toLocaleString('en-IN')}
 Savings Rate: ${Math.round(savingsRate * 100)}%
 
-Breakdown:
-• Fixed Saving: ₹${Math.round(fixedSaving).toLocaleString('en-IN')}
-• One-time Saving: ₹${Math.round(onetimeSaving).toLocaleString('en-IN')}
-• Fixed Investment: ₹${Math.round(fixedInvestment).toLocaleString('en-IN')}
-• One-time Investment: ₹${Math.round(onetimeInvestment).toLocaleString('en-IN')}
+Breakdown: the Budget page's Savings category (automatic/fixed saving plus on-demand saving).
 
 Scoring:
 • ≥30% = 20 points (Excellent)
@@ -623,6 +646,11 @@ export function renderDashboard(appData, netWorthSummary = {}) {
     const totalOutflow = Number(monthData._calculatedTotalOutflow || sumNumbers(monthData.outflow));
     const borrowing = Number(monthData.inflow?.borrowing || 0);
     const usableIncome = totalIncome - borrowing;
+    const budgetDistribution = getMonthlyBudgetDistribution(monthData);
+    const actualSavings = budgetDistribution.saving;
+    const actualExpenditure = budgetDistribution.expenditure;
+    const savingsRate = usableIncome > 0 ? Math.max(0, actualSavings / usableIncome) : 0;
+    const expenditureRate = usableIncome > 0 ? Math.max(0, actualExpenditure / usableIncome) : 0;
     
     // Calculate monthly commitments (all recurring outflows)
     const recurringOutflows = outflows.filter(item => Number(item.amount || 0) > 0 && (item.frequency || 'Monthly') !== 'One-Time');
@@ -757,6 +785,10 @@ export function renderDashboard(appData, netWorthSummary = {}) {
     const totalAssets = Number(netWorthSummary.totalAssets || 0);
     const totalLiabilities = Number(netWorthSummary.totalLiabilities || 0);
     const assetCount = Number(netWorthSummary.assetCount || 0);
+    const financialYearTotals = getFinancialYearTotals(appData, now);
+    const currentExpenses = (appData.expenseTrackingData || {})[getMonthKey(now)]?.expenses || [];
+    const expensesByCategory = groupExpenses(currentExpenses, 'category');
+    const expensesByPaymentMethod = groupExpenses(currentExpenses, 'paymentMethod');
 
     // Calculate 6-month trend data
     const sixMonthData = [];
@@ -767,13 +799,10 @@ export function renderDashboard(appData, netWorthSummary = {}) {
         const monthName = date.toLocaleDateString('en-IN', { month: 'short' });
         const mData = (appData.monthlyBudgetData || {})[monthKey] || {};
         
-        const investment = Number(mData.outflow?.fixedInvestment || 0) + Number(mData.investing?.onetimeInvestment || 0);
-        const expenditure = Number(mData.outflow?.variableExpenditure || 0) + Number(mData.outflow?.fixedExpenditure || 0);
-        const saving = Number(mData.outflow?.fixedSaving || 0) + Number(mData.investing?.onetimeSaving || 0);
-        const liability = Number(mData.outflow?.loanEMI || 0) + Number(mData.investing?.ondemandLiability || 0);
-        const others = Number(mData.outflow?.fixedOthers || 0);
+        const distribution = getMonthlyBudgetDistribution(mData);
+        const { income, investment, expenditure, saving, liability, other: others } = distribution;
         
-        sixMonthData.push({ monthName, investment, expenditure, saving, liability, others });
+        sixMonthData.push({ monthName, income, investment, expenditure, saving, liability, others });
     }
     
     const maxValue = Math.max(...sixMonthData.flatMap(m => [m.investment, m.expenditure, m.saving, m.liability, m.others])) || 1;
@@ -793,7 +822,6 @@ export function renderDashboard(appData, netWorthSummary = {}) {
     });
     
     // Generate insights and recommendations
-    const savingsRate = usableIncome > 0 ? (usableIncome - monthlyCommitments) / usableIncome : 0;
     const insights = generateInsights({
         budgetBalance, emergencyFund, idealEmergencyFund, savingsRate, healthInsurance,
         idealHealthInsurance, termInsurance, idealTermInsurance, activeGoals,
@@ -867,6 +895,20 @@ export function renderDashboard(appData, netWorthSummary = {}) {
     `;
 
     grid.innerHTML = `
+        <article class="dash-card dash-fy-overview" style="grid-column: 1 / -1;">
+            <div class="dash-card-header">
+                <span class="dash-card-title">${iconSvg('barChart', 'dash-title-icon')} Financial Year overview</span>
+                <span class="dash-card-badge" style="background:#3b82f622;color:#3b82f6">FY ${now.getMonth() >= 3 ? now.getFullYear() : now.getFullYear() - 1}-${String((now.getMonth() >= 3 ? now.getFullYear() : now.getFullYear() - 1) + 1).slice(-2)}</span>
+            </div>
+            <div class="dash-fy-kpis">
+                <div><span>Income</span><strong>${fmtMoney(financialYearTotals.income)}</strong></div>
+                <div><span>Expenditure</span><strong style="color:${COLOR_NEGATIVE}">${fmtMoney(financialYearTotals.expenditure)}</strong></div>
+                <div><span>Saved</span><strong style="color:${COLOR_POSITIVE}">${fmtMoney(financialYearTotals.saving)}</strong></div>
+                <div><span>Invested</span><strong style="color:#3b82f6">${fmtMoney(financialYearTotals.investment)}</strong></div>
+                <div><span>Liabilities</span><strong style="color:${COLOR_WARNING}">${fmtMoney(financialYearTotals.liability)}</strong></div>
+            </div>
+        </article>
+
         <article class="dash-card dash-card-primary">
             <div class="dash-card-header">
                 <span class="dash-card-title">${iconSvg('calendar', 'dash-title-icon')} This month</span>
@@ -879,8 +921,6 @@ export function renderDashboard(appData, netWorthSummary = {}) {
             <div class="dash-stat-row"><span class="dash-stat-label">Monthly commitments</span><span class="dash-stat-value">${fmtMoney(monthlyCommitments)}</span></div>
             ${budgetSurplusText ? `<div class="dash-stat-row"><span class="dash-stat-label">Budget status</span><span class="dash-stat-value" style="color:${budgetSurplusColor}">${budgetSurplusText}</span></div>` : ''}
             <div class="dash-stat-row"><span class="dash-stat-label">Credit card usage</span><span class="dash-stat-value" style="color:${totalCreditCardUsage > 0 ? COLOR_WARNING : COLOR_POSITIVE}">${fmtMoney(totalCreditCardUsage)}</span></div>
-            <div class="dash-stat-row"><span class="dash-stat-label">Variable expenses</span><span class="dash-stat-value">${fmtMoney(variableExp)}</span></div>
-            <div class="dash-stat-row"><span class="dash-stat-label">On-demand items</span><span class="dash-stat-value" style="color:#3b82f6">${fmtMoney(totalOndemand)}</span></div>
             <div class="dash-card-note">Values from Budget tab · <a href="#" onclick="switchToTab('monthlyBudget'); return false;" style="color:#3b82f6;text-decoration:underline;cursor:pointer;">View Budget</a></div>
         </article>
 
@@ -894,11 +934,47 @@ export function renderDashboard(appData, netWorthSummary = {}) {
             <div class="dash-stat-row"><span class="dash-stat-label">Assets</span><span class="dash-stat-value" style="color:${COLOR_POSITIVE}">${fmtMoney(totalAssets)}</span></div>
             <div class="dash-stat-row"><span class="dash-stat-label">Liabilities</span><span class="dash-stat-value" style="color:${COLOR_NEGATIVE}">${fmtMoney(totalLiabilities)}</span></div>
             <div class="dash-stat-row"><span class="dash-stat-label">Cash in accounts</span><span class="dash-stat-value">${fmtMoney(accountBalance)}</span></div>
-            <div class="dash-stat-row"><span class="dash-stat-label">Primary account</span><span class="dash-stat-value">${expenditureAccount ? 'Set' : 'Missing'}</span></div>
-            <div class="dash-stat-row"><span class="dash-stat-label">Salary account</span><span class="dash-stat-value">${salaryAccount ? 'Set' : 'Missing'}</span></div>
-            <div class="dash-stat-row"><span class="dash-stat-label">Saving account</span><span class="dash-stat-value">${savingAccount ? 'Set' : 'Missing'}</span></div>
-            <div class="dash-stat-row"><span class="dash-stat-label">Investment account</span><span class="dash-stat-value">${investmentAccount ? 'Set' : 'Missing'}</span></div>
+            <div class="dash-stat-row"><span class="dash-stat-label">Primary spending</span><span class="dash-stat-value">${expenditureAccount ? fmtMoney(expenditureAccount.balance || 0) : 'Not set'}</span></div>
+            <div class="dash-stat-row"><span class="dash-stat-label">Savings account</span><span class="dash-stat-value">${savingAccount ? fmtMoney(savingAccount.balance || 0) : 'Not set'}</span></div>
             <div class="dash-card-note">${accounts.length} account${accounts.length === 1 ? '' : 's'} · ${assetCount} asset${assetCount === 1 ? '' : 's'} tracked · <a href="#" onclick="switchToTab('netWorth'); return false;" style="color:#3b82f6;text-decoration:underline;cursor:pointer;">View Net Worth</a></div>
+        </article>
+
+        <article class="dash-card dash-spend-breakdown">
+            <div class="dash-card-header">
+                <span class="dash-card-title">${iconSvg('pieChart', 'dash-title-icon')} Spending breakdown</span>
+                <span class="dash-card-badge" style="background:#f9731622;color:#f97316">This month</span>
+            </div>
+            <div class="dash-distribution-section">
+                <span class="dash-distribution-heading">By category</span>
+                ${renderDistributionRows(expensesByCategory)}
+            </div>
+            ${Object.keys(expensesByPaymentMethod).some(method => method !== 'Not specified') ? `
+                <div class="dash-distribution-section">
+                    <span class="dash-distribution-heading">By payment method</span>
+                    ${renderDistributionRows(expensesByPaymentMethod, 3)}
+                </div>` : ''}
+            <div class="dash-card-note">Recorded transactions only · <a href="#" onclick="switchToTab('expenseTracking'); return false;" style="color:#3b82f6;text-decoration:underline;cursor:pointer;">View Expenses</a></div>
+        </article>
+
+        <article class="dash-card dash-kpi-card">
+            <div class="dash-card-header">
+                <span class="dash-card-title">${iconSvg('trendingUp', 'dash-title-icon')} Savings Rate</span>
+            </div>
+            <div class="dash-primary-value" style="color:${savingsRate >= 0.2 ? COLOR_POSITIVE : savingsRate >= 0.1 ? '#f59e0b' : COLOR_NEGATIVE}">${Math.round(savingsRate * 100)}%</div>
+            <p class="dash-primary-label">of usable income actually saved</p>
+            <div class="dash-stat-row"><span class="dash-stat-label">Usable Income</span><span class="dash-stat-value">${fmtMoney(usableIncome)}</span></div>
+            <div class="dash-stat-row"><span class="dash-stat-label">Saved Monthly</span><span class="dash-stat-value" style="color:${COLOR_POSITIVE}">${fmtMoney(actualSavings)}</span></div>
+            <div class="dash-stat-row"><span class="dash-stat-label">Benchmark</span><span class="dash-stat-value">${savingsRate >= 0.2 ? 'Excellent (≥20%)' : savingsRate >= 0.1 ? 'Good (≥10%)' : 'Below target'}</span></div>
+            <div class="dash-card-note dash-rate-note">Budget Savings category: automatic/fixed saving + on-demand saving.</div>
+            <div class="dash-rate-divider" role="separator"></div>
+            <div class="dash-card-header dash-secondary-rate-header">
+                <span class="dash-card-title">${iconSvg('trendingDown', 'dash-title-icon')} Expenditure Rate</span>
+            </div>
+            <div class="dash-secondary-value" style="color:${expenditureRate <= 0.5 ? COLOR_POSITIVE : expenditureRate <= 0.7 ? '#f59e0b' : COLOR_NEGATIVE}">${Math.round(expenditureRate * 100)}%</div>
+            <p class="dash-primary-label">of usable income spent</p>
+            <div class="dash-stat-row"><span class="dash-stat-label">Monthly Expenditure</span><span class="dash-stat-value" style="color:${COLOR_NEGATIVE}">${fmtMoney(actualExpenditure)}</span></div>
+            <div class="dash-stat-row"><span class="dash-stat-label">Benchmark</span><span class="dash-stat-value">${expenditureRate <= 0.5 ? 'Healthy (≤50%)' : expenditureRate <= 0.7 ? 'Watch (≤70%)' : 'High (>70%)'}</span></div>
+            <div class="dash-card-note dash-rate-note">Budget Expenditure category: fixed, variable, manual, card, and on-demand expenditure.</div>
         </article>
 
         <article class="dash-card">
@@ -978,19 +1054,7 @@ export function renderDashboard(appData, netWorthSummary = {}) {
                     </div>
                 </div>
             </div>
-            <div style="border-top:1px solid var(--border);padding-top:16px;margin-top:16px;">
-                <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
-                    <span style="font-size:14px;font-weight:600;color:var(--text)">Budget vs Actual</span>
-                    <span class="dash-card-badge" style="background:${budgetBalance >= 0 ? COLOR_POSITIVE : COLOR_WARNING}22;color:${budgetBalance >= 0 ? COLOR_POSITIVE : COLOR_WARNING};font-size:12px;padding:4px 8px;">${budgetBalance >= 0 ? 'On Track' : 'Over'}</span>
-                </div>
-                <div style="display:grid;grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));gap:12px;">
-                    <div class="dash-stat-row"><span class="dash-stat-label">Budgeted</span><span class="dash-stat-value">${fmtMoney(spendable)}</span></div>
-                    <div class="dash-stat-row"><span class="dash-stat-label">Spent</span><span class="dash-stat-value" style="color:${untracked > spendable ? COLOR_NEGATIVE : COLOR_POSITIVE}">${fmtMoney(untracked)}</span></div>
-                    <div class="dash-stat-row"><span class="dash-stat-label">Balance</span><span class="dash-stat-value" style="color:${budgetBalance >= 0 ? COLOR_POSITIVE : COLOR_NEGATIVE}">${budgetBalance >= 0 ? '+' : ''}${fmtMoney(budgetBalance)}</span></div>
-                    <div class="dash-stat-row"><span class="dash-stat-label">Adherence</span><span class="dash-stat-value">${spendable > 0 ? Math.min(100, Math.round((1 - Math.max(0, untracked - spendable) / spendable) * 100)) : 0}%</span></div>
-                </div>
-            </div>
-            <div class="dash-card-note">${insuranceCount} polic${insuranceCount === 1 ? 'y' : 'ies'} · ${fmtMoney(variableExp)} var · ${fmtMoney(totalCreditCardUsage)} CC · ${fmtMoney(totalOndemand)} on-demand</div>
+            <div class="dash-card-note">${insuranceCount} polic${insuranceCount === 1 ? 'y' : 'ies'} tracked · <a href="#" onclick="switchToTab('insurance'); return false;" style="color:#3b82f6;text-decoration:underline;cursor:pointer;">Review protection</a></div>
         </article>
         
         ${insights.length > 0 ? `
@@ -1068,59 +1132,43 @@ export function renderDashboard(appData, netWorthSummary = {}) {
         
         const ctx = canvas.getContext('2d');
         new Chart(ctx, {
-            type: 'bar',
+            type: 'line',
             data: {
                 labels: sixMonthData.map(m => m.monthName),
                 datasets: [
                     {
-                        label: 'Investment',
-                        data: sixMonthData.map(m => m.investment),
-                        backgroundColor: '#3b82f6', // Investment color
-                        borderColor: '#3b82f6',
-                        borderWidth: 0,
-                        borderRadius: 5,
-                        borderSkipped: false,
-                        maxBarThickness: 28
-                    },
-                    {
-                        label: 'Liability',
-                        data: sixMonthData.map(m => m.liability),
-                        backgroundColor: '#ef4444', // Liability color
-                        borderColor: '#ef4444',
-                        borderWidth: 0,
-                        borderRadius: 5,
-                        borderSkipped: false,
-                        maxBarThickness: 28
-                    },
-                    {
-                        label: 'Saving',
-                        data: sixMonthData.map(m => m.saving),
-                        backgroundColor: '#22c55e', // Savings color
+                        label: 'Income',
+                        data: sixMonthData.map(m => m.income),
                         borderColor: '#22c55e',
-                        borderWidth: 0,
-                        borderRadius: 5,
-                        borderSkipped: false,
-                        maxBarThickness: 28
+                        backgroundColor: '#22c55e22',
+                        borderWidth: 3,
+                        tension: 0.35,
+                        pointRadius: 3,
+                        pointHoverRadius: 5,
+                        fill: false
                     },
                     {
                         label: 'Expenditure',
                         data: sixMonthData.map(m => m.expenditure),
-                        backgroundColor: '#f97316', // Expenditure color
-                        borderColor: '#f97316',
-                        borderWidth: 0,
-                        borderRadius: 5,
-                        borderSkipped: false,
-                        maxBarThickness: 28
+                        borderColor: '#ef4444',
+                        backgroundColor: '#ef444422',
+                        borderWidth: 3,
+                        tension: 0.35,
+                        pointRadius: 3,
+                        pointHoverRadius: 5,
+                        fill: false
                     },
                     {
-                        label: 'Others',
-                        data: sixMonthData.map(m => m.others),
-                        backgroundColor: '#eab308', // Others color
+                        label: 'Saving',
+                        data: sixMonthData.map(m => m.saving),
                         borderColor: '#eab308',
-                        borderWidth: 0,
-                        borderRadius: 5,
-                        borderSkipped: false,
-                        maxBarThickness: 28
+                        backgroundColor: '#eab30822',
+                        borderWidth: 2,
+                        borderDash: [5, 4],
+                        tension: 0.35,
+                        pointRadius: 2,
+                        pointHoverRadius: 4,
+                        fill: false
                     }
                 ]
             },
@@ -1141,20 +1189,7 @@ export function renderDashboard(appData, netWorthSummary = {}) {
                             }
                         }
                     },
-                    datalabels: {
-                        display: true,
-                        color: '#fff',
-                        font: {
-                            weight: 'bold',
-                            size: 10
-                        },
-                        formatter: function(value) {
-                            if (value === 0) return '';
-                            return '₹' + (value / 1000).toFixed(0) + 'K';
-                        },
-                        anchor: 'end',
-                        align: 'top'
-                    }
+                    datalabels: { display: false }
                 },
                 scales: {
                     x: {
@@ -1169,28 +1204,7 @@ export function renderDashboard(appData, netWorthSummary = {}) {
                         }
                     }
                 }
-            },
-            plugins: [{
-                afterDatasetsDraw: function(chart) {
-                    const isMobile = window.innerWidth < 768;
-                    if (isMobile) return;
-                    
-                    const ctx = chart.ctx;
-                    chart.data.datasets.forEach(function(dataset, i) {
-                        const meta = chart.getDatasetMeta(i);
-                        meta.data.forEach(function(bar, index) {
-                            const data = dataset.data[index];
-                            if (data > 0) {
-                                ctx.fillStyle = '#fff';
-                                ctx.font = 'bold 10px sans-serif';
-                                ctx.textAlign = 'center';
-                                ctx.textBaseline = 'bottom';
-                                ctx.fillText('₹' + (data / 1000).toFixed(0) + 'K', bar.x, bar.y - 5);
-                            }
-                        });
-                    });
-                }
-            }]
+            }
         });
     }, 100);
 }
@@ -1340,4 +1354,3 @@ setTimeout(() => {
     initCarouselKeyboardSupport();
     initDescTooltipTouchSupport();
 }, 500);
-

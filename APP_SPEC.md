@@ -583,13 +583,20 @@ Expense Tracking provides detailed, month-by-month expense categorization and an
 - Expense list grouped by category with amounts
 
 **Edit Mode**
-- Form to add expenses:
+- **CSV/Bank Statement Import** (NEW)
+  - File upload for CSV files with columns: Date, Category, Amount, Payment Method (optional)
+  - Template download with example format
+  - Bulk import with progress indicator
+  - Error handling with detailed feedback
+  - Auto-formats dates, validates amounts, handles missing fields
+- Form to add/edit expenses:
   - Category (dropdown)
   - Amount (₹)
   - Date
+  - **Payment Method** (NEW - dropdown: UPI, Credit Card, Debit Card, Cash, Wallet, Bank Transfer, Other)
   - Description (optional)
 - Expense table showing all expenses with:
-  - Date, Category, Description, Amount
+  - Date, Category, Amount, **Payment Method** (NEW), Actions
   - Edit and Delete buttons
 - Full CRUD operations (Create, Read, Update, Delete)
 
@@ -605,7 +612,9 @@ expenseTrackingData: {
         "amount": 1500,
         "date": "2026-06-15",
         "description": "Dinner at restaurant",
-        "createdAt": "2026-06-15T18:30:00.000Z"
+        "paymentMethod": "UPI",  // NEW FIELD
+        "createdAt": "2026-06-15T18:30:00.000Z",
+        "importedFromCSV": false  // NEW FIELD (optional, for tracking imports)
       }
     ]
   }
@@ -646,6 +655,92 @@ When a Budget month is closed:
 - `currentExpenseMonth` - Currently viewed month (Date object)
 - `isExpenseEditMode` - Edit mode toggle (boolean)
 - `expensePieChart` - Chart.js instance for pie chart
+
+### New Features in v4.0.2
+
+#### CSV/Bank Statement Import
+- **File Format**: CSV with columns: Date, Category, Amount, Payment Method (optional)
+- **Template Download**: One-click template with example data
+- **Batch Import**: Process up to 1000 expenses per file
+- **Error Handling**: Detailed error report showing rows skipped and reasons
+- **Progress Indicator**: Real-time progress bar during import
+- **Date Validation**: Auto-formats dates, skips invalid entries
+- **Payment Method Handling**: Defaults to "UPI" if not specified in import
+- **Data Integrity**: Each imported expense gets unique ID and timestamp
+
+#### Payment Method Tracking
+- **Field Location**: Payment method select field in expense form (adjacent to date field)
+- **Options**: UPI, Credit Card, Debit Card, Cash, Wallet, Bank Transfer, Other
+- **Table Display**: Payment method shown in expense table (new 4th column)
+- **Backward Compatibility**: Expenses without payment method default to "UPI"
+- **Edit Support**: Payment method can be changed when editing expenses
+- **CSV Mapping**: Maps "Payment Method" column from CSV imports
+
+---
+
+## 5.6. Global Period Selector (NEW in v4.0.2)
+
+### Location
+- Header bar (top of application), centered between logo and user controls
+- Visible on all tabs for cross-tab period filtering
+
+### Features
+- **Monthly**: Current calendar month (default)
+- **Quarterly**: Current financial quarter (Jan-Mar, Apr-Jun, Jul-Sep, Oct-Dec)
+- **Financial Year**: April-March (Indian fiscal year) - FY 2026-27, etc.
+- **Custom Range**: User-selected start and end dates
+
+### UI Components
+- Period type dropdown (`globalPeriodType`)
+- Period display text (`globalPeriodDisplay`) - shows selected period label
+- Custom date inputs (`globalPeriodCustomStart`, `globalPeriodCustomEnd`) - hidden except in custom mode
+
+### State Management
+- `globalPeriodType` - Currently selected period type
+- `globalPeriodStart` - Start date of selected period (Date object)
+- `globalPeriodEnd` - End date of selected period (Date object)
+
+### Display Examples
+- Monthly: "August 2026"
+- Quarterly: "Q3 2026"
+- Financial Year: "FY 2026-2027"
+- Custom: "15 Aug 2026 - 30 Sep 2026"
+
+### Integration Points
+- Can be used by dashboard, reports, and analytics features
+- Data is available in app state for future filtering features
+- Extensible for future period-based analytics
+
+---
+
+## 5.7. Dashboard Enhancements (NEW in v4.0.2)
+
+### Savings Rate KPI Card
+- **Location**: Dashboard grid, positioned after Accounts & Net Worth card
+- **Calculation**: `(Usable Income - Monthly Commitments) / Usable Income × 100`
+- **Display Format**: Percentage (0-100%)
+- **Color Coding**:
+  - Green (≥20%): Excellent savings rate
+  - Orange (≥10%): Good savings rate
+  - Red (<10%): Below target
+- **Breakdown**: Shows usable income, monthly savings amount, and benchmark level
+- **Educational Note**: Target is 20% or more of usable income
+
+### Current Balance KPI Card
+- **Location**: Dashboard grid, positioned after Savings Rate card
+- **Calculation**: Sum of all account balances
+- **Display Format**: Indian currency (₹)
+- **Breakdown**: Shows Primary, Salary, Saving, and Investment account balances
+- **Quick Link**: "Manage Accounts" link to Accounts tab
+- **Data Source**: Updated from `appData.tabData.cards`
+
+### Toggle Button Fix
+- **Issue Fixed**: Monthly/Annual budget view toggle button had alignment issues
+- **Changes**:
+  - CSS: Added flex display, min-width (140px), and gap (6px)
+  - HTML: Icon and text now wrapped in separate spans
+  - Consistency: Icon always visible and properly aligned
+  - Responsive: Works on mobile, tablet, and desktop
 
 ---
 

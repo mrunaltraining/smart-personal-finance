@@ -14,6 +14,7 @@ import {
     toMonthlyAmount, getPeriodsPerYear
 } from './modules/constants.js';
 import { iconSvg } from './modules/icons.js';
+import { getMonthlyBudgetDistribution } from './modules/budget-distribution.js';
 
 // ── Lazy-Load Helpers (P2: lazy-load SheetJS + Chart.js) ─────────────────────
 const _loadedScripts = {};
@@ -1065,6 +1066,19 @@ let expensePieChart = null; // Expense tracking pie chart
 let expensePieChartResizeHandler = null; // Store resize handler
 let isBudgetEditMode = false;
 let isAnnualBudgetView = false;
+
+function renderBudgetViewToggle() {
+    if (!toggleBudgetView) return;
+    const switchToAnnual = !isAnnualBudgetView;
+    const label = switchToAnnual ? "Annual" : "Monthly";
+    const icon = switchToAnnual ? "receipt" : "calendar";
+
+    toggleBudgetView.setAttribute("aria-pressed", String(isAnnualBudgetView));
+    toggleBudgetView.setAttribute("aria-label", `Switch to ${switchToAnnual ? "annual" : "monthly"} budget view`);
+    toggleBudgetView.innerHTML = `<span class="view-toggle-icon" aria-hidden="true">${iconSvg(icon, "btn-action-svg")}</span><span class="btn-text">${label}</span>`;
+}
+
+renderBudgetViewToggle();
 let isGoalEditMode  = false;
 let isInflowEditMode = false;
 let isOutflowEditMode = false;
@@ -3353,53 +3367,7 @@ function getFinancialYearMonthKeys(startYear) {
     });
 }
 
-function getMonthlyDistribution(monthData) {
-    const inflowTotal = Object.values(monthData.inflow || {}).reduce((s, v) => s + Number(v || 0), 0);
-    const outflowTotal = Object.values(monthData.outflow || {}).reduce((s, v) => s + Number(v || 0), 0);
-
-    // Only recurring monthly instruments (outflow category) — excludes on-demand/one-time investing items
-    // Liability = loan EMIs + debt repayment + on-demand liability
-    const loanEMI = Number(monthData.outflow?.loanEMI || 0);
-    const debtRepayment = Number(monthData.outflow?.debtRepayment || 0);
-    const ondemandLiability = Number(monthData.investing?.ondemandLiability || 0);
-    const liability = loanEMI + debtRepayment + ondemandLiability;
-
-    // Insurance = auto-calc insurance premiums
-    const insurance = Number(monthData.outflow?.insurancePremiums || 0);
-
-    // Expenditure = fixed recurring + variable + manual outflow items + CC spending + on-demand expenditure
-    const ondemandExpenditure = Number(monthData.investing?.ondemandExpenditure || 0);
-    const expenditure = Number(monthData.outflow?.fixedExpenditure || 0)
-        + Number(monthData.outflow?.variableExpenditure || 0)
-        + Number(monthData.outflow?.utilityBills || 0)
-        + Number(monthData.outflow?.familyExpenditure || 0)
-        + Number(monthData.outflow?.miscExpenses || 0)
-        + Number(monthData.outflow?.creditCardOutstanding || 0)
-        + Number(monthData.outflow?.midMonthCCOutstanding || 0)
-        + ondemandExpenditure;
-
-    // Saving = fixed recurring + on-demand saving
-    const onetimeSaving = Number(monthData.investing?.onetimeSaving || 0);
-    const saving = Number(monthData.outflow?.fixedSaving || 0) + onetimeSaving;
-    
-    // Investment = fixed recurring + on-demand investment
-    const onetimeInvestment = Number(monthData.investing?.onetimeInvestment || 0);
-    const investment = Number(monthData.outflow?.fixedInvestment || 0) + onetimeInvestment;
-
-    // Other = total outflow - all categorised outflow items
-    const allCategorised = liability + insurance + expenditure + saving + investment;
-    const other = Math.max(0, outflowTotal - allCategorised);
-
-    return {
-        income: inflowTotal,
-        expenditure,
-        saving,
-        investment,
-        liability,
-        insurance,
-        other,
-    };
-}
+const getMonthlyDistribution = getMonthlyBudgetDistribution;
 
 // ── Expense Tracking ──────────────────────────────────────────────────────────
 
@@ -3588,7 +3556,7 @@ function getExpenseCategoryIcon(category) {
 
 function renderExpenseTable(expenses) {
     if (expenses.length === 0) {
-        expenseTableBody.innerHTML = '<tr><td colspan="5" class="empty-state">No expenses yet. Add your first expense above.</td></tr>';
+        expenseTableBody.innerHTML = '<tr><td colspan="6" class="empty-state">No expenses yet. Add your first expense above.</td></tr>';
         return;
     }
     
@@ -3600,6 +3568,7 @@ function renderExpenseTable(expenses) {
             <td>${new Date(exp.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}</td>
             <td><span class="table-category-cell"><span class="expense-category-icon" aria-hidden="true">${iconSvg(getExpenseCategoryIcon(exp.category), 'expense-category-svg')}</span>${esc(exp.category)}</span></td>
             <td>${formatMoney(exp.amount)}</td>
+            <td><span class="table-payment-method" title="${exp.paymentMethod || 'Not specified'}">${exp.paymentMethod || 'UPI'}</span></td>
             <td>
                 <button onclick="editExpense('${exp.id}')" class="btn-edit" title="Edit expense">Edit</button>
                 <button onclick="deleteExpense('${exp.id}')" class="btn-delete" title="Delete expense">Delete</button>
@@ -3734,6 +3703,8 @@ if (expenseForm) {
         const category = document.getElementById('expenseCategory').value;
         const amount = document.getElementById('expenseAmount').value;
         const date = document.getElementById('expenseDate').value;
+        const paymentMethod = document.getElementById('expensePaymentMethod')?.value || 'UPI';
+        const description = document.getElementById('expenseDescription')?.value || '';
         
         if (!category || !amount || !date) {
             showToast('Please fill in all required fields', { variant: 'error' });
@@ -3748,6 +3719,8 @@ if (expenseForm) {
             category,
             amount: Number(amount),
             date,
+            paymentMethod,
+            description,
             createdAt: new Date().toISOString()
         };
         
@@ -3762,9 +3735,138 @@ if (expenseForm) {
             const firstDay = new Date(currentExpenseMonth.getFullYear(), currentExpenseMonth.getMonth(), 1);
             expenseDateInput.value = firstDay.toISOString().split('T')[0];
         }
+        // Set payment method to default (UPI)
+        const paymentSelect = document.getElementById('expensePaymentMethod');
+        if (paymentSelect) {
+            paymentSelect.value = 'UPI';
+        }
         
         renderExpenseTracking();
         showToast('Expense added successfully', { variant: 'success' });
+    });
+}
+
+// CSV Import functionality
+window.downloadExpenseTemplate = function() {
+    const csvContent = `Date,Category,Amount,Payment Method
+2024-01-15,Food & Dining,500,UPI
+2024-01-16,Transportation,200,Debit Card
+2024-01-17,Shopping,1500,Credit Card
+2024-01-18,Entertainment,300,Cash
+2024-01-19,Healthcare,800,Bank Transfer`;
+    
+    const element = document.createElement('a');
+    element.setAttribute('href', 'data:text/csv;charset=utf-8,' + encodeURIComponent(csvContent));
+    element.setAttribute('download', 'expense_template.csv');
+    element.style.display = 'none';
+    document.body.appendChild(element);
+    element.click();
+    document.body.removeChild(element);
+    
+    showToast('Template downloaded! Fill it with your expenses and upload.', { variant: 'success' });
+};
+
+const expenseImportBtn = document.getElementById('expenseImportBtn');
+const expenseFileImport = document.getElementById('expenseFileImport');
+
+if (expenseImportBtn && expenseFileImport) {
+    expenseImportBtn.addEventListener('click', async (e) => {
+        e.preventDefault();
+        
+        const file = expenseFileImport.files[0];
+        if (!file) {
+            showToast('Please select a CSV or XLSX file', { variant: 'error' });
+            return;
+        }
+        
+        try {
+            const text = await file.text();
+            const rows = text.trim().split('\n').map(row => row.split(',').map(cell => cell.trim()));
+            
+            if (rows.length < 2) {
+                showToast('CSV must have at least a header row and one data row', { variant: 'error' });
+                return;
+            }
+            
+            const headers = rows[0].map(h => h.toLowerCase());
+            const dateIdx = headers.findIndex(h => h.includes('date'));
+            const categoryIdx = headers.findIndex(h => h.includes('category'));
+            const amountIdx = headers.findIndex(h => h.includes('amount'));
+            const paymentIdx = headers.findIndex(h => h.includes('payment'));
+            
+            if (dateIdx === -1 || categoryIdx === -1 || amountIdx === -1) {
+                showToast('CSV must have Date, Category, and Amount columns', { variant: 'error' });
+                return;
+            }
+            
+            const monthKey = getExpenseMonthKey();
+            const monthData = getExpenseMonthData(monthKey);
+            let imported = 0;
+            let errors = [];
+            
+            const progressDiv = document.getElementById('importProgress');
+            const importedCountSpan = document.getElementById('importedCount');
+            const progressBar = document.getElementById('importProgressBar');
+            
+            progressDiv.style.display = 'block';
+            
+            for (let i = 1; i < rows.length; i++) {
+                try {
+                    const row = rows[i];
+                    if (row.length < 3 || !row[dateIdx] || !row[amountIdx]) continue;
+                    
+                    const date = new Date(row[dateIdx]);
+                    if (isNaN(date.getTime())) {
+                        errors.push(`Row ${i + 1}: Invalid date format`);
+                        continue;
+                    }
+                    
+                    const amount = Number(row[amountIdx]);
+                    if (isNaN(amount) || amount <= 0) {
+                        errors.push(`Row ${i + 1}: Invalid amount`);
+                        continue;
+                    }
+                    
+                    const expense = {
+                        id: Date.now().toString() + '_' + i,
+                        date: date.toISOString().split('T')[0],
+                        category: row[categoryIdx] || 'Others',
+                        amount: amount,
+                        paymentMethod: (paymentIdx >= 0 ? row[paymentIdx] : 'UPI') || 'UPI',
+                        createdAt: new Date().toISOString(),
+                        importedFromCSV: true
+                    };
+                    
+                    monthData.expenses.push(expense);
+                    imported++;
+                    
+                    importedCountSpan.textContent = imported;
+                    progressBar.style.width = ((i / (rows.length - 1)) * 100) + '%';
+                } catch (err) {
+                    errors.push(`Row ${i + 1}: ${err.message}`);
+                }
+            }
+            
+            scheduleSave();
+            progressDiv.style.display = 'none';
+            expenseFileImport.value = '';
+            
+            let message = `Imported ${imported} expense${imported !== 1 ? 's' : ''}`;
+            if (errors.length > 0) {
+                message += ` (${errors.length} skipped)`;
+            }
+            
+            showToast(message, { variant: imported > 0 ? 'success' : 'error' });
+            
+            if (errors.length > 0) {
+                console.log('Import errors:', errors);
+            }
+            
+            renderExpenseTracking();
+        } catch (error) {
+            console.error('Error importing CSV:', error);
+            showToast('Error reading file: ' + error.message, { variant: 'error' });
+        }
     });
 }
 
@@ -3840,6 +3942,10 @@ window.editExpense = function(id) {
     
     document.getElementById('expenseCategory').value = expense.category;
     document.getElementById('expenseAmount').value = expense.amount;
+    const paymentSelect = document.getElementById('expensePaymentMethod');
+    if (paymentSelect) {
+        paymentSelect.value = expense.paymentMethod || 'UPI';
+    }
     
     // Validate and set date - ensure it's within current month range
     const expenseDateInput = document.getElementById('expenseDate');
@@ -8017,7 +8123,7 @@ nextMonthBtn.addEventListener("click", () => {
 
 toggleBudgetView.addEventListener("click", () => {
     isAnnualBudgetView = !isAnnualBudgetView;
-    toggleBudgetView.innerHTML = isAnnualBudgetView ? `${iconSvg('calendar', 'btn-action-svg')} Monthly` : `${iconSvg('receipt', 'btn-action-svg')} Annual`;
+    renderBudgetViewToggle();
     prevMonthBtn.textContent = isAnnualBudgetView ? "← Previous FY" : "← Previous";
     nextMonthBtn.textContent = isAnnualBudgetView ? "Next FY →" : "Next →";
     
@@ -8036,7 +8142,7 @@ toggleBudgetEdit.addEventListener("click", () => {
     // If in annual view, switch to monthly first before editing
     if (isAnnualBudgetView) {
         isAnnualBudgetView = false;
-        toggleBudgetView.innerHTML = `${iconSvg('receipt', 'btn-action-svg')} Annual`;
+        renderBudgetViewToggle();
         prevMonthBtn.textContent = "← Previous";
         nextMonthBtn.textContent = "Next →";
     }

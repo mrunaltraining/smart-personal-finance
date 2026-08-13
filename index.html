@@ -170,13 +170,13 @@
                     <span id="currentMonthDisplay" class="month-display"></span>
                     <button type="button" id="nextMonth" class="btn-nav">Next →</button>
                 </div>
-                <button type="button" id="toggleBudgetView" class="btn-nav btn-view-toggle" aria-label="Switch to annual budget view">Annual</button>
+                <button type="button" id="toggleBudgetView" class="btn-nav btn-view-toggle" aria-label="Switch to annual budget view" aria-pressed="false"><span class="view-toggle-icon" aria-hidden="true"><svg class="btn-action-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20V4a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v16l-2-1-2 1-2-1-2 1-2-1-2 1Z"/><line x1="8" y1="7" x2="16" y2="7"/><line x1="8" y1="11" x2="16" y2="11"/><line x1="8" y1="15" x2="12" y2="15"/></svg></span><span class="btn-text">Annual</span></button>
                 <button type="button" id="toggleBudgetEdit" class="btn-nav btn-icon">Edit</button>
             </div>
 
             <!-- Annual Summary Section (hidden by default) -->
             <div id="annualSummarySection" class="annual-summary-section" hidden>
-                <div class="annual-summary">
+                <div class="annual-summary summary-strip">
                     <div class="annual-summary-item">
                         <span class="annual-summary-label">Total Income</span>
                         <strong id="annualTotalIncome">₹0</strong>
@@ -496,6 +496,26 @@
             <!-- Expense Edit Mode -->
             <div id="expenseEdit" class="expense-edit" hidden>
                 <h3>Add/Edit Expenses</h3>
+                
+                <!-- CSV Import Section -->
+                <div class="expense-import-section" style="border: 1px solid var(--border); padding: 16px; border-radius: 8px; margin-bottom: 20px; background: var(--surf2);">
+                    <h4 style="margin-top: 0; font-size: 0.95rem; font-weight: 600;">Import from CSV or Bank Statement</h4>
+                    <p style="margin: 8px 0; font-size: 0.85rem; color: var(--dim);">
+                        Upload a CSV file with columns: Date, Category, Amount, Payment Method (optional)
+                    </p>
+                    <div style="display: flex; gap: 8px; align-items: center; flex-wrap: wrap;">
+                        <input type="file" id="expenseFileImport" accept=".csv,.xlsx" style="flex: 1; min-width: 200px;">
+                        <button type="button" id="expenseImportBtn" class="btn-add" style="white-space: nowrap;">Import</button>
+                        <a href="#" onclick="downloadExpenseTemplate(); return false;" style="font-size: 0.85rem; color: #3b82f6; text-decoration: underline;">Download Template</a>
+                    </div>
+                    <div id="importProgress" style="margin-top: 12px; display: none;">
+                        <div style="font-size: 0.85rem; margin-bottom: 6px;">Processing <span id="importedCount">0</span> expenses...</div>
+                        <div class="dash-progress-bar" style="height: 8px;">
+                            <div class="dash-progress-fill" id="importProgressBar" style="width: 0%; background: #3b82f6;"></div>
+                        </div>
+                    </div>
+                </div>
+                
                 <form id="expenseForm" class="expense-form">
                     <div class="form-row">
                         <div class="form-group">
@@ -526,6 +546,18 @@
                             <input type="date" id="expenseDate" required>
                             <small class="field-hint">Limited to current month</small>
                         </div>
+                        <div class="form-group">
+                            <label for="expensePaymentMethod">Payment Method</label>
+                            <select id="expensePaymentMethod">
+                                <option value="UPI">UPI</option>
+                                <option value="Credit Card">Credit Card</option>
+                                <option value="Debit Card">Debit Card</option>
+                                <option value="Cash">Cash</option>
+                                <option value="Wallet">Wallet</option>
+                                <option value="Bank Transfer">Bank Transfer</option>
+                                <option value="Other">Other</option>
+                            </select>
+                        </div>
                     </div>
                     <div class="field field-btn">
                         <button type="submit" class="btn-add">Add Expense</button>
@@ -540,6 +572,7 @@
                                 <th>Date</th>
                                 <th>Category</th>
                                 <th>Amount</th>
+                                <th>Payment Method</th>
                                 <th>Actions</th>
                             </tr>
                         </thead>
