@@ -1,0 +1,38 @@
+name: Auto Bump Version
+
+on:
+  push:
+    branches: [main]
+
+jobs:
+  bump:
+    # Skip if this commit was the version bump itself (prevents infinite loop)
+    if: "!contains(github.event.head_commit.message, '[skip ci]')"
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Bump build number
+        run: |
+          # Extract current build number
+          CURRENT=$(grep -oP 'build:\s*\K\d+' assets/js/app.js)
+          NEW=$((CURRENT + 1))
+          # Replace in file
+          sed -i "s/build: $CURRENT/build: $NEW/" assets/js/app.js
+          # Read full version for commit message
+          MAJOR=$(grep -oP 'major:\s*\K\d+' assets/js/app.js)
+          MINOR=$(grep -oP 'minor:\s*\K\d+' assets/js/app.js)
+          echo "VERSION=v${MAJOR}.${MINOR}.${NEW}" >> $GITHUB_ENV
+          echo "Bumped build: $CURRENT -> $NEW (v${MAJOR}.${MINOR}.${NEW})"
+
+      - name: Commit version bump
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add assets/js/app.js
+          git commit -m "chore: bump version to ${{ env.VERSION }} [skip ci]"
+          git push
