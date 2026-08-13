@@ -118,6 +118,38 @@
         </div>
         <div class="user-bar">
             <span id="userEmailDisplay" class="user-email"></span>
+            <!-- ── NETWORK STATUS INDICATOR ────────────────────────────────── -->
+            <div id="networkStatus" class="network-status" hidden>
+                <div class="network-status-icon">
+                    <!-- Checkmark icon for online/saved -->
+                    <svg class="icon-online" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <polyline points="20 6 9 17 4 12"></polyline>
+                    </svg>
+                    <!-- Refresh icon for retrying -->
+                    <svg class="icon-retrying" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" hidden>
+                        <path d="M23 4v6h-6"></path>
+                        <path d="M1 20v-6h6"></path>
+                        <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path>
+                    </svg>
+                    <!-- Error icon for error -->
+                    <svg class="icon-error" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" hidden>
+                        <circle cx="12" cy="12" r="10"></circle>
+                        <line x1="12" y1="8" x2="12" y2="12"></line>
+                        <line x1="12" y1="16" x2="12.01" y2="16"></line>
+                    </svg>
+                    <!-- Offline icon -->
+                    <svg class="icon-offline" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" hidden>
+                        <path d="M1 1l22 22"></path>
+                        <path d="M16.72 11.06A10.94 10.94 0 0 1 19 12.55"></path>
+                        <path d="M5 12.55a10.94 10.94 0 0 1 5.17-2.39"></path>
+                        <path d="M10.71 5.05A16 16 0 0 1 22.58 9"></path>
+                        <path d="M1.42 9a15.91 15.91 0 0 1 4.7-2.88"></path>
+                        <path d="M8.53 16.11a6 6 0 0 1 6.95 0"></path>
+                        <line x1="12" y1="20" x2="12.01" y2="20"></line>
+                    </svg>
+                </div>
+                <div class="network-status-text">Saved</div>
+            </div>
             <button type="button" id="logoutBtn" class="btn-icon-only" aria-label="Sign Out">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="20" height="20">
                     <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
@@ -399,29 +431,9 @@
 
             <!-- Edit Mode -->
             <div id="budgetEdit" class="budget-edit" hidden>
-                <div class="categories-container">
-                    <div class="category-section">
-                        <h3>Cash Inflow</h3>
-                        <div id="inflowFields"></div>
-                        <div class="category-total">Total: <strong id="inflowTotalEdit">₹0</strong></div>
-                    </div>
-
-                    <div class="category-section">
-                        <h3>Cash Outflow</h3>
-                        <div id="outflowFields"></div>
-                        <div class="category-total">Total: <strong id="outflowTotalEdit">₹0</strong></div>
-                    </div>
-
-                    <div class="category-section">
-                        <h3>On-Demand Outflow</h3>
-                        <div id="investingFields"></div>
-                        <div class="category-total">Total: <strong id="investingTotalEdit">₹0</strong></div>
-                    </div>
-                </div>
-
-                <!-- Mid-Month Quick Update (consolidated) -->
-                <div class="mid-month-update-section">
-                    <h3>Quick Update (Mid-Month)</h3>
+                <!-- Mid-Month Quick Update (consolidated) - MOVED TO TOP -->
+                <div class="mid-month-update-section" style="margin-bottom: 24px; border: 2px solid #3b82f6; border-radius: 12px; padding: 20px; background: rgba(59, 130, 246, 0.05);">
+                    <h3 style="color: #3b82f6; margin-top: 0;">Quick Update (Mid-Month)</h3>
                     <p class="section-description">Update these values periodically to track your spending. Variable expenditure is auto-calculated. Current Month CC Spending entered here will appear in the Cash Outflow section.</p>
                     <div class="mid-month-row">
                         <div class="mid-month-field">
@@ -445,6 +457,84 @@
                         <span class="field-hint">Amount spent from expenditure account (funded − current balance)</span>
                     </div>
                 </div>
+
+                <div class="categories-container">
+                    <div class="category-section">
+                        <h3>Cash Inflow</h3>
+                        <div id="inflowFields"></div>
+                        <div class="category-total">Total: <strong id="inflowTotalEdit">₹0</strong></div>
+                    </div>
+
+                    <div class="category-section">
+                        <h3>Cash Outflow</h3>
+                        <div id="outflowFields"></div>
+                        <div class="category-total">Total: <strong id="outflowTotalEdit">₹0</strong></div>
+                    </div>
+
+                    <div class="category-section">
+                        <h3>On-Demand Outflow</h3>
+                        <div id="investingFields"></div>
+                        <div class="category-total">Total: <strong id="investingTotalEdit">₹0</strong></div>
+                    </div>
+                </div>
+
+                <!-- Monthly Transfer & Reconciliation Section -->
+                <div class="expense-transfer-section" id="transferBreakdownSection">
+                    <h3>Monthly Transfer Breakdown</h3>
+                    <div class="expense-transfer-grid">
+                        <div class="expense-transfer-item">
+                            <span class="expense-transfer-label">Primary Income This Month</span>
+                            <strong id="transferPrimaryIncome">₹0</strong>
+                        </div>
+                        <div class="expense-transfer-item">
+                            <span class="expense-transfer-label">Auto-deducted Fixed Outflow</span>
+                            <strong id="transferFixedExpenses">₹0</strong>
+                        </div>
+                        <div class="auto-debit-breakdown-container">
+                            <span class="expense-transfer-label" style="font-size:0.78rem;color:var(--dim)">Breakdown by destination:</span>
+                            <div id="autoDebitBreakdown" class="auto-debit-breakdown"></div>
+                        </div>
+                        <div class="expense-transfer-item highlight-transfer">
+                            <span class="expense-transfer-label">Remaining → Transfer to Primary (Expenditure)</span>
+                            <strong id="transferAmount">₹0</strong>
+                        </div>
+                    </div>
+                    <div class="transfer-action-row">
+                        <div class="transfer-warning" style="background:rgba(234,179,8,0.10);border:1px solid rgba(234,179,8,0.3);border-radius:8px;padding:10px 14px;margin-bottom:8px;font-size:0.82rem;color:#eab308;">
+                            <strong>Warning:</strong> Add ALL outflow items before Execute Transfer. Items added after won't be deducted from salary.
+                        </div>
+                        <button type="button" id="btnDoTransfer" class="btn-do-transfer">Execute Transfer</button>
+                        <small class="transfer-note">Deducts all obligations from Salary, credits Expenditure/Saving/Investment accounts.</small>
+                    </div>
+                </div>
+
+                <!-- Transfer Mismatch Warning (outflows changed after transfer) -->
+                <div class="expense-transfer-section" id="transferMismatchWarning" hidden style="border-color:#ef4444">
+                    <h3 style="color:#ef4444">Transfer Mismatch Detected</h3>
+                    <div style="font-size:0.85rem;color:var(--dim);margin-bottom:0.5rem">
+                        Outflow items were added or changed <strong>after</strong> Execute Transfer. The transfer amount and variable expenditure are incorrect.
+                    </div>
+                    <div class="expense-transfer-grid">
+                        <div class="expense-transfer-item">
+                            <span class="expense-transfer-label">Transfer Used (old outflows)</span>
+                            <strong id="mismatchOldTransfer" style="color:#ef4444">₹0</strong>
+                        </div>
+                        <div class="expense-transfer-item">
+                            <span class="expense-transfer-label">Correct Transfer (current outflows)</span>
+                            <strong id="mismatchNewTransfer" style="color:#22c55e">₹0</strong>
+                        </div>
+                        <div class="expense-transfer-item">
+                            <span class="expense-transfer-label">Difference</span>
+                            <strong id="mismatchDifference" style="color:#eab308">₹0</strong>
+                        </div>
+                    </div>
+                    <div class="transfer-action-row">
+                        <button type="button" id="btnRecalcTransfer" class="btn-do-transfer" style="background:#ef4444">Recalculate Transfer</button>
+                        <small class="transfer-note">Corrects _transferDone and _initialBalance to match current outflows. Does not change account balances.</small>
+                    </div>
+                </div>
+
+                <!-- Reconciliation merged into Quick Update above -->
             </div><!-- end budgetEdit -->
             </div><!-- end monthlyViewSection -->
         </div><!-- end monthlyBudgetUI -->
@@ -501,11 +591,12 @@
                 <div class="expense-import-section" style="border: 1px solid var(--border); padding: 16px; border-radius: 8px; margin-bottom: 20px; background: var(--surf2);">
                     <h4 style="margin-top: 0; font-size: 0.95rem; font-weight: 600;">Import from CSV or Bank Statement</h4>
                     <p style="margin: 8px 0; font-size: 0.85rem; color: var(--dim);">
-                        Upload a CSV file with columns: Date, Category, Amount, Payment Method (optional)
+                        Upload a CSV file with columns: Date, Category, Amount, Payment Method, TransactionType
                     </p>
                     <div style="display: flex; gap: 8px; align-items: center; flex-wrap: wrap;">
                         <input type="file" id="expenseFileImport" accept=".csv,.xlsx" style="flex: 1; min-width: 200px;">
                         <button type="button" id="expenseImportBtn" class="btn-add" style="white-space: nowrap;">Import</button>
+                        <button type="button" id="expenseFileClearBtn" class="btn-icon-only" style="white-space: nowrap; padding: 8px 16px;" aria-label="Clear file">✕</button>
                         <a href="#" onclick="downloadExpenseTemplate(); return false;" style="font-size: 0.85rem; color: #3b82f6; text-decoration: underline;">Download Template</a>
                     </div>
                     <div id="importProgress" style="margin-top: 12px; display: none;">
@@ -559,6 +650,16 @@
                             </select>
                         </div>
                     </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="expenseMerchant">Merchant</label>
+                            <input type="text" id="expenseMerchant" placeholder="e.g. Amazon, Swiggy">
+                        </div>
+                        <div class="form-group">
+                            <label for="expenseDescription">Description</label>
+                            <input type="text" id="expenseDescription" placeholder="Optional notes">
+                        </div>
+                    </div>
                     <div class="field field-btn">
                         <button type="submit" class="btn-add">Add Expense</button>
                     </div>
@@ -573,6 +674,8 @@
                                 <th>Category</th>
                                 <th>Amount</th>
                                 <th>Payment Method</th>
+                                <th>Merchant</th>
+                                <th>Description</th>
                                 <th>Actions</th>
                             </tr>
                         </thead>

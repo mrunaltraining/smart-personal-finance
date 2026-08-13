@@ -1,6 +1,23 @@
-# SmartFin – User Manual (v4.0.1)
+# SmartFin – User Manual (v4.0.5)
 
 A comprehensive guide to using SmartFin for personal financial planning.
+
+## What's New in v4.0.5
+
+### 🔧 Error Handling & Network Status
+- **Network Status Indicator**: Visual indicator in user bar (next to your email) showing Firebase save status
+  - ✅ Green checkmark: Data saved successfully
+  - 🔄 Yellow blinking refresh: Retrying save due to network issue
+  - ⚠️ Red warning: Save failed or connection lost
+  - 📶 Red WiFi slash: Browser is offline
+  - Hover over the icon to see status text
+  - Indicator automatically hides after successful save
+- **Better Error Messages**: Clear, specific messages for different error types
+  - Quota exceeded: Informs you about quota reset timing and upgrade options
+  - Network errors: Shows automatic retry status
+  - Permission errors: Guides you to re-login if needed
+- **Automatic Retry**: Network errors automatically retry after 2 seconds with visual feedback
+- **Offline Detection**: Automatically detects when browser goes offline and shows status
 
 ## What's New in v4.0.1
 

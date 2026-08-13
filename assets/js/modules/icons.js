@@ -24,7 +24,7 @@ const ICONS = {
     flag: '<path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z"/><line x1="4" y1="22" x2="4" y2="15"/>',
     
     // Alerts & Notifications
-    alert: '<path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0Z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/>',
+    alert: '<path d="M10.29 5.86L3.82 17a2 2 0 0 0 1.71 3h12.94a2 2 0 0 0 1.71-3L13.71 5.86a2 2 0 0 0-3.42 0Z"/><line x1="12" y1="10" x2="12" y2="13"/><line x1="12" y1="16" x2="12.01" y2="16"/>',
     alertCircle: '<circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>',
     bell: '<path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/>',
     info: '<circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/>',
@@ -86,7 +86,7 @@ const ICONS = {
     hospitalSmall: '<rect x="4" y="4" width="16" height="16" rx="2"/><path d="M12 8v8"/><path d="M8 12h8"/>',
     trendingUpSmall: '<polyline points="4 20 12 10 20 4"/>',
     targetSmall: '<circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="3"/>',
-    alertSmall: '<path d="M12 2L4 20h16L12 2z"/><path d="M12 10v4"/><path d="M12 16v.01"/>',
+    alertSmall: '<path d="M12 4L5 18h14L12 4z"/><path d="M12 10v4"/><path d="M12 15v.01"/>',
     shieldCheckSmall: '<path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10Z"/><path d="M9 12l2 2 4-4"/>',
     creditCardSmall: '<rect x="4" y="6" width="16" height="12" rx="2"/><line x1="4" y1="10" x2="20" y2="10"/>',
     calendarSmall: '<rect x="4" y="4" width="16" height="16" rx="2"/><line x1="14" y1="2" x2="14" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/>',

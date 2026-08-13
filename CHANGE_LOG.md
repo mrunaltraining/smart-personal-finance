@@ -5,11 +5,61 @@ All notable changes to SmartFin will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [4.0.5] - 2026-08-15 - Error Handling & Network Status Improvements
+
+### Added
+- **Network Status Indicator**: Visual indicator in user bar showing Firebase save status
+  - Icon-based status display (checkmark, refresh, warning, offline icons)
+  - Compact design: 14px icons, shows text on hover
+  - Located in user bar next to user email
+  - Status values: online (green checkmark), retrying (yellow blinking refresh), error (red warning), offline (red WiFi slash)
+  - Automatically hides after 2 seconds on successful save
+  - Browser online/offline detection with automatic status updates
+- **Enhanced Error Handling**: Improved Firebase error handling with specific user notifications
+  - Quota exceeded error: Specific message about quota reset timing and upgrade options
+  - Network errors: Automatic retry with visual "Retrying save..." indicator
+  - Permission errors: Clear message about re-login requirements
+  - Connection loss: Network status indicator shows error state
+  - All errors now have user-friendly alert messages
+
+### Changed
+- **Save Retry Logic**: Network errors now automatically retry after 2 seconds with visual feedback
+- **Error Messages**: More specific error messages based on error type (quota, network, permission)
+- **Status Indicator**: Changed from simple colored dots to SVG icons for better visual clarity
+- **Animation**: Retrying status now uses blinking animation instead of spinning
+
+### Fixed
+- **Firebase Quota Error**: Now properly identified and communicated to user instead of generic error
+- **Network Error Visibility**: User now notified when automatic retries are happening
+- **Connection Loss**: Firestore listener errors now show network status indicator
+
 ## [4.0.2] - 2026-08-15 - Dashboard Enhancements & Import Features
 
 ### Added
 
 #### Dashboard Features
+- **6-Month Trend Chart Enhancement**: Updated to show all 5 budget categories
+  - Now displays: Income, Saving, Expenditure, Investment, and Liability
+  - Consistent color coding matching category colors throughout the app
+  - Modern line chart styling with smooth curves (tension: 0.35)
+  - Automatic chart destruction before re-render to prevent canvas reuse errors
+- **Financial Year Overview Enhancement**: Added Others category
+  - Now shows: Income, Expenditure, Saved, Invested, Liabilities, and Others
+  - Others category includes all fixedOthers from outflow (auto-calculated)
+  - Properly calculated and displayed in Financial Year totals
+- **This Month Card Enhancement**: Added Variable Expenses and On-Demand Expense display
+  - Variable Expenses: Shows actual spending + credit card usage
+  - On-Demand Expense: Shows total on-demand items (saving, investment, expenditure, liability)
+  - Better visibility into monthly budget allocation
+- **Accounts & Net Worth Card Enhancement**: Added total balance and credit limit
+  - Total balance (all accounts): Sum of all account balances
+  - Total credit limit: Sum of all credit card limits across accounts
+  - Provides quick overview of available funds and credit capacity
+- **Spending Breakdown Enhancement**: Now shows all 10 expense categories
+  - Displays all categories except "Others" (up to 10 categories)
+  - Automatic separator when more than 5 categories exist
+  - Categories split evenly on both sides of separator for better organization
+  - Maintains current view for 5 or fewer categories
 - **Savings Rate KPI Card**: New dashboard card displaying savings rate percentage, benchmark status, and formula
   - Shows percentage of usable income saved/invested
   - Color-coded: Green (≥20%), Orange (≥10%), Red (<10%)
@@ -51,6 +101,24 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 
 #### Bug Fixes
+- **Chart.js Canvas Reuse Error**: Fixed "Canvas is already in use" error
+  - Automatically destroys existing chart instance before creating new one
+  - Uses Chart.getChart() to check for existing instance
+  - Prevents memory leaks and canvas conflicts
+  - Applies to dashboard 6-month trend chart
+- **Expense Page Mobile Layout**: Fixed edit/done button alignment on mobile
+  - Edit/done button now properly right-aligned like other pages
+  - Added flex-wrap to expense-header for proper wrapping
+  - Added order property for mobile layout (button order: 2, margin-left: auto)
+  - Consistent with budget and goal page layouts
+- **Net Worth Projection Chart Styling**: Updated to match modern dashboard style
+  - Changed from filled area chart to line chart with consistent styling
+  - Updated tension to 0.35 for smooth curves
+  - Increased border width to 3px for better visibility
+  - Updated point radius and hover states
+  - Added modern tooltip formatting
+  - Y-axis now shows values in ₹K format
+  - Legend position changed to bottom for consistency
 - **Annual Budget Calculation**: Verified correct aggregation of monthly data
   - Confirmed fiscal year (April-March) calculation logic
   - Ensured on-demand items summed correctly

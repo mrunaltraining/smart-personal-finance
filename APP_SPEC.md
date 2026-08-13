@@ -1,4 +1,4 @@
-# SmartFin – Application Specification (v4.0.1)
+# SmartFin – Application Specification (v4.0.5)
 
 > **Purpose**: Single source of truth for the app's architecture, data models, business logic, and UI structure.
 > Use this file as context when making future modifications. Update it after every significant change.
@@ -23,6 +23,37 @@
 > - Test with different screen orientations (portrait/landscape)
 > - Verify smooth performance on lower-end mobile devices
 > - Use passive event listeners for scroll/touch events to improve performance
+>
+> **Version 4.0.3 Updates - Error Handling & Network Status Improvements**:
+> - **Network Status Indicator**: Visual indicator in user bar showing Firebase save status
+>   - Icon-based status display (checkmark, refresh, warning, offline icons)
+>   - Compact design: 14px icons, shows text on hover
+>   - Located in user bar next to user email
+>   - Status values: online (green checkmark), retrying (yellow blinking refresh), error (red warning), offline (red WiFi slash)
+>   - Automatically hides after 2 seconds on successful save
+>   - Browser online/offline detection with automatic status updates
+> - **Enhanced Error Handling**: Improved Firebase error handling with specific user notifications
+>   - Quota exceeded error: Specific message about quota reset timing and upgrade options
+>   - Network errors: Automatic retry after 2 seconds with visual "Retrying save..." indicator
+>   - Permission errors: Clear message about re-login requirements
+>   - Connection loss: Network status indicator shows error state
+>   - All errors now have user-friendly alert messages
+> - **Error Handling Functions**: New functions for network status management
+>   - `showNetworkStatus(status)`: Shows indicator with appropriate icon and text
+>   - `hideNetworkStatus()`: Hides the indicator
+>   - Browser event listeners for online/offline detection
+>   - Automatic retry logic for network errors
+>
+> **Version 4.0.2 Updates - Dashboard Enhancements & Bug Fixes**: 
+> - **6-Month Trend Chart**: Now displays all 5 categories (Income, Saving, Expenditure, Investment, Liability) with consistent color coding
+> - **Chart.js Canvas Fix**: Automatic destruction of existing chart instances before creating new ones to prevent canvas reuse errors
+> - **Net Worth Projection Chart**: Updated styling to match modern dashboard 6-Month Trend appearance (smooth curves, consistent styling)
+> - **Spending Breakdown**: Shows all 10 expense categories (excluding Others) with automatic separator when more than 5 items
+> - **This Month Card**: Added Variable Expenses and On-Demand Expense display for better budget visibility
+> - **Financial Year Overview**: Added Others category to show all outflow types including fixedOthers
+> - **Accounts & Net Worth Card**: Added total balance (all accounts) and total credit limit display
+> - **Mobile UI Fix**: Expense page edit/done button now properly right-aligned on mobile devices like other pages
+> - **Responsive Design**: All changes tested and optimized for mobile, tablet, and desktop views
 >
 > **Version 4.0.1 Updates - Major Architecture Redesign**: 
 > - **Core Business Logic Extraction**: All business logic separated into platform-independent modules (13 modules, 2,780 lines)
@@ -958,8 +989,10 @@ copy of each workspace. It shows enhanced cards with actionable insights:
 
 **Layout**: 2x2 grid (2 rows, 2 columns) for the 4 main cards on desktop, responsive to 2 columns on tablet and 1 column on mobile.
 
-- **This month**: usable income, recurring monthly commitments, amount available after commitments, credit card usage, expenditure account balance, and **budget surplus/deficit status**. Borrowing is excluded from usable income. Includes navigation links to Budget and Fixed Outflow tabs. Shows account configuration status (Primary, Salary, Saving, Investment accounts).
-- **Accounts & Net Worth** (combined card): current assets, liabilities, net worth, cash in accounts, and account configuration status. Totals use the exact same manual and auto-generated entries as the Net Worth tab. Includes navigation link to Net Worth tab.
+- **Financial Year Overview**: Shows Income, Expenditure, Saved, Invested, Liabilities, and **Others** for the current financial year (April-March). The Others category includes all outflow items categorized as "Others" type (fixedOthers).
+- **This month**: usable income, recurring monthly commitments, amount available after commitments, **Variable Expenses**, **On-Demand Expense**, credit card usage, expenditure account balance, and **budget surplus/deficit status**. Borrowing is excluded from usable income. Includes navigation links to Budget and Fixed Outflow tabs. Shows account configuration status (Primary, Salary, Saving, Investment accounts).
+- **Accounts & Net Worth** (combined card): current assets, liabilities, net worth, **total balance (all accounts)**, **total credit limit**, primary spending account, and savings account balances. Totals use the exact same manual and auto-generated entries as the Net Worth tab. Includes navigation link to Net Worth tab.
+- **Spending Breakdown**: Shows all expense categories (up to 10 categories, excluding "Others") from expense tracking. If more than 5 categories exist, displays them in two columns separated by a visual separator for better organization.
 - **Goals & Investment Planning** (combined card): portfolio value, monthly investment contribution, tax items logged, planned-gifts total, and **All active goals with individual progress bars** showing percentage funded and remaining amount. Includes navigation links to Goals and Gifts tabs.
 - **Preparedness & Budget** (merged card): 
   - **Preparedness Section**: Progress bars for Emergency Fund, Health Insurance, and Term Insurance with ideal amounts calculated based on:
@@ -967,7 +1000,7 @@ copy of each workspace. It shows enhanced cards with actionable insights:
     - Health Insurance: Based on age, location (metro/non-metro), and family size. Custom cities are assumed non-metro.
     - Term Insurance: Based on age, monthly expenses, and current savings (formula: Monthly Expenses × 12 × [65 - Age] - Savings)
   - **Budget Section**: Budgeted amount, spent amount, balance, and adherence percentage for variable expenses and credit card spending. Shows Variable Expenses (actual spending + CC, excluding on-demand), On-Demand Items (saving, investment, expenditure, liability), and Total Allocated (sum of both).
-- **6-Month Trend**: Stacked bar chart showing Income, Expenditure, Saving, Liability, and Others for the last 6 months. Numbers hidden on mobile (< 768px) for better readability.
+- **6-Month Trend**: Line chart showing **Income, Saving, Expenditure, Investment, and Liability** for the last 6 months with modern styling (smooth curves, consistent colors matching category color codes). Chart automatically destroys previous instance before rendering to prevent canvas reuse errors. Numbers hidden on mobile (< 768px) for better readability.
 
 **Ideal Insurance Calculation Formulas (v6.1):**
 - Health Insurance: `(Base City Cost × Age Risk Multiplier) × Family Size Variant`

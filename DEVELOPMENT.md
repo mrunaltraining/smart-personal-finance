@@ -1,4 +1,4 @@
-# SmartFin – Developer Guide (v4.0.1)
+# SmartFin – Developer Guide (v4.0.5)
 
 > Local development, testing, and deployment instructions.
 
@@ -8,7 +8,7 @@
 
 1. **Check APP_VERSION**: Current version is in `assets/js/app.js` line 593:
    ```javascript
-   const APP_VERSION = { major: 4, minor: 0, build: 1 };
+   const APP_VERSION = { major: 4, minor: 0, build: 5 };
    ```
 
 2. **Update version numbers** in these files to match APP_VERSION:

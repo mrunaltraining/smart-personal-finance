@@ -1,6 +1,6 @@
 # SmartFin – Smart Financial Planning
 
-![Version](https://img.shields.io/badge/version-4.0.1-blue.svg)
+![Version](https://img.shields.io/badge/version-4.0.5-blue.svg)
 ![License](https://img.shields.io/badge/license-MIT-green.svg)
 ![Firebase](https://img.shields.io/badge/firebase-enabled-orange.svg)
 ![Platform](https://img.shields.io/badge/platform-web%20%7C%20mobile-lightgrey.svg)
@@ -8,6 +8,10 @@
 ![Architecture](https://img.shields.io/badge/architecture-modular-purple.svg)
 
 A comprehensive dark-themed personal finance app with login/register, cross-device sync via Firebase, and tabbed sections for complete financial management.
+
+**v4.0.5 - Error Handling & Network Status Improvements**: Added network status indicator, enhanced Firebase error handling with specific user notifications, automatic retry logic for network errors, and browser online/offline detection.
+
+**v4.0.2 - Dashboard Enhancements & Bug Fixes**: Enhanced 6-month trend chart, improved spending breakdown, added variable expenses display, and fixed Chart.js canvas errors.
 
 **v4.0.1 - Major Architecture Redesign**: Platform-independent business logic modules, fully tested, ready for web and mobile deployment.
 
@@ -36,6 +40,41 @@ A comprehensive dark-themed personal finance app with login/register, cross-devi
 - 🛡️ **Insurance Management**: Track insurance policies and coverage
 - 🎁 **Gifts & Donations**: Track charitable giving
 - 💸 **Expense Tracking**: Category-wise expense tracking with visual breakdowns
+
+## 🚀 What's New in v4.0.3
+
+### 🔧 Error Handling & Network Status
+- **Network Status Indicator**: Visual indicator in user bar showing Firebase save status
+  - Icon-based display (checkmark, refresh, warning, offline icons)
+  - Compact design with hover-to-show text
+  - Automatic hide after successful save
+- **Enhanced Error Handling**: Specific user notifications for different error types
+  - Quota exceeded: Clear message about reset timing and upgrade options
+  - Network errors: Automatic retry with visual feedback
+  - Permission errors: Re-login guidance
+  - Connection loss: Status indicator shows error state
+- **Browser Detection**: Automatic online/offline detection with status updates
+
+## 🚀 What's New in v4.0.2
+
+### 📊 Dashboard Enhancements
+- **6-Month Trend Chart**: Now displays all 5 categories (Income, Saving, Expenditure, Investment, Liability) with modern styling
+- **Financial Year Overview**: Added Others category to show complete outflow breakdown
+- **This Month Card**: Added Variable Expenses and On-Demand Expense for better budget visibility
+- **Accounts & Net Worth**: Added total balance and total credit limit display
+- **Spending Breakdown**: Shows all 10 expense categories with automatic separator for better organization
+
+### 🐛 Bug Fixes
+- **Chart.js Canvas Error**: Fixed "Canvas is already in use" error by automatically destroying existing charts
+- **Mobile Layout**: Fixed expense page edit/done button alignment on mobile devices
+- **Net Worth Chart**: Updated styling to match modern dashboard appearance with smooth curves
+
+### 🎨 UI/UX Improvements
+- Consistent color coding across all charts and visualizations
+- Better responsive design for mobile, tablet, and desktop
+- Improved visual hierarchy and spacing
+
+---
 
 ## 🚀 What's New in v4.0.1
 

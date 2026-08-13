@@ -597,8 +597,7 @@ function getAppVersion() {
 }
 
 // Log version on load
-console.log(`%c🚀 SmartFin ${getAppVersion()} - Modular Architecture`, 'color: #7c3aed; font-weight: bold; font-size: 14px;');
-console.log('%c✨ New: Platform-independent business logic modules', 'color: #22c55e; font-size: 12px;');
+console.log(`%c🚀 SmartFin ${getAppVersion()} loaded`, 'color: #7c3aed; font-weight: bold; font-size: 14px;');
 console.log('If you see errors about "saveData is not defined", please hard refresh (Ctrl+Shift+R)');
 console.log('Current APP_VERSION:', APP_VERSION);
 
@@ -645,7 +644,9 @@ const TAB_FIELDS = {
     expenseTracking: [
         { id: "category",  label: "Category",           type: "select", options: ["Food & Dining", "Transportation", "Shopping", "Entertainment", "Healthcare", "Education", "Personal Care", "Home & Utilities", "Travel", "Gifts & Donations", "Others"], required: true },
         { id: "amount",    label: "Amount (₹)",         type: "number", placeholder: "0", required: true },
-        { id: "date",      label: "Date",               type: "date",   placeholder: "", required: true }
+        { id: "date",      label: "Date",               type: "date",   placeholder: "", required: true },
+        { id: "merchant",  label: "Merchant",           type: "text",   placeholder: "e.g. Amazon, Swiggy" },
+        { id: "description", label: "Description",        type: "text",   placeholder: "Optional notes" }
     ],
     financialGoal: [
         { id: "name",      label: "Goal Name",           type: "text",   placeholder: "e.g. Emergency Fund", required: true },
@@ -704,8 +705,7 @@ const TAB_FIELDS = {
         { id: "name",      label: "Gift Type",           type: "select",   options: ["Cash", "Gold", "Silver", "Gift"], required: true },
         { id: "transactionType", label: "Transaction Type", type: "select", options: ["Given", "Taken"] },
         { id: "category",  label: "Category",            type: "select", options: ["Fixed Every Year", "On Demand"] },
-        { id: "month",     label: "Month",                type: "select", options: ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"] },
-        { id: "relativeName", label: "Relative Name",    type: "text",   placeholder: "e.g. John Doe" },
+        { id: "relativeName", label: "Relative Name",    type: "text",   placeholder: "e.g. John Doe", required: true },
         { id: "occasion",  label: "Occasion",             type: "text",   placeholder: "e.g. Birthday, Wedding, Anniversary" },
         { id: "amount",    label: "Amount (₹)",          type: "number", placeholder: "0" },
         { id: "date",      label: "Gift Date",            type: "date",   placeholder: "" },
@@ -2193,6 +2193,7 @@ function startListening() {
             logger.error('Firestore listener error', { code: err.code, message: err.message });
             if (err.code === 'unavailable' || err.code === 'permission-denied') {
                 showAlert('Connection to database lost. Please check your internet connection and refresh the page.', { variant: 'error' });
+                showNetworkStatus('error');
             }
         });
 }
@@ -2221,15 +2222,26 @@ function doSave() {
         .then(() => {
             console.log('Saved successfully');
             logger.info('Data saved successfully', { userId: currentUser.uid });
+            showNetworkStatus('online');
+            // Hide status after 2 seconds
+            setTimeout(() => {
+                hideNetworkStatus();
+            }, 2000);
         })
-        .catch(err => { 
-            localWritePending = false; 
+        .catch(err => {
+            localWritePending = false;
             logger.error('Save failed', { error: err.message, code: err.code });
             console.error("Save failed:", err);
-            // Show user-friendly error message
-            if (err.code === 'unavailable' || err.code === 'failed-precondition') {
+            
+            // Quota exceeded - specific handling
+            if (err.code === 'resource-exhausted') {
+                showAlert('Firebase quota exceeded. Data will be saved when quota resets (daily at midnight Pacific time) or upgrade your Firebase plan.', { variant: 'warning' });
+            }
+            // Network errors - retry with user notification
+            else if (err.code === 'unavailable' || err.code === 'failed-precondition') {
                 logger.warning('Network issue detected, retrying save');
                 console.warn("Network issue detected. Data will be retried automatically.");
+                showNetworkStatus('retrying');
                 // Retry after 2 seconds
                 setTimeout(() => {
                     if (currentUser) {
@@ -2237,11 +2249,98 @@ function doSave() {
                         scheduleSave();
                     }
                 }, SAVE_RETRY_DELAY_MS);
-            } else {
+            }
+            // Permission denied
+            else if (err.code === 'permission-denied') {
+                showAlert('Permission denied. You may need to re-login or check your account access.', { variant: 'error' });
+                showNetworkStatus('error');
+            }
+            // Other errors
+            else {
                 showAlert('Failed to save data. Please check your internet connection and try again.', { variant: 'error' });
+                showNetworkStatus('error');
             }
         });
 }
+
+// ── Network Status Indicator Functions ──────────────────────────────────
+let networkStatusTimeout = null;
+
+function showNetworkStatus(status) {
+    const networkStatusEl = document.getElementById('networkStatus');
+    if (!networkStatusEl) return;
+    
+    // Clear existing timeout
+    if (networkStatusTimeout) {
+        clearTimeout(networkStatusTimeout);
+        networkStatusTimeout = null;
+    }
+    
+    // Remove all status classes
+    networkStatusEl.classList.remove('retrying', 'quota-exceeded', 'error', 'online', 'offline');
+    
+    // Add new status class
+    networkStatusEl.classList.add(status);
+    
+    // Set text and title based on status
+    const textEl = networkStatusEl.querySelector('.network-status-text');
+    if (textEl) {
+        switch (status) {
+            case 'retrying':
+                textEl.textContent = 'Retrying save...';
+                networkStatusEl.title = 'Retrying save...';
+                break;
+            case 'quota-exceeded':
+                textEl.textContent = 'Quota exceeded';
+                networkStatusEl.title = 'Quota exceeded';
+                break;
+            case 'error':
+                textEl.textContent = 'Save failed';
+                networkStatusEl.title = 'Save failed';
+                break;
+            case 'online':
+                textEl.textContent = 'Saved';
+                networkStatusEl.title = 'Saved';
+                break;
+            case 'offline':
+                textEl.textContent = 'Offline';
+                networkStatusEl.title = 'Offline';
+                break;
+            default:
+                textEl.textContent = '';
+                networkStatusEl.title = '';
+        }
+    }
+    
+    // Show the indicator
+    networkStatusEl.hidden = false;
+}
+
+function hideNetworkStatus() {
+    const networkStatusEl = document.getElementById('networkStatus');
+    if (!networkStatusEl) return;
+    
+    networkStatusEl.hidden = true;
+    networkStatusEl.classList.remove('retrying', 'quota-exceeded', 'error', 'online', 'offline');
+}
+
+// ── Browser Online/Offline Detection ──────────────────────────────────
+window.addEventListener('online', () => {
+    console.log('Browser is online');
+    showNetworkStatus('online');
+    setTimeout(() => {
+        hideNetworkStatus();
+    }, 2000);
+    // Retry any pending save
+    if (localWritePending) {
+        scheduleSave();
+    }
+});
+
+window.addEventListener('offline', () => {
+    console.log('Browser is offline');
+    showNetworkStatus('offline');
+});
 
 function normalizeAppDataModel() {
     if (!appData.tabData) appData.tabData = {};
@@ -2488,7 +2587,7 @@ function buildSortFilterToolbar(tabId, hideFields = []) {
     </div>`;
 }
 
-function applyListSortFilter(tabId, entries) {
+function applyListSortFilter(tabId, entries, skipFilters = false) {
     const state = listSortFilter[tabId];
     const fields = TAB_FIELDS[tabId] || [];
     let result = [...entries];
@@ -2506,10 +2605,12 @@ function applyListSortFilter(tabId, entries) {
         });
     }
 
-    // Apply dropdown filters
-    Object.entries(state.filters).forEach(([fieldId, val]) => {
-        if (val) result = result.filter(e => (e[fieldId] || "") === val);
-    });
+    // Apply dropdown filters (skip if requested for custom filtering)
+    if (!skipFilters) {
+        Object.entries(state.filters).forEach(([fieldId, val]) => {
+            if (val) result = result.filter(e => (e[fieldId] || "") === val);
+        });
+    }
 
     // Apply sorting
     if (state.sortBy) {
@@ -2661,6 +2762,21 @@ function beginEditEntry(tabId, id) {
     if (!entry) return;
     editingEntryIds[tabId] = id;
     const cfg = sectionConfig[tabId];
+    
+    // Clear dynamic fields to force re-render with new values
+    const dynamicFieldsMap = {
+        financialGoal: goalDynamicFields,
+        inflow: inflowDynamicFields,
+        outflow: outflowDynamicFields,
+        cards: cardDynamicFields,
+        netWorth: netWorthDynamicFields,
+        taxPlan: taxPlanDynamicFields,
+        gifts: giftsDynamicFields,
+        insurance: insuranceDynamicFields,
+    };
+    const dynamicFields = dynamicFieldsMap[tabId];
+    if (dynamicFields) dynamicFields.innerHTML = "";
+    
     cfg.render();
     populateSectionForm(tabId, entry);
     cfg.form()?.scrollIntoView({ behavior: "smooth", block: "start" });
@@ -2709,13 +2825,21 @@ function handleTableAction(tabId, e) {
 function normalizeGoalStatus(goal) {
     const needed = Number(goal.amountNeeded || 0);
     const accumulated = Number(goal.amountAccumulated || 0);
-    if (needed > 0 && accumulated >= needed) return "Achieved";
-    if (goal.targetDate) {
-        const target = new Date(goal.targetDate);
-        target.setHours(23, 59, 59, 999);
-        if (target < new Date()) return "Missed";
+    const targetDate = goal.targetDate ? new Date(`${goal.targetDate}T00:00:00`) : null;
+    const now = new Date();
+    const datePassed = targetDate && targetDate < now;
+
+    if (!datePassed) {
+        // Target date not passed
+        if (accumulated === 0) return "Planned";
+        if (accumulated < needed) return "Ongoing";
+        return "Achieved";
+    } else {
+        // Target date passed
+        if (accumulated === 0) return "Missed";
+        if (accumulated < needed) return "Missed";
+        return "Covered";
     }
-    return accumulated > 0 ? "Ongoing" : "Planned";
 }
 
 function monthsBetween(startDate, endDate = new Date()) {
@@ -2932,8 +3056,8 @@ function buildMonthlyAutoValues(monthKey) {
     return { values, breakdown };
 }
 
-function applyMonthlyAutoValues(monthKey, monthData) {
-    logger.info('Applying monthly auto values', { monthKey });
+function applyMonthlyAutoValues(monthKey, monthData, forceApply = false) {
+    logger.info('Applying monthly auto values', { monthKey, forceApply });
     
     monthData.autoLinkedFields = monthData.autoLinkedFields || {};
     monthData.autoLinkedBreakdown = monthData.autoLinkedBreakdown || {};
@@ -2941,7 +3065,7 @@ function applyMonthlyAutoValues(monthKey, monthData) {
     // Preserve Current Month CC Spending value from Quick Update before clearing
     const preservedCCValue = Number(monthData.outflow?.midMonthCCOutstanding || 0);
     
-    if (!isCurrentOrFutureMonth(monthKey)) {
+    if (!forceApply && !isCurrentOrFutureMonth(monthKey)) {
         logger.info('Skipping auto values for past month', { monthKey });
         return monthData.autoLinkedFields;
     }
@@ -3157,6 +3281,14 @@ function renderMonthlyBudget() {
         investing: {},
         monthEndBalance: 0
     };
+    
+    // Ensure _transferDone is reset for new months (only for current/future months)
+    const today = new Date();
+    const isCurrentOrFutureMonth = monthKey >= getMonthKey(today);
+    if (isCurrentOrFutureMonth && monthData._transferDone === undefined) {
+        monthData._transferDone = 0;
+    }
+    
     appData.monthlyBudgetData[monthKey] = monthData;
     const autoLinkedFields = applyMonthlyAutoValues(monthKey, monthData);
 
@@ -3525,6 +3657,8 @@ function renderExpenseList(expenses) {
                             <div class="expense-item-details">
                                 <span class="expense-item-date">${new Date(exp.date).toLocaleDateString('en-IN', { month: 'short', day: 'numeric' })}</span>
                                 <span class="expense-item-category-label">${esc(category)}</span>
+                                ${exp.merchant ? `<span class="expense-item-merchant">${esc(exp.merchant)}</span>` : ''}
+                                ${exp.description ? `<span class="expense-item-description">${esc(exp.description)}</span>` : ''}
                             </div>
                             <span class="expense-item-amount">${formatMoney(exp.amount)}</span>
                         </div>
@@ -3556,7 +3690,7 @@ function getExpenseCategoryIcon(category) {
 
 function renderExpenseTable(expenses) {
     if (expenses.length === 0) {
-        expenseTableBody.innerHTML = '<tr><td colspan="6" class="empty-state">No expenses yet. Add your first expense above.</td></tr>';
+        expenseTableBody.innerHTML = '<tr><td colspan="8" class="empty-state">No expenses yet. Add your first expense above.</td></tr>';
         return;
     }
     
@@ -3569,6 +3703,8 @@ function renderExpenseTable(expenses) {
             <td><span class="table-category-cell"><span class="expense-category-icon" aria-hidden="true">${iconSvg(getExpenseCategoryIcon(exp.category), 'expense-category-svg')}</span>${esc(exp.category)}</span></td>
             <td>${formatMoney(exp.amount)}</td>
             <td><span class="table-payment-method" title="${exp.paymentMethod || 'Not specified'}">${exp.paymentMethod || 'UPI'}</span></td>
+            <td>${exp.merchant ? esc(exp.merchant) : '-'}</td>
+            <td>${exp.description ? esc(exp.description) : '-'}</td>
             <td>
                 <button onclick="editExpense('${exp.id}')" class="btn-edit" title="Edit expense">Edit</button>
                 <button onclick="deleteExpense('${exp.id}')" class="btn-delete" title="Delete expense">Delete</button>
@@ -3604,10 +3740,20 @@ async function renderExpensePieChart(expenses, totalExpenses, budgetVarExp) {
     if (difference > 0) {
         categoryTotals['Unidentified'] = difference;
     }
-    
+
+    // Sort categories: Others and Unidentified at the end, others by amount descending
+    const sortedCategories = Object.entries(categoryTotals).sort((a, b) => {
+        const aIsSpecial = a[0] === 'Others' || a[0] === 'Unidentified';
+        const bIsSpecial = b[0] === 'Others' || b[0] === 'Unidentified';
+        if (aIsSpecial && !bIsSpecial) return 1;
+        if (!aIsSpecial && bIsSpecial) return -1;
+        if (aIsSpecial && bIsSpecial) return a[0].localeCompare(b[0]);
+        return b[1] - a[1]; // Sort by amount descending
+    });
+
     // Prepare chart data
-    const labels = Object.keys(categoryTotals);
-    const data = Object.values(categoryTotals);
+    const labels = sortedCategories.map(entry => entry[0]);
+    const data = sortedCategories.map(entry => entry[1]);
     const colors = [
         '#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6',
         '#ec4899', '#14b8a6', '#f97316', '#06b6d4', '#84cc16', '#6366f1'
@@ -3704,6 +3850,7 @@ if (expenseForm) {
         const amount = document.getElementById('expenseAmount').value;
         const date = document.getElementById('expenseDate').value;
         const paymentMethod = document.getElementById('expensePaymentMethod')?.value || 'UPI';
+        const merchant = document.getElementById('expenseMerchant')?.value || '';
         const description = document.getElementById('expenseDescription')?.value || '';
         
         if (!category || !amount || !date) {
@@ -3720,6 +3867,7 @@ if (expenseForm) {
             amount: Number(amount),
             date,
             paymentMethod,
+            merchant,
             description,
             createdAt: new Date().toISOString()
         };
@@ -3748,13 +3896,18 @@ if (expenseForm) {
 
 // CSV Import functionality
 window.downloadExpenseTemplate = function() {
-    const csvContent = `Date,Category,Amount,Payment Method
-2024-01-15,Food & Dining,500,UPI
-2024-01-16,Transportation,200,Debit Card
-2024-01-17,Shopping,1500,Credit Card
-2024-01-18,Entertainment,300,Cash
-2024-01-19,Healthcare,800,Bank Transfer`;
-    
+    const csvContent = `Date,Category,Amount,Payment Method,TransactionType,Merchant,Description
+2024-01-15,Food & Dining,500,UPI,Debit,Swiggy,Lunch
+2024-01-16,Transportation,200,Debit Card,Debit,Uber,Office commute
+2024-01-17,Shopping,1500,Credit Card,Debit,Amazon,Electronics
+2024-01-18,Entertainment,300,Cash,Debit,Netflix,Monthly subscription
+2024-01-19,Healthcare,800,Bank Transfer,Debit,Hospital,Checkup
+2024-01-20,Education,5000,UPI,Debit,College,Tuition fee
+2024-01-21,Personal Care,500,Cash,Debit,Salon,Haircut
+2024-01-22,Home & Utilities,2000,Bank Transfer,Debit,Electricity Board,Monthly bill
+2024-01-23,Travel,5000,Credit Card,Debit,MakeMyTrip,Flight tickets
+2024-01-24,Gifts & Donations,1000,UPI,Debit,Charity,Donation`;
+
     const element = document.createElement('a');
     element.setAttribute('href', 'data:text/csv;charset=utf-8,' + encodeURIComponent(csvContent));
     element.setAttribute('download', 'expense_template.csv');
@@ -3762,7 +3915,7 @@ window.downloadExpenseTemplate = function() {
     document.body.appendChild(element);
     element.click();
     document.body.removeChild(element);
-    
+
     showToast('Template downloaded! Fill it with your expenses and upload.', { variant: 'success' });
 };
 
@@ -3793,7 +3946,10 @@ if (expenseImportBtn && expenseFileImport) {
             const categoryIdx = headers.findIndex(h => h.includes('category'));
             const amountIdx = headers.findIndex(h => h.includes('amount'));
             const paymentIdx = headers.findIndex(h => h.includes('payment'));
-            
+            const transactionTypeIdx = headers.findIndex(h => h.includes('transaction'));
+            const merchantIdx = headers.findIndex(h => h.includes('merchant'));
+            const descriptionIdx = headers.findIndex(h => h.includes('description'));
+
             if (dateIdx === -1 || categoryIdx === -1 || amountIdx === -1) {
                 showToast('CSV must have Date, Category, and Amount columns', { variant: 'error' });
                 return;
@@ -3803,6 +3959,10 @@ if (expenseImportBtn && expenseFileImport) {
             const monthData = getExpenseMonthData(monthKey);
             let imported = 0;
             let errors = [];
+            
+            // Calculate first and last day of current month for validation
+            const firstDay = new Date(currentExpenseMonth.getFullYear(), currentExpenseMonth.getMonth(), 1);
+            const lastDay = new Date(currentExpenseMonth.getFullYear(), currentExpenseMonth.getMonth() + 1, 0);
             
             const progressDiv = document.getElementById('importProgress');
             const importedCountSpan = document.getElementById('importedCount');
@@ -3821,18 +3981,34 @@ if (expenseImportBtn && expenseFileImport) {
                         continue;
                     }
                     
+                    // Validate date is within current month
+                    const dateStr = date.toISOString().split('T')[0];
+                    if (date < firstDay || date > lastDay) {
+                        errors.push(`Row ${i + 1}: Date ${dateStr} is not in current month (${firstDay.toISOString().split('T')[0]} to ${lastDay.toISOString().split('T')[0]})`);
+                        continue;
+                    }
+                    
                     const amount = Number(row[amountIdx]);
                     if (isNaN(amount) || amount <= 0) {
                         errors.push(`Row ${i + 1}: Invalid amount`);
                         continue;
                     }
-                    
+
+                    // Check transaction type - only import if Debit
+                    const transactionType = transactionTypeIdx >= 0 ? (row[transactionTypeIdx] || '').toLowerCase() : 'debit';
+                    if (transactionType !== 'debit') {
+                        errors.push(`Row ${i + 1}: Skipped - Transaction type is '${row[transactionTypeIdx] || 'Unknown'}', only 'Debit' transactions are imported`);
+                        continue;
+                    }
+
                     const expense = {
                         id: Date.now().toString() + '_' + i,
                         date: date.toISOString().split('T')[0],
                         category: row[categoryIdx] || 'Others',
                         amount: amount,
                         paymentMethod: (paymentIdx >= 0 ? row[paymentIdx] : 'UPI') || 'UPI',
+                        merchant: (merchantIdx >= 0 ? row[merchantIdx] : '') || '',
+                        description: (descriptionIdx >= 0 ? row[descriptionIdx] : '') || '',
                         createdAt: new Date().toISOString(),
                         importedFromCSV: true
                     };
@@ -3868,6 +4044,17 @@ if (expenseImportBtn && expenseFileImport) {
             showToast('Error reading file: ' + error.message, { variant: 'error' });
         }
     });
+
+    // Clear file button
+    const expenseFileClearBtn = document.getElementById('expenseFileClearBtn');
+    if (expenseFileClearBtn) {
+        expenseFileClearBtn.addEventListener('click', () => {
+            const expenseFileImport = document.getElementById('expenseFileImport');
+            if (expenseFileImport) {
+                expenseFileImport.value = '';
+            }
+        });
+    }
 }
 
 // Month navigation
@@ -3962,6 +4149,16 @@ window.editExpense = function(id) {
         showToast('Date reset to first day of current month (original date was in different month)', { variant: 'info' });
     }
     
+    // Populate merchant and description fields
+    const merchantInput = document.getElementById('expenseMerchant');
+    if (merchantInput) {
+        merchantInput.value = expense.merchant || '';
+    }
+    const descriptionInput = document.getElementById('expenseDescription');
+    if (descriptionInput) {
+        descriptionInput.value = expense.description || '';
+    }
+    
     // Remove the old expense (will be re-added on submit)
     monthData.expenses = monthData.expenses.filter(e => e.id !== id);
     scheduleSave();
@@ -4003,8 +4200,10 @@ function renderFinancialGoal() {
         const goalSummary = document.querySelector('.goal-summary');
         if (goalSummary) goalSummary.hidden = true;
         
-        // Render form fields
-        renderGoalDynamicFields();
+        // Only render form fields if they don't exist yet (prevents losing user input during re-renders)
+        if (!goalDynamicFields?.hasChildNodes()) {
+            renderGoalDynamicFields();
+        }
         updateSectionSubmitButton("financialGoal");
         
         // Render table
@@ -4075,6 +4274,9 @@ function renderGoalTable(entries) {
         th.textContent = f.label;
         tr.appendChild(th);
     });
+    const statusTh = document.createElement("th");
+    statusTh.textContent = "Status";
+    tr.appendChild(statusTh);
     const actionTh = document.createElement("th");
     actionTh.textContent = "";
     tr.appendChild(actionTh);
@@ -4095,6 +4297,17 @@ function renderGoalTable(entries) {
             }
             row.appendChild(td);
         });
+        const statusTd = document.createElement("td");
+        const status = normalizeGoalStatus(item);
+        const statusColors = {
+            "Planned": "#6b7280",
+            "Ongoing": "#3b82f6",
+            "Achieved": "#10b981",
+            "Covered": "#10b981",
+            "Missed": "#ef4444"
+        };
+        statusTd.innerHTML = `<span style="color:${statusColors[status] || "#6b7280"};font-weight:500;">${status}</span>`;
+        row.appendChild(statusTd);
         const actionTd = document.createElement("td");
         actionTd.innerHTML = `${renderRowActions(item.id)}`;
         row.appendChild(actionTd);
@@ -4184,7 +4397,10 @@ function renderInflow() {
     if (isInflowEditMode) {
         if (inflowTabPreview) inflowTabPreview.hidden = true;
         if (inflowTabEdit) inflowTabEdit.hidden = false;
-        renderInflowDynamicFields();
+        // Only render form fields if they don't exist yet (prevents losing user input during re-renders)
+        if (!inflowDynamicFields?.hasChildNodes()) {
+            renderInflowDynamicFields();
+        }
         updateSectionSubmitButton("inflow");
         renderInflowTable(entries);
     } else {
@@ -4484,7 +4700,10 @@ function renderOutflow() {
     if (isOutflowEditMode) {
         if (outflowTabPreview) outflowTabPreview.hidden = true;
         if (outflowTabEdit) outflowTabEdit.hidden = false;
-        renderOutflowDynamicFields();
+        // Only render form fields if they don't exist yet (prevents losing user input during re-renders)
+        if (!outflowDynamicFields?.hasChildNodes()) {
+            renderOutflowDynamicFields();
+        }
         updateSectionSubmitButton("outflow");
         renderOutflowTable(entries);
     } else {
@@ -4703,8 +4922,10 @@ function renderCards() {
         cardPreview.hidden = true;
         cardEdit.hidden = false;
         
-        // Render form fields
-        renderCardDynamicFields();
+        // Only render form fields if they don't exist yet (prevents losing user input during re-renders)
+        if (!cardDynamicFields?.hasChildNodes()) {
+            renderCardDynamicFields();
+        }
         updateSectionSubmitButton("cards");
         
         // Render table
@@ -5000,8 +5221,10 @@ function renderNetWorth() {
         netWorthPreview.hidden = true;
         netWorthEdit.hidden = false;
 
-        // Render form fields
-        renderNetWorthDynamicFields();
+        // Only render form fields if they don't exist yet (prevents losing user input during re-renders)
+        if (!netWorthDynamicFields?.hasChildNodes()) {
+            renderNetWorthDynamicFields();
+        }
         updateSectionSubmitButton("netWorth");
 
         // Render table (manual entries only)
@@ -5257,7 +5480,7 @@ function renderNetWorthProjectionChart(entries) {
     document.getElementById("projectedNetWorth").textContent = formatMoney(finalProjectedNetWorth);
     document.getElementById("inflationAdjustedNetWorth").textContent = formatMoney(finalInflationAdjusted);
     
-    // Create chart
+    // Create chart with modern styling matching dashboard 6-Month Trend
     const ctx = netWorthProjectionChartCanvas.getContext("2d");
     netWorthProjectionChart = new Chart(ctx, {
         type: "line",
@@ -5268,23 +5491,23 @@ function renderNetWorthProjectionChart(entries) {
                     label: "Projected Net Worth",
                     data: projectedValues,
                     borderColor: "#3b82f6",
-                    backgroundColor: "rgba(59, 130, 246, 0.1)",
-                    fill: true,
-                    tension: 0.4,
-                    borderWidth: 2,
-                    pointRadius: 0,
-                    pointHoverRadius: 4
+                    backgroundColor: "#3b82f622",
+                    fill: false,
+                    tension: 0.35,
+                    borderWidth: 3,
+                    pointRadius: 3,
+                    pointHoverRadius: 5
                 },
                 {
                     label: "Inflation-Adjusted",
                     data: inflationAdjustedValues,
                     borderColor: COLOR_NEGATIVE,
-                    backgroundColor: "rgba(239, 68, 68, 0.1)",
-                    fill: true,
-                    tension: 0.4,
-                    borderWidth: 2,
-                    pointRadius: 0,
-                    pointHoverRadius: 4
+                    backgroundColor: "#ef444422",
+                    fill: false,
+                    tension: 0.35,
+                    borderWidth: 3,
+                    pointRadius: 3,
+                    pointHoverRadius: 5
                 }
             ]
         },
@@ -5294,17 +5517,40 @@ function renderNetWorthProjectionChart(entries) {
             plugins: {
                 legend: {
                     display: true,
-                    position: window.innerWidth < 640 ? 'bottom' : 'top',
+                    position: 'bottom',
                     labels: { color: getChartThemeColors().text, boxWidth: 12, padding: 14 }
-                }
+                },
+                tooltip: {
+                    callbacks: {
+                        label: function(context) {
+                            const label = context.dataset.label || '';
+                            const value = context.parsed.y;
+                            return `${label}: ${formatMoney(value)}`;
+                        }
+                    }
+                },
+                datalabels: { display: false }
             },
             scales: {
                 x: {
+                    stacked: false,
                     ticks: { color: getChartThemeColors().text },
                     grid: { color: getChartThemeColors().grid }
                 },
                 y: {
-                    ticks: { color: getChartThemeColors().text },
+                    beginAtZero: true,
+                    ticks: {
+                        color: getChartThemeColors().text,
+                        callback: function(value) {
+                            if (value >= 10000000) {
+                                // Show in Crores (1 Cr = 10,000,000)
+                                return '₹' + (value / 10000000).toFixed(1) + 'Cr';
+                            } else {
+                                // Show in Lakhs (1 L = 100,000)
+                                return '₹' + (value / 100000).toFixed(1) + 'L';
+                            }
+                        }
+                    },
                     grid: { color: getChartThemeColors().grid }
                 }
             }
@@ -5515,8 +5761,10 @@ function renderTaxPlan() {
             // Populate house property form
             populateHousePropertyForm();
             
-            // Render form fields
-            renderTaxPlanDynamicFields();
+            // Only render form fields if they don't exist yet (prevents losing user input during re-renders)
+            if (!taxPlanDynamicFields?.hasChildNodes()) {
+                renderTaxPlanDynamicFields();
+            }
             updateSectionSubmitButton("taxPlan");
             
             // Render table
@@ -6104,27 +6352,29 @@ function calculateIncomeFromHouseProperty(hp) {
 
 function renderGifts() {
     const entries = activeEntries();
-    
+
     // Update toggle button text
     setToggleButtonIconText(toggleGiftsEdit, isGiftsEditMode, 'Edit');
-    
+
     // Hide gifts summary in edit mode
     const giftsSummary = document.querySelector('.gifts-summary');
     if (giftsSummary) giftsSummary.hidden = isGiftsEditMode;
-    
+
     // Hide monthly chart in edit mode
     const giftsMonthlyChartContainer = document.getElementById('giftsMonthlyChartContainer');
     if (giftsMonthlyChartContainer) giftsMonthlyChartContainer.hidden = isGiftsEditMode;
-    
+
     // Show/hide preview/edit modes
     if (isGiftsEditMode) {
         giftsPreview.hidden = true;
         giftsEdit.hidden = false;
-        
-        // Render form fields
-        renderGiftsDynamicFields();
+
+        // Only render form fields if they don't exist yet (prevents losing user input during re-renders)
+        if (!giftsDynamicFields.hasChildNodes()) {
+            renderGiftsDynamicFields();
+        }
         updateSectionSubmitButton("gifts");
-        
+
         // Render table
         renderGiftsTable(entries);
     } else {
@@ -6207,15 +6457,15 @@ function renderGiftsMonthlyChart(entries) {
 function renderGiftsDynamicFields() {
     giftsDynamicFields.innerHTML = "";
     const fields = TAB_FIELDS.gifts || TAB_FIELDS.monthlyBudget;
-    
+
     fields.forEach(field => {
         const div = document.createElement("div");
         div.className = "field";
-        
+
         const label = document.createElement("label");
         label.textContent = field.label;
         div.appendChild(label);
-        
+
         let input;
         if (field.type === "select") {
             input = document.createElement("select");
@@ -6240,7 +6490,7 @@ function renderGiftsDynamicFields() {
             input.value = getDefaultDateValue();
         }
         div.appendChild(input);
-        
+
         giftsDynamicFields.appendChild(div);
     });
 }
@@ -6329,12 +6579,66 @@ function calculateGiftsSummary(entries) {
 
 function renderGiftsPreviewCards(entries) {
     const toolbarEl = document.getElementById("giftsSortFilter");
+    const monthOptions = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+
     // Only rebuild toolbar if it's empty or doesn't exist
     if (toolbarEl && !toolbarEl.querySelector('.list-toolbar')) {
-        toolbarEl.innerHTML = buildSortFilterToolbar("gifts");
+        // Build custom toolbar with month filter
+        const currentMonthFilter = listSortFilter.gifts.filters.month || "";
+        const monthFilterHtml = monthOptions.map(m => `<option value="${m}"${currentMonthFilter === m ? " selected" : ""}>${m}</option>`).join("");
+
+        toolbarEl.innerHTML = `
+            <div class="list-toolbar">
+                <div class="toolbar-search-item">
+                    <input type="text" class="toolbar-search-input" data-tab="gifts" placeholder="Search all fields..." value="${esc(listSortFilter.gifts.searchText || "")}">
+                </div>
+                <div class="list-toolbar-sort">
+                    <label>Sort by</label>
+                    <select class="toolbar-sort-select" data-tab="gifts">
+                        <option value="">None</option>
+                        <option value="date"${listSortFilter.gifts.sortBy === "date" ? " selected" : ""}>Date</option>
+                        <option value="amount"${listSortFilter.gifts.sortBy === "amount" ? " selected" : ""}>Amount</option>
+                        <option value="transactionType"${listSortFilter.gifts.sortBy === "transactionType" ? " selected" : ""}>Transaction Type</option>
+                        <option value="category"${listSortFilter.gifts.sortBy === "category" ? " selected" : ""}>Category</option>
+                    </select>
+                    <button type="button" class="toolbar-sort-dir" data-tab="gifts">${listSortFilter.gifts.sortDir === "asc" ? "↑ Asc" : "↓ Desc"}</button>
+                </div>
+                <div class="list-toolbar-divider"></div>
+                <div class="list-toolbar-filters">
+                    <div class="toolbar-filter-item">
+                        <label>Month</label>
+                        <select class="toolbar-filter-select" data-tab="gifts" data-field="month">
+                            <option value="">All</option>
+                            ${monthFilterHtml}
+                        </select>
+                    </div>
+                </div>
+            </div>
+        `;
     }
 
-    const displayEntries = applyListSortFilter("gifts", entries);
+    // Apply custom month filter based on date field
+    let filteredEntries = [...entries];
+    const monthFilter = listSortFilter.gifts.filters.month;
+    if (monthFilter) {
+        const currentDate = new Date();
+        const fyStartYear = currentDate.getMonth() < 3 ? currentDate.getFullYear() - 1 : currentDate.getFullYear();
+        const fyStart = new Date(fyStartYear, 3, 1);
+        const fyEnd = new Date(fyStartYear + 1, 2, 31);
+
+        const targetMonthIndex = monthOptions.indexOf(monthFilter);
+
+        filteredEntries = filteredEntries.filter(gift => {
+            if (!gift.date) return false;
+            const giftDate = new Date(gift.date);
+            if (isNaN(giftDate.getTime())) return false;
+            if (giftDate < fyStart || giftDate > fyEnd) return false;
+            return giftDate.getMonth() === targetMonthIndex;
+        });
+    }
+
+    // Apply sort/filter (skip built-in filters since we do custom month filtering)
+    const displayEntries = applyListSortFilter("gifts", filteredEntries, true);
     giftsList.innerHTML = "";
 
     if (displayEntries.length === 0) {
@@ -6370,6 +6674,7 @@ function renderGiftsPreviewCards(entries) {
                 <div class="gift-item-title">${esc(gift.name)}</div>
                 <div class="gift-item-details">
                     <span class="gift-item-category ${categoryClass}">${esc(gift.category || "On Demand")}</span>
+                    <span class="gift-item-transaction-type">${esc(gift.transactionType || "—")}</span><br>
                     ${esc(gift.relativeName || "—")}<br>
                     Occasion: ${esc(gift.occasion || "—")}${dateDisplay ? ` · ${dateDisplay}` : ""}<br>
                     ${gift.details ? `Details: ${esc(gift.details)}` : ""}
@@ -6466,7 +6771,10 @@ function renderInsurance() {
     if (isInsuranceEditMode) {
         if (insuranceTabPreview) insuranceTabPreview.hidden = true;
         if (insuranceTabEdit) insuranceTabEdit.hidden = false;
-        renderInsuranceDynamicFields();
+        // Only render form fields if they don't exist yet (prevents losing user input during re-renders)
+        if (!insuranceDynamicFields?.hasChildNodes()) {
+            renderInsuranceDynamicFields();
+        }
         updateSectionSubmitButton("insurance");
         renderInsuranceTable(entries);
     } else {
@@ -6762,8 +7070,10 @@ function calculateAnnualSummary() {
             const storedData = monthlyBudgetData[monthKey];
             if (!storedData) return;
             const monthData = { ...storedData, inflow: { ...(storedData.inflow || {}) }, outflow: { ...(storedData.outflow || {}) }, investing: { ...(storedData.investing || {}) } };
-            // Apply auto-values so loanEMI, insurancePremiums etc. are populated
-            applyMonthlyAutoValues(monthKey, monthData);
+            // Apply auto-values only for current/future months; for closed past months, use stored values as-is
+            if (!storedData._monthClosed) {
+                applyMonthlyAutoValues(monthKey, monthData);
+            }
             const dist = getMonthlyDistribution(monthData);
             Object.keys(totals).forEach(key => { totals[key] += Number(dist[key] || 0); });
             monthDataList.push({ month: monthKey, ...dist });
@@ -6798,8 +7108,6 @@ function calculateAnnualSummary() {
             
             // Calculate budget status for this month
             const storedMd = monthlyBudgetData[month.month] || {};
-            const totalOutflowMonth = month.expenditure + month.saving + month.investment + month.liability + month.insurance + month.other;
-            const budgetDiff = month.income - totalOutflowMonth;
             let budgetStatusHtml = "";
             if (storedMd._closedBudgetStatus) {
                 // Use saved status from when month was closed
@@ -6807,11 +7115,35 @@ function calculateAnnualSummary() {
                 const statusColor = statusType === "positive" ? COLOR_POSITIVE : statusType === "negative" ? COLOR_NEGATIVE : COLOR_WARNING;
                 budgetStatusHtml = `<span class="annual-month-budget-status" style="color:${statusColor};font-weight:600;font-size:0.78rem;">${storedMd._closedBudgetStatus}</span>`;
             } else if (month.income > 0) {
-                // Compute budget status: income vs total outflow
-                if (budgetDiff > 0) {
-                    budgetStatusHtml = `<span class="annual-month-budget-status" style="color:${COLOR_POSITIVE};font-weight:600;font-size:0.78rem;">Under Budget: +${formatMoney(budgetDiff)}</span>`;
-                } else if (budgetDiff < 0) {
-                    budgetStatusHtml = `<span class="annual-month-budget-status" style="color:${COLOR_NEGATIVE};font-weight:600;font-size:0.78rem;">Over Budget: ${formatMoney(Math.abs(budgetDiff))}</span>`;
+                // Use the same budget balance calculation as monthly view
+                // This uses the stored _calculatedBudgetBalance if available, otherwise calculate it
+                let budgetBalance = storedMd._calculatedBudgetBalance;
+                if (budgetBalance === undefined) {
+                    // Calculate budget balance using the same logic as monthly view
+                    const allOutflows = ((appData.tabData || {}).outflow || []);
+                    let fixedMonthlyOutflow = 0;
+                    allOutflows.forEach(e => {
+                        const amount = Number(e.amount || 0);
+                        if (amount <= 0) return;
+                        const freq = e.frequency || "Monthly";
+                        const monthlyAmt = toMonthlyAmount(amount, freq);
+                        fixedMonthlyOutflow += monthlyAmt;
+                    });
+                    // Exclude borrowing from spendable as it's not new income
+                    const borrowing = Number(monthData.inflow?.borrowing || 0);
+                    const inflowWithoutBorrowing = month.income - borrowing;
+                    const spendable = inflowWithoutBorrowing - fixedMonthlyOutflow;
+                    // Calculate actual variable expenditure and CC outstanding
+                    const actualVariableExp = Number(monthData.outflow?.variableExpenditure || 0);
+                    const actualCCOutstanding = Number(monthData.outflow?.creditCardOutstanding || 0) + Number(monthData.outflow?.midMonthCCOutstanding || 0);
+                    const totalOndemand = Number(monthData.investing?.onetimeSaving || 0) + Number(monthData.investing?.onetimeInvestment || 0) + Number(monthData.investing?.ondemandExpenditure || 0) + Number(monthData.investing?.ondemandLiability || 0);
+                    budgetBalance = spendable - (actualVariableExp + actualCCOutstanding + totalOndemand);
+                }
+                
+                if (budgetBalance > 0) {
+                    budgetStatusHtml = `<span class="annual-month-budget-status" style="color:${COLOR_POSITIVE};font-weight:600;font-size:0.78rem;">Under Budget: +${formatMoney(budgetBalance)}</span>`;
+                } else if (budgetBalance < 0) {
+                    budgetStatusHtml = `<span class="annual-month-budget-status" style="color:${COLOR_NEGATIVE};font-weight:600;font-size:0.78rem;">Over Budget: ${formatMoney(Math.abs(budgetBalance))}</span>`;
                 } else {
                     budgetStatusHtml = `<span class="annual-month-budget-status" style="color:${COLOR_WARNING};font-weight:600;font-size:0.78rem;">Balanced</span>`;
                 }
@@ -8695,6 +9027,9 @@ if (btnUpdateCCOutstanding) btnUpdateCCOutstanding.addEventListener("click", () 
 // Financial Goal event bindings
 toggleGoalEdit.addEventListener("click", () => {
     isGoalEditMode = !isGoalEditMode;
+    // Clear dynamic fields when toggling edit mode to ensure fresh render
+    if (goalDynamicFields) goalDynamicFields.innerHTML = "";
+    clearEditing("financialGoal");
     renderFinancialGoal();
 });
 
@@ -8706,6 +9041,9 @@ goalTableBody.addEventListener("click", e => {
 // Inflow event bindings
 if (toggleInflowEdit) toggleInflowEdit.addEventListener("click", () => {
     isInflowEditMode = !isInflowEditMode;
+    // Clear dynamic fields when toggling edit mode to ensure fresh render
+    if (inflowDynamicFields) inflowDynamicFields.innerHTML = "";
+    clearEditing("inflow");
     renderInflow();
 });
 if (inflowForm) inflowForm.addEventListener("submit", addInflowEntry);
@@ -8714,6 +9052,9 @@ if (inflowTableBody) inflowTableBody.addEventListener("click", e => handleTableA
 // Outflow event bindings
 if (toggleOutflowEdit) toggleOutflowEdit.addEventListener("click", () => {
     isOutflowEditMode = !isOutflowEditMode;
+    // Clear dynamic fields when toggling edit mode to ensure fresh render
+    if (outflowDynamicFields) outflowDynamicFields.innerHTML = "";
+    clearEditing("outflow");
     if (isOutflowEditMode && monthlyIncomeInput) {
         // Entering edit mode - populate the field
         monthlyIncomeInput.value = appData.fixedMonthlyIncome || "";
@@ -8733,6 +9074,9 @@ if (outflowTableBody) outflowTableBody.addEventListener("click", e => handleTabl
 // Cards event bindings
 toggleCardEdit.addEventListener("click", () => {
     isCardEditMode = !isCardEditMode;
+    // Clear dynamic fields when toggling edit mode to ensure fresh render
+    if (cardDynamicFields) cardDynamicFields.innerHTML = "";
+    clearEditing("cards");
     renderCards();
 });
 
@@ -8744,6 +9088,9 @@ cardTableBody.addEventListener("click", e => {
 // Net Worth event bindings
 toggleNetWorthEdit.addEventListener("click", () => {
     isNetWorthEditMode = !isNetWorthEditMode;
+    // Clear dynamic fields when toggling edit mode to ensure fresh render
+    if (netWorthDynamicFields) netWorthDynamicFields.innerHTML = "";
+    clearEditing("netWorth");
     renderNetWorth();
 });
 
@@ -8763,6 +9110,9 @@ function initTaxPlanEventListeners() {
                     saveHousePropertyDetailsAuto();
                 }
                 isTaxPlanEditMode = !isTaxPlanEditMode;
+                // Clear dynamic fields when toggling edit mode to ensure fresh render
+                if (taxPlanDynamicFields) taxPlanDynamicFields.innerHTML = "";
+                clearEditing("taxPlan");
                 renderTaxPlan();
             } catch (error) {
                 console.error("Error toggling tax plan edit mode:", error);
@@ -8802,6 +9152,9 @@ function initTaxPlanEventListeners() {
 // Gifts event bindings
 toggleGiftsEdit.addEventListener("click", () => {
     isGiftsEditMode = !isGiftsEditMode;
+    // Clear dynamic fields when toggling edit mode to ensure fresh render
+    if (giftsDynamicFields) giftsDynamicFields.innerHTML = "";
+    clearEditing("gifts");
     renderGifts();
 });
 
@@ -8830,6 +9183,9 @@ emergencyFundForm.addEventListener("submit", (e) => {
 // Insurance event bindings
 if (toggleInsuranceEdit) toggleInsuranceEdit.addEventListener("click", () => {
     isInsuranceEditMode = !isInsuranceEditMode;
+    // Clear dynamic fields when toggling edit mode to ensure fresh render
+    if (insuranceDynamicFields) insuranceDynamicFields.innerHTML = "";
+    clearEditing("insurance");
     if (!isInsuranceEditMode) scheduleSave();
     renderInsurance();
 });

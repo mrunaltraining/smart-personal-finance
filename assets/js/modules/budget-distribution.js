@@ -21,7 +21,9 @@ export function getMonthlyBudgetDistribution(monthData = {}) {
         + Number(monthData.investing?.onetimeSaving || 0);
     const investment = Number(monthData.outflow?.fixedInvestment || 0)
         + Number(monthData.investing?.onetimeInvestment || 0);
-    const other = Math.max(0, outflowTotal - liability - insurance - expenditure - saving - investment);
+    // Include fixedOthers explicitly in the calculation
+    const fixedOthers = Number(monthData.outflow?.fixedOthers || 0);
+    const other = Math.max(0, outflowTotal - liability - insurance - expenditure - saving - investment - fixedOthers) + fixedOthers;
 
-    return { income: inflowTotal, expenditure, saving, investment, liability, insurance, other };
+    return { income: inflowTotal, expenditure, saving, investment, liability, insurance, other, fixedOthers };
 }
