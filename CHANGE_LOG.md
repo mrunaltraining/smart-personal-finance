@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [5.3.0] - 2026-06-20 - Dynamic Notifications & Enhanced Insights
 
+## [v5.3.1] - 2026-08-17 - Build Update
+
+### Changed
+- Bumped build number to 1
+
+
 ### Added
 - **Dynamic Notification System**: Bell icon with live badge counter in header
   - 7 smart triggers: Budget, Goals, Insurance, Expenses, Net Worth, Tax, Gifts
