@@ -36,3 +36,46 @@ will get about ₹1.5–1.6 lakh/month at retirement (age 55). But in today’s 
 If retire at 50 and withdraw immediately → ~₹1.1L/month (₹49K/month today).
 If retire at 50 but wait till 55 to withdraw → ~₹1.75L/month (₹58K/month today).
 If retire at 50 but wait till 60 to withdraw → ~₹2.7L/month (₹77K/month today).
+
+
+
+
+
+
+see if we can modify the fucntion like this
+function normalizeGoalStatus(goal) {
+    const needed = Number(goal.amountNeeded);
+    const accumulated = Number(goal.amountAccumulated || 0);
+
+    const targetDate = goal.targetDate
+        ? new Date(`${goal.targetDate}T23:59:59`)
+        : null;
+
+    const now = new Date();
+    const datePassed = targetDate && targetDate < now;
+
+    if (!datePassed) {
+        if (accumulated === 0) return "Planned";
+        if (accumulated < needed) return "Ongoing";
+        return "Achieved";
+    }
+
+    if (accumulated < needed) return "Missed";
+
+    return "Covered";
+}
+
+mak ethe dates more readable and human friendly for goal list like 15th August 2026 instead of 2040-01-01
+
+see if we can give an option to hide completed ones which will hide the covered ones or garyed out 
+in list view have teh default dvew as group the list by goal type and sorted by status logically 
+
+also see why the gaol type filter is not working properly
+
+remove sort by details ad that doe s not needed 
+
+
+
+under tax paln tab, make this more comprehensive for tax calulation and retirement corpus calulation in future or pension calulation
+let the user give option al inputs here have most common salary bearkdown components 
+Salary Details (Optional - for HRA exemption)
