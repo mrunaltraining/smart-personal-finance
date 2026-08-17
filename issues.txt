@@ -6,3 +6,33 @@ make sure the /Users/mrunal/Documents/MyWork/mrunaldevcontainer/mrunalworkspace/
 so taht the tag will be automaticall updated in github view as it renders from readme.md
 
 see if import/export works fine or not if all data structures of teh app are taken care or not we should have some uts to test import export using the sampledata.json file we have under test directory
+
+
+on Spending breakdown section , make this a disclaimer at bottom of section : Recorded transactions only
+
+on dashboard tab, Goals & Investment section folloing sectionis duplicated
+
+1 ongoing · 4 planned · 0 achieved · 0 missed · 5 covered · 6 short-term · 4 mid-term · 5 long-term
+
+remove the 2nd instance from the bottom of teh Goals & Investment section and add some quick insights about investments instead like value projected for next 5 yr 10 yr 
+
+In dashboard page, add this kind of summerized/optimized ß insights generated for retirment planning as well under Insights & Recommendations section
+based on existing investment values / recurring values underinvestment tab
+Want to Retire at Age 50 (official Retiremnt Age is 60)
+Get pension for 20 Years Atleast
+
+At age of 55 EPF total asset value would be 1,19,89,293 considering I retire at 55
+At age of 60 EPFcorpus value would be 1,95,60,142 without income for 55-60 and will b elligible to withdraw epf
+(Calculated at current Basic (32,576 rs  at age of 32) with annual 5% hike till Age 55)
+Which is approx 40-45K Per month for next 25 Years i.e Age 85 (Inflation not considered)
+So need to plan for Age 50-60 and Invest in PPF so that (50000rs per month pension x 12 months x 10years) i.e. to make 60,00,000 at Age 50 from PPF 
+The investment for above I will start in 2030-2040
+
+EPF + NPS contributions will give  ₹4 Cr at 55, Guaranteed pension ~₹30K/month from NPS 
+You want to take ₹1 crore at age 55 and use rest 3cr for an annuity or systematic drawdown for 25 years (till age 80)
+will get about ₹1.5–1.6 lakh/month at retirement (age 55). But in today’s money, that will only feel like ~₹53K/month. (6% inflation considered)
+
+
+If retire at 50 and withdraw immediately → ~₹1.1L/month (₹49K/month today).
+If retire at 50 but wait till 55 to withdraw → ~₹1.75L/month (₹58K/month today).
+If retire at 50 but wait till 60 to withdraw → ~₹2.7L/month (₹77K/month today).
