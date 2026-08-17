@@ -1,4 +1,4 @@
-# SmartFin – Developer Guide (v5.4.4)
+# SmartFin – Developer Guide (v5.4.5)
 
 > Local development, testing, and deployment instructions.
 
@@ -71,7 +71,7 @@ After making code changes, update documentation:
 
 2. **Version Updates**: Use the version bump scripts or GitHub Actions - do NOT manually update version numbers
 
-## Recent Changes (v5.4.4)
+## Recent Changes (v5.4.5)
 
 - **Budget calculation refinement**: On-demand items (saving, investment, expenditure, liability) now reduce expenditure account balance and are included in budget surplus calculation. Variable Expenses display excludes on-demand items to show actual spending. On-Demand Items displayed separately with Total Allocated as sum of both.
 - **Dashboard enhancements**: Added Saving and Investment account status display. Optimized dashboard notes with concise format showing actual values. Added navigation links to Goals and Gifts tabs. Fixed calculation to use corrected values with fallback for consistency.
@@ -79,7 +79,7 @@ After making code changes, update documentation:
 - **UI layout improvements**: Summary grid changed to fixed 4 columns (desktop) / 2 columns (mobile) for consistent layout. Removed fixed min-height from summary items for even distribution. Reduced icon sizes (28px) for insights and alerts.
 - **Responsive improvements**: Added responsive sizing for app tagline to scale with screen size.
 
-## Recent Changes (v5.4.4)
+## Recent Changes (v5.4.5)
 
 - **UI system refresh**: unified headers, icon navigation, divider-based summaries, refined charts, and responsive list/form presentation.
 - **Expense tracking fix**: summary updates now target the Expense Tracking total rather than the Budget total.
@@ -97,7 +97,7 @@ After making code changes, update documentation:
 - `assets/js/app.js`: Tax calculation logic, gifts summary, location handling
 - `assets/js/modules/dashboard.js`: Enhanced calculations, 6-month chart, preparedness formulas
 - `assets/css/styles.css`: Compact dashboard cards, responsive grid (3-column → 2-column → 1-column)
-- `APP_SPEC.md`: Updated to v5.4.4 with all new features documented
+- `APP_SPEC.md`: Updated to v5.4.5 with all new features documented
 
 ---
 
