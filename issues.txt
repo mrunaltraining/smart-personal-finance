@@ -1,2 +1,22 @@
 listof issues:
 --------------
+Issue list
+
+Goals & Investment
+8 change this to total 8 goals
+All Goals Combined
+4 ongoing · 1 planned- show all types
+May be how may shorterm how long term etc
+
+Check in indicator why the icon not visible for offline status
+ 
+Liability breakdown says loan emi but that is actually sun of emi rent maintainance etc so it should say fixed liabilities instead
+Also see if the calculation os correct or not
+It shays in pie chart that in includes fixed expense variable expense and current month cc is that calculated correctly
+In the pie chart we need to add something like untracked and where is that component coming from if the total sum of all items does not match the total income of the month 
+
+
+Optimise the following section for mobile view too
+Financial Year overviewFY 2026-27. Currently it looks items with horizontal dividers
+In web view that is ok but in mobile view it looks like a list bit right side
+
