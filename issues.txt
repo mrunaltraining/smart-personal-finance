@@ -1,3 +1,6 @@
 listof issues:
 --------------
-new list
+make sure the /Users/mrunal/Documents/MyWork/mrunaldevcontainer/mrunalworkspace/mrunaldevrepo/smart-personal-finance/scripts/bump-version.sh takes care of bumping teh version on readme.md for folloing content
+![Version](https://img.shields.io/badge/version-4.0.5-blue.svg)
+
+so taht the tag will be automaticall updated in github view as it renders from readme.md
