@@ -1,15 +1,19 @@
 @echo off
 REM Version Bump Script for Windows
 REM This script reads APP_VERSION from app.js (source of truth) and updates all documentation files
-REM Usage: bump-version.bat [major|minor|build] (default: build)
+REM Usage: scripts\bump-version.bat [major|minor|build] (default: build)
 
 setlocal enabledelayedexpansion
+
+REM Get script directory and project root
+set SCRIPT_DIR=%~dp0
+set PROJECT_ROOT=%SCRIPT_DIR%..
 
 REM Get the version bump type (default: build)
 set BUMP_TYPE=%1
 if "%BUMP_TYPE%"=="" set BUMP_TYPE=build
 
-set APP_JS=assets\js\app.js
+set APP_JS=%PROJECT_ROOT%\assets\js\app.js
 
 if not exist "%APP_JS%" (
     echo Error: %APP_JS% not found
@@ -52,6 +56,9 @@ powershell -Command "(Get-Content '%APP_JS%') -replace 'major: \d+', 'major: %MA
 powershell -Command "(Get-Content '%APP_JS%') -replace 'minor: \d+', 'minor: %MINOR%' | Set-Content '%APP_JS%'"
 powershell -Command "(Get-Content '%APP_JS%') -replace 'build: \d+', 'build: %BUILD%' | Set-Content '%APP_JS%'"
 echo Updated %APP_JS%
+
+REM Change to project root for file operations
+cd /d "%PROJECT_ROOT%"
 
 REM Update documentation files
 set FILES=USER_MANUAL.md README.md APP_SPEC.md DEVELOPMENT.md TO-DO.txt tests\test-utils.html tests\test.html

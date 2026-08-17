@@ -2,15 +2,19 @@
 
 # Version Bump Script
 # This script reads APP_VERSION from app.js (source of truth) and updates all documentation files
-# Usage: ./bump-version.sh [major|minor|build] (default: build)
+# Usage: ./scripts/bump-version.sh [major|minor|build] (default: build)
 
 set -e
+
+# Get the script directory
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+PROJECT_ROOT="$(dirname "$SCRIPT_DIR")"
 
 # Get the version bump type (default: build)
 BUMP_TYPE=${1:-build}
 
 # Extract current version from app.js (source of truth)
-APP_JS="assets/js/app.js"
+APP_JS="$PROJECT_ROOT/assets/js/app.js"
 
 if [ ! -f "$APP_JS" ]; then
     echo "Error: $APP_JS not found"
@@ -54,7 +58,9 @@ sed -i "s/build: [0-9]\+/build: $BUILD/" "$APP_JS"
 
 echo "✓ Updated $APP_JS"
 
-# Update documentation files
+# Update documentation files (relative to project root)
+cd "$PROJECT_ROOT"
+
 FILES=(
     "USER_MANUAL.md"
     "README.md"

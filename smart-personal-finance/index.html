@@ -1,0 +1,1989 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="theme-color" content="#000000">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="SmartFin">
+<meta name="theme-color" content="#0b1020">
+<link rel="icon" type="image/png" href="assets/logo.png" id="favicon-icon">
+<link rel="icon" type="image/png" href="assets/logo.png" id="favicon-icon-32" sizes="32x32">
+<link rel="apple-touch-icon" href="assets/logo.png" id="apple-touch-icon">
+<link rel="apple-touch-icon-precomposed" href="assets/logo.png" id="apple-touch-icon-precomposed">
+<link rel="mask-icon" href="assets/logo.png" color="#7c3aed">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/css/styles.css?v=1785884544">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+<title>₹ SmartFin – Financial Planning</title>
+</head>
+<body>
+
+<!-- ── LOADING SPINNER ────────────────────────────────── -->
+<div id="loadingOverlay" class="sf-loading-overlay">
+    <div class="sf-spinner">
+        <img class="sf-spinner-logo" src="assets/logo.png" alt="SmartFin">
+    </div>
+    <span class="sf-loading-text">Loading SmartFin...</span>
+</div>
+
+<!-- ── AUTH SCREEN ──────────────────────────────────── -->
+<div id="authScreen" class="auth-screen" hidden>
+    <div class="auth-card">
+        <div class="auth-brand">
+            <img class="logo-img logo-img-lg" src="assets/logo.png" alt="SmartFin">
+            <h1>SmartFin</h1>
+            <p>Smart Financial Planning</p>
+        </div>
+        <div id="authError" class="auth-error" hidden></div>
+        <form id="authForm" autocomplete="off" novalidate>
+            <div class="field" id="nameField" hidden>
+                <label for="authName">Your name</label>
+                <input id="authName" type="text" placeholder="e.g. John Doe"
+                       autocomplete="name">
+            </div>
+            <div class="field" id="dobField" hidden>
+                <label for="authDob">Date of Birth</label>
+                <input id="authDob" type="date" autocomplete="bday">
+            </div>
+            <div class="field" id="locationField" hidden>
+                <label for="authLocation">Location (City)</label>
+                <select id="authLocation" autocomplete="off">
+                    <option value="Bengaluru, Karnataka, India" selected>Bengaluru, Karnataka, India</option>
+                    <option value="Mumbai, Maharashtra, India">Mumbai, Maharashtra, India</option>
+                    <option value="Delhi, Delhi, India">Delhi, Delhi, India</option>
+                    <option value="Pune, Maharashtra, India">Pune, Maharashtra, India</option>
+                    <option value="Hyderabad, Telangana, India">Hyderabad, Telangana, India</option>
+                    <option value="Chennai, Tamil Nadu, India">Chennai, Tamil Nadu, India</option>
+                    <option value="Kolkata, West Bengal, India">Kolkata, West Bengal, India</option>
+                    <option value="Ahmedabad, Gujarat, India">Ahmedabad, Gujarat, India</option>
+                    <option value="Jaipur, Rajasthan, India">Jaipur, Rajasthan, India</option>
+                    <option value="Lucknow, Uttar Pradesh, India">Lucknow, Uttar Pradesh, India</option>
+                    <option value="Chandigarh, Chandigarh, India">Chandigarh, Chandigarh, India</option>
+                    <option value="Kochi, Kerala, India">Kochi, Kerala, India</option>
+                    <option value="Indore, Madhya Pradesh, India">Indore, Madhya Pradesh, India</option>
+                    <option value="Coimbatore, Tamil Nadu, India">Coimbatore, Tamil Nadu, India</option>
+                    <option value="Bhopal, Madhya Pradesh, India">Bhopal, Madhya Pradesh, India</option>
+                    <option value="Visakhapatnam, Andhra Pradesh, India">Visakhapatnam, Andhra Pradesh, India</option>
+                    <option value="Nagpur, Maharashtra, India">Nagpur, Maharashtra, India</option>
+                    <option value="Surat, Gujarat, India">Surat, Gujarat, India</option>
+                    <option value="Gurgaon, Haryana, India">Gurgaon, Haryana, India</option>
+                    <option value="Noida, Uttar Pradesh, India">Noida, Uttar Pradesh, India</option>
+                    <option value="Other">Other (Custom City)</option>
+                </select>
+            </div>
+            <div class="field" id="customLocationField" hidden>
+                <label for="authCustomLocation">Enter Your City</label>
+                <input id="authCustomLocation" type="text" placeholder="e.g. Mysore, Karnataka, India" autocomplete="off">
+            </div>
+            <div class="field">
+                <label for="authEmail">Email address</label>
+                <input id="authEmail" type="email" placeholder="you@example.com"
+                       autocomplete="email" required>
+            </div>
+            <div class="field">
+                <label for="authPassword">Password</label>
+                <input id="authPassword" type="password" placeholder="••••••••"
+                       autocomplete="current-password" minlength="6" required>
+            </div>
+            <div class="auth-forgot" id="forgotPasswordRow">
+                <button type="button" id="forgotPasswordBtn" class="btn-link">Forgot password?</button>
+            </div>
+            <button type="submit" id="authSubmitBtn" class="btn-primary btn-full">Sign In</button>
+        </form>
+        <div class="auth-switch">
+            <span id="authSwitchText">Don't have an account?</span>
+            <button type="button" id="authToggleBtn" class="btn-link">Register</button>
+        </div>
+    </div>
+</div>
+
+<!-- ── APP SCREEN ───────────────────────────────────── -->
+<div id="appScreen" class="app-screen" hidden>
+<main class="app-shell">
+
+    <header class="app-header">
+        <div class="app-brand" id="appBrandLogo" role="button" tabindex="0" aria-label="Go to Dashboard" title="Go to Dashboard" style="cursor: pointer;">
+            <img class="logo-img logo-img-sm app-logo" src="assets/logo_dark.png" alt="SmartFin">
+            <div class="brand-text">
+                <div class="brand-name">
+                    <h1>SmartFin</h1>
+                    <span class="brand-badge">PRO</span>
+                </div>
+                <div class="app-tagline">Complete Personal Finance</div>
+            </div>
+        </div>
+        <div class="user-bar">
+            <span id="userEmailDisplay" class="user-email"></span>
+            <!-- ── NETWORK STATUS INDICATOR ────────────────────────────────── -->
+            <div id="networkStatus" class="network-status" hidden>
+                <div class="network-status-icon">
+                    <!-- Checkmark icon for online/saved -->
+                    <svg class="icon-online" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="10"></circle>
+                        <polyline points="20 6 9 17 4 12"></polyline>
+                    </svg>
+                    <!-- Refresh icon for retrying -->
+                    <svg class="icon-retrying" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M23 4v6h-6"></path>
+                        <path d="M1 20v-6h6"></path>
+                        <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path>
+                    </svg>
+                    <!-- Error icon for error (circle with exclamation) -->
+                    <svg class="icon-error" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="10"></circle>
+                        <line x1="12" y1="8" x2="12" y2="12"></line>
+                        <line x1="12" y1="16" x2="12.01" y2="16"></line>
+                    </svg>
+                    <!-- Offline icon (WiFi with slash) -->
+                    <svg class="icon-offline" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M1 1l22 22"></path>
+                        <path d="M16.72 11.06A10.94 10.94 0 0 1 19 12.55"></path>
+                        <path d="M5 12.55a10.94 10.94 0 0 1 5.17-2.39"></path>
+                        <path d="M10.71 5.05A16 16 0 0 1 22.58 9"></path>
+                        <path d="M1.42 9a15.91 15.91 0 0 1 4.7-2.88"></path>
+                        <path d="M8.53 16.11a6 6 0 0 1 6.95 0"></path>
+                        <line x1="12" y1="20" x2="12.01" y2="20"></line>
+                    </svg>
+                    <!-- Quota exceeded icon (triangle alert) -->
+                    <svg class="icon-quota-exceeded" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M10.29 5.86L3.82 17a2 2 0 0 0 1.71 3h12.94a2 2 0 0 0 1.71-3L13.71 5.86a2 2 0 0 0-3.42 0Z"></path>
+                        <line x1="12" y1="10" x2="12" y2="13"></line>
+                        <line x1="12" y1="16" x2="12.01" y2="16"></line>
+                    </svg>
+                    <!-- Reconnecting icon (refresh with slash) -->
+                    <svg class="icon-reconnecting" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M1 1l22 22"></path>
+                        <path d="M23 4v6h-6"></path>
+                        <path d="M1 20v-6h6"></path>
+                        <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path>
+                    </svg>
+                </div>
+                <div class="network-status-text">Saved</div>
+            </div>
+            <button type="button" id="logoutBtn" class="btn-icon-only" aria-label="Sign Out">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="20" height="20">
+                    <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
+                    <polyline points="16 17 21 12 16 7"/>
+                    <line x1="21" y1="12" x2="9" y2="12"/>
+                </svg>
+            </button>
+            <button type="button" id="notificationBtn" class="btn-icon-only" aria-label="Notifications" title="Notifications">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="20" height="20">
+                    <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/>
+                    <path d="M13.73 21a2 2 0 0 1-3.46 0"/>
+                </svg>
+                <span id="notificationBadge" class="notification-badge" hidden>0</span>
+            </button>
+            <button type="button" id="settingsBtn" class="btn-icon-only" aria-label="Settings">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="20" height="20">
+                    <circle cx="12" cy="12" r="3"/>
+                    <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/>
+                </svg>
+            </button>
+            <button type="button" id="helpBtn" class="btn-icon-only" aria-label="Help Guide" title="Help & User Guide">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="20" height="20">
+                    <circle cx="12" cy="12" r="10"/>
+                    <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/>
+                    <line x1="12" y1="17" x2="12.01" y2="17"/>
+                </svg>
+            </button>
+        </div>
+    </header>
+
+    <nav class="tab-bar" id="tabBar" aria-label="Financial sections">
+        <div class="tab-mobile-row">
+            <span id="mobileActiveTab" class="mobile-active-tab-name"></span>
+            <button type="button" id="tabMenuToggle" class="tab-menu-toggle" aria-label="Toggle navigation">
+                <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+                    <line x1="2" y1="5" x2="18" y2="5"/>
+                    <line x1="2" y1="10" x2="18" y2="10"/>
+                    <line x1="2" y1="15" x2="18" y2="15"/>
+                </svg>
+            </button>
+        </div>
+        <div class="tab-list" id="tabList"></div>
+    </nav>
+
+    <section class="work-area">
+        <!-- Dashboard / Overview UI -->
+        <div id="dashboardUI" class="dashboard-ui" hidden>
+            <div id="dashboardGrid" class="dash-grid"></div>
+        </div>
+
+        <!-- Monthly Budget Specific UI -->
+        <div id="monthlyBudgetUI" class="monthly-budget-ui" hidden>
+            <div class="budget-header">
+                <h2 class="page-title-visually-hidden">Monthly Budget</h2>
+                <div class="month-nav">
+                    <button type="button" id="prevMonth" class="btn-nav">← Previous</button>
+                    <span id="currentMonthDisplay" class="month-display"></span>
+                    <button type="button" id="nextMonth" class="btn-nav">Next →</button>
+                </div>
+                <button type="button" id="toggleBudgetView" class="btn-nav btn-view-toggle" aria-label="Switch to annual budget view" aria-pressed="false"><span class="view-toggle-icon" aria-hidden="true"><svg class="btn-action-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20V4a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v16l-2-1-2 1-2-1-2 1-2-1-2 1Z"/><line x1="8" y1="7" x2="16" y2="7"/><line x1="8" y1="11" x2="16" y2="11"/><line x1="8" y1="15" x2="12" y2="15"/></svg></span><span class="btn-text">Annual</span></button>
+                <button type="button" id="toggleBudgetEdit" class="btn-nav btn-icon">Edit</button>
+            </div>
+
+            <!-- Annual Summary Section (hidden by default) -->
+            <div id="annualSummarySection" class="annual-summary-section" hidden>
+                <div class="annual-summary summary-strip">
+                    <div class="annual-summary-item">
+                        <span class="annual-summary-label">Total Income</span>
+                        <strong id="annualTotalIncome">₹0</strong>
+                    </div>
+                    <div class="annual-summary-item">
+                        <span class="annual-summary-label">Total Expenditure</span>
+                        <strong id="annualTotalExpenditure">₹0</strong>
+                    </div>
+                    <div class="annual-summary-item">
+                        <span class="annual-summary-label">Total Savings</span>
+                        <strong id="annualTotalSavings">₹0</strong>
+                    </div>
+                    <div class="annual-summary-item">
+                        <span class="annual-summary-label">Total Investment</span>
+                        <strong id="annualTotalInvestment">₹0</strong>
+                    </div>
+                    <div class="annual-summary-item">
+                        <span class="annual-summary-label">Total Liability</span>
+                        <strong id="annualTotalLiability">₹0</strong>
+                    </div>
+                    <div class="annual-summary-item">
+                        <span class="annual-summary-label">Total Insurance</span>
+                        <strong id="annualTotalInsurance">₹0</strong>
+                    </div>
+                    <div class="annual-summary-item">
+                        <span class="annual-summary-label">Total Others</span>
+                        <strong id="annualTotalOther">₹0</strong>
+                    </div>
+                    <div class="annual-summary-item">
+                        <span class="annual-summary-label">Avg Monthly Income</span>
+                        <strong id="avgMonthlyIncome">₹0</strong>
+                    </div>
+                    <div class="annual-summary-item">
+                        <span class="annual-summary-label">Avg Monthly Expenditure</span>
+                        <strong id="avgMonthlyExpenditure">₹0</strong>
+                    </div>
+                    <div class="annual-summary-item">
+                        <span class="annual-summary-label">Avg Monthly Savings</span>
+                        <strong id="avgMonthlySavings">₹0</strong>
+                    </div>
+                    <div class="annual-summary-item">
+                        <span class="annual-summary-label">Avg Monthly Investment</span>
+                        <strong id="avgMonthlyInvestment">₹0</strong>
+                    </div>
+                    <div class="annual-summary-item">
+                        <span class="annual-summary-label">Avg Monthly Liability</span>
+                        <strong id="avgMonthlyLiability">₹0</strong>
+                    </div>
+                    <div class="annual-summary-item">
+                        <span class="annual-summary-label">Avg Monthly Insurance</span>
+                        <strong id="avgMonthlyInsurance">₹0</strong>
+                    </div>
+                    <div class="annual-summary-item">
+                        <span class="annual-summary-label">Avg Monthly Others</span>
+                        <strong id="avgMonthlyOther">₹0</strong>
+                    </div>
+                </div>
+                <div class="annual-bottom-row">
+                    <div class="annual-months-list">
+                        <h3>Monthly Breakdown</h3>
+                        <div id="annualMonthsList" class="annual-months-list-content"></div>
+                    </div>
+                    <div class="chart-section annual-pie-section">
+                        <h3>Annual Distribution</h3>
+                        <div class="chart-wrapper">
+                            <canvas id="annualPieChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Monthly View Section -->
+            <div id="monthlyViewSection">
+                <!-- Budget Status -->
+                <div id="budgetStatus" class="budget-status"></div>
+
+            <!-- Preview Mode -->
+            <div id="budgetPreview" class="budget-preview">
+                <div class="summary-grid summary-strip">
+                    <div class="summary-item">
+                        <span class="summary-label">Total Inflow</span>
+                        <span class="summary-hint">All income sources this month</span>
+                        <strong id="totalIncome">₹0</strong>
+                    </div>
+                    <div class="summary-item">
+                        <span class="summary-label">Total Outflow</span>
+                        <span class="summary-hint">Recurring monthly obligations only</span>
+                        <strong id="totalExpenses">₹0</strong>
+                    </div>
+                    <div class="summary-item">
+                        <span class="summary-label" id="salaryBalanceLabel">Salary A/c Balance</span>
+                        <span class="summary-hint" id="salaryBalanceHint">Current balance in your salary account</span>
+                        <strong id="initialBalance">₹0</strong>
+                    </div>
+                    <div class="summary-item">
+                        <span class="summary-label">Expenditure Account Balance</span>
+                        <span class="summary-hint">Current balance in your spending account</span>
+                        <strong id="expenditureAccountBalance">₹0</strong>
+                    </div>
+                    <div class="summary-item">
+                        <span id="amountAvailableLabel" class="summary-label">Total Spendable This Month</span>
+                        <span class="summary-hint">Total cash inflow minus all fixed obligations</span>
+                        <strong id="amountAvailableToSpend" style="color:#22c55e">₹0</strong>
+                    </div>
+                    <div class="summary-item">
+                        <span class="summary-label">Variable Expenses</span>
+                        <span class="summary-hint">Amount spent from expenditure account + CC outstanding</span>
+                        <strong id="variableExpensesTotal" style="color:#eab308">₹0</strong>
+                    </div>
+                    <div class="summary-item">
+                        <span class="summary-label">On-Demand Items</span>
+                        <span class="summary-hint">On-demand saving, investment, expenditure, liability</span>
+                        <strong id="ondemandItemsTotal" style="color:#3b82f6">₹0</strong>
+                    </div>
+                    <div class="summary-item">
+                        <span class="summary-label" id="untrackedExpensesLabel">Total Allocated</span>
+                        <span class="summary-hint">Variable expenses + on-demand items</span>
+                        <strong id="untrackedExpenses" style="color:#ef4444">₹0</strong>
+                    </div>
+                </div>
+
+                <div class="categories-preview">
+                    <div class="category-preview-section">
+                        <h3>Cash Inflow</h3>
+                        <div id="inflowPreview" class="category-preview-list"></div>
+                        <div class="category-total">Total: <strong id="inflowTotal">₹0</strong></div>
+                    </div>
+
+                    <div class="category-preview-section">
+                        <h3>Cash Outflow</h3>
+                        <div id="outflowPreview" class="category-preview-list"></div>
+                        <div class="category-total">Total: <strong id="outflowTotal">₹0</strong></div>
+                    </div>
+
+                    <div class="category-preview-section" id="investingPreviewSection">
+                        <h3>On-Demand Outflow</h3>
+                        <div id="investingPreview" class="category-preview-list"></div>
+                        <div class="category-total">Total: <strong id="investingTotal">₹0</strong></div>
+                    </div>
+                </div>
+
+                <!-- Monthly Transfer & Reconciliation Section -->
+                <div class="expense-transfer-section" id="transferBreakdownSection">
+                    <h3>Monthly Transfer Breakdown</h3>
+                    <div class="expense-transfer-grid">
+                        <div class="expense-transfer-item">
+                            <span class="expense-transfer-label">Primary Income This Month</span>
+                            <strong id="transferPrimaryIncome">₹0</strong>
+                        </div>
+                        <div class="expense-transfer-item">
+                            <span class="expense-transfer-label">Auto-deducted Fixed Outflow</span>
+                            <strong id="transferFixedExpenses">₹0</strong>
+                        </div>
+                        <div class="auto-debit-breakdown-container">
+                            <span class="expense-transfer-label" style="font-size:0.78rem;color:var(--dim)">Breakdown by destination:</span>
+                            <div id="autoDebitBreakdown" class="auto-debit-breakdown"></div>
+                        </div>
+                        <div class="expense-transfer-item highlight-transfer">
+                            <span class="expense-transfer-label">Remaining → Transfer to Primary (Expenditure)</span>
+                            <strong id="transferAmount">₹0</strong>
+                        </div>
+                    </div>
+                    <div class="transfer-action-row">
+                        <div class="transfer-warning" style="background:rgba(234,179,8,0.10);border:1px solid rgba(234,179,8,0.3);border-radius:8px;padding:10px 14px;margin-bottom:8px;font-size:0.82rem;color:#eab308;">
+                            <strong>Warning:</strong> Add ALL outflow items before Execute Transfer. Items added after won't be deducted from salary.
+                        </div>
+                        <button type="button" id="btnDoTransfer" class="btn-do-transfer">Execute Transfer</button>
+                        <small class="transfer-note">Deducts all obligations from Salary, credits Expenditure/Saving/Investment accounts.</small>
+                    </div>
+                </div>
+
+                <!-- Transfer Mismatch Warning (outflows changed after transfer) -->
+                <div class="expense-transfer-section" id="transferMismatchWarning" hidden style="border-color:#ef4444">
+                    <h3 style="color:#ef4444">Transfer Mismatch Detected</h3>
+                    <div style="font-size:0.85rem;color:var(--dim);margin-bottom:0.5rem">
+                        Outflow items were added or changed <strong>after</strong> Execute Transfer. The transfer amount and variable expenditure are incorrect.
+                    </div>
+                    <div class="expense-transfer-grid">
+                        <div class="expense-transfer-item">
+                            <span class="expense-transfer-label">Transfer Used (old outflows)</span>
+                            <strong id="mismatchOldTransfer" style="color:#ef4444">₹0</strong>
+                        </div>
+                        <div class="expense-transfer-item">
+                            <span class="expense-transfer-label">Correct Transfer (current outflows)</span>
+                            <strong id="mismatchNewTransfer" style="color:#22c55e">₹0</strong>
+                        </div>
+                        <div class="expense-transfer-item">
+                            <span class="expense-transfer-label">Difference</span>
+                            <strong id="mismatchDifference" style="color:#eab308">₹0</strong>
+                        </div>
+                    </div>
+                    <div class="transfer-action-row">
+                        <button type="button" id="btnRecalcTransfer" class="btn-do-transfer" style="background:#ef4444">Recalculate Transfer</button>
+                        <small class="transfer-note">Corrects _transferDone and _initialBalance to match current outflows. Does not change account balances.</small>
+                    </div>
+                </div>
+
+                <!-- Reconciliation merged into Quick Update above -->
+
+                <!-- Close Current Month Budget -->
+                <div class="expense-transfer-section" id="carryforwardSection" hidden>
+                    <h3>Close Current Month Budget</h3>
+                    <div class="expense-transfer-grid">
+                        <div class="expense-transfer-item">
+                            <span class="expense-transfer-label">Expenditure Account Balance</span>
+                            <strong id="carryforwardBalance">₹0</strong>
+                        </div>
+                    </div>
+                    <div class="transfer-action-row">
+                        <button type="button" id="btnCarryForward" class="btn-do-transfer" style="background:#ef4444">Close Month</button>
+                        <small class="transfer-note">Marks this month as read-only. Leftover balance carries forward, CC outstanding becomes next month's unpaid bill.</small>
+                    </div>
+                </div>
+
+                <div class="chart-container">
+                    <h3>Monthly Distribution</h3>
+                    <canvas id="pieChart"></canvas>
+                </div>
+            </div>
+
+            <!-- Edit Mode -->
+            <div id="budgetEdit" class="budget-edit" hidden>
+                <!-- Mid-Month Quick Update (consolidated) - MOVED TO TOP -->
+                <div class="mid-month-update-section" style="margin-bottom: 24px; border: 2px solid #3b82f6; border-radius: 12px; padding: 20px; background: rgba(59, 130, 246, 0.05);">
+                    <h3 style="color: #3b82f6; margin-top: 0;">Quick Update (Mid-Month)</h3>
+                    <p class="section-description">Update these values periodically to track your spending. Variable expenditure is auto-calculated. Current Month CC Spending entered here will appear in the Cash Outflow section.</p>
+                    <div class="mid-month-row">
+                        <div class="mid-month-field">
+                            <label for="midMonthExpBalance">Expenditure Account Balance</label>
+                            <span class="field-hint">Current balance in your spending account today</span>
+                            <input type="number" id="midMonthExpBalance" min="0" step="1" placeholder="Current expenditure balance">
+                            <button type="button" id="btnUpdateExpBalance" class="btn-mid-update">Update</button>
+                        </div>
+                        <div class="mid-month-field">
+                            <label for="midMonthCCOutstanding">Current Month CC Spending (Primary Entry)</label>
+                            <span class="field-hint">Total credit card purchases made this month so far. This value will auto-populate in the Cash Outflow section.</span>
+                            <input type="number" id="midMonthCCOutstanding" min="0" step="1" placeholder="This month's CC spending">
+                            <button type="button" id="btnUpdateCCOutstanding" class="btn-mid-update">Update</button>
+                        </div>
+                    </div>
+                    <div id="quickUpdateResult" class="quick-update-result" hidden>
+                        <div class="quick-update-result-item">
+                            <span>Variable Expenditure</span>
+                            <strong id="quickUpdateUntracked" style="color:#eab308">₹0</strong>
+                        </div>
+                        <span class="field-hint">Amount spent from expenditure account (funded − current balance)</span>
+                    </div>
+                </div>
+
+                <div class="categories-container">
+                    <div class="category-section">
+                        <h3>Cash Inflow</h3>
+                        <div id="inflowFields"></div>
+                        <div class="category-total">Total: <strong id="inflowTotalEdit">₹0</strong></div>
+                    </div>
+
+                    <div class="category-section">
+                        <h3>Cash Outflow</h3>
+                        <div id="outflowFields"></div>
+                        <div class="category-total">Total: <strong id="outflowTotalEdit">₹0</strong></div>
+                    </div>
+
+                    <div class="category-section">
+                        <h3>On-Demand Outflow</h3>
+                        <div id="investingFields"></div>
+                        <div class="category-total">Total: <strong id="investingTotalEdit">₹0</strong></div>
+                    </div>
+                </div>
+
+                <!-- Monthly Transfer & Reconciliation Section -->
+                <div class="expense-transfer-section" id="transferBreakdownSection">
+                    <h3>Monthly Transfer Breakdown</h3>
+                    <div class="expense-transfer-grid">
+                        <div class="expense-transfer-item">
+                            <span class="expense-transfer-label">Primary Income This Month</span>
+                            <strong id="transferPrimaryIncome">₹0</strong>
+                        </div>
+                        <div class="expense-transfer-item">
+                            <span class="expense-transfer-label">Auto-deducted Fixed Outflow</span>
+                            <strong id="transferFixedExpenses">₹0</strong>
+                        </div>
+                        <div class="auto-debit-breakdown-container">
+                            <span class="expense-transfer-label" style="font-size:0.78rem;color:var(--dim)">Breakdown by destination:</span>
+                            <div id="autoDebitBreakdown" class="auto-debit-breakdown"></div>
+                        </div>
+                        <div class="expense-transfer-item highlight-transfer">
+                            <span class="expense-transfer-label">Remaining → Transfer to Primary (Expenditure)</span>
+                            <strong id="transferAmount">₹0</strong>
+                        </div>
+                    </div>
+                    <div class="transfer-action-row">
+                        <div class="transfer-warning" style="background:rgba(234,179,8,0.10);border:1px solid rgba(234,179,8,0.3);border-radius:8px;padding:10px 14px;margin-bottom:8px;font-size:0.82rem;color:#eab308;">
+                            <strong>Warning:</strong> Add ALL outflow items before Execute Transfer. Items added after won't be deducted from salary.
+                        </div>
+                        <button type="button" id="btnDoTransfer" class="btn-do-transfer">Execute Transfer</button>
+                        <small class="transfer-note">Deducts all obligations from Salary, credits Expenditure/Saving/Investment accounts.</small>
+                    </div>
+                </div>
+
+                <!-- Transfer Mismatch Warning (outflows changed after transfer) -->
+                <div class="expense-transfer-section" id="transferMismatchWarning" hidden style="border-color:#ef4444">
+                    <h3 style="color:#ef4444">Transfer Mismatch Detected</h3>
+                    <div style="font-size:0.85rem;color:var(--dim);margin-bottom:0.5rem">
+                        Outflow items were added or changed <strong>after</strong> Execute Transfer. The transfer amount and variable expenditure are incorrect.
+                    </div>
+                    <div class="expense-transfer-grid">
+                        <div class="expense-transfer-item">
+                            <span class="expense-transfer-label">Transfer Used (old outflows)</span>
+                            <strong id="mismatchOldTransfer" style="color:#ef4444">₹0</strong>
+                        </div>
+                        <div class="expense-transfer-item">
+                            <span class="expense-transfer-label">Correct Transfer (current outflows)</span>
+                            <strong id="mismatchNewTransfer" style="color:#22c55e">₹0</strong>
+                        </div>
+                        <div class="expense-transfer-item">
+                            <span class="expense-transfer-label">Difference</span>
+                            <strong id="mismatchDifference" style="color:#eab308">₹0</strong>
+                        </div>
+                    </div>
+                    <div class="transfer-action-row">
+                        <button type="button" id="btnRecalcTransfer" class="btn-do-transfer" style="background:#ef4444">Recalculate Transfer</button>
+                        <small class="transfer-note">Corrects _transferDone and _initialBalance to match current outflows. Does not change account balances.</small>
+                    </div>
+                </div>
+
+                <!-- Reconciliation merged into Quick Update above -->
+            </div><!-- end budgetEdit -->
+            </div><!-- end monthlyViewSection -->
+        </div><!-- end monthlyBudgetUI -->
+
+        <!-- Expense Tracking Specific UI -->
+        <div id="expenseTrackingUI" class="expense-tracking-ui" hidden>
+            <div class="expense-header">
+                <h2 class="page-title-visually-hidden">Expense Tracking</h2>
+                <div class="month-nav">
+                    <button type="button" id="prevExpenseMonth" class="btn-nav">← Previous</button>
+                    <span id="currentExpenseMonthDisplay" class="month-display"></span>
+                    <button type="button" id="nextExpenseMonth" class="btn-nav">Next →</button>
+                </div>
+                <button type="button" id="toggleExpenseEdit" class="btn-nav btn-icon">Edit</button>
+            </div>
+
+            <!-- Expense Summary Cards -->
+            <div id="expenseSummary" class="expense-summary summary-strip">
+                <div class="summary-card">
+                    <span class="summary-label">Total Expenses</span>
+                    <span class="summary-desc">Total of all expenses this month</span>
+                    <strong id="expenseTrackingTotalExpenses" class="summary-value">₹0</strong>
+                </div>
+                <div class="summary-card">
+                    <span class="summary-label">Budget Variable Expenditure</span>
+                    <span class="summary-desc">Budgeted amount for variable expenses</span>
+                    <strong id="budgetVariableExp" class="summary-value">₹0</strong>
+                </div>
+                <div class="summary-card" id="expenseDifferenceCard">
+                    <span class="summary-label">Difference</span>
+                    <span class="summary-desc">Difference between actual expenses and budget</span>
+                    <strong id="expenseDifference" class="summary-value">₹0</strong>
+                </div>
+            </div>
+
+            <!-- Expense List (Preview Mode) -->
+            <div id="expensePreview" class="expense-preview">
+                <div id="expenseSortFilter"></div>
+                <h3>Expenses This Month</h3>
+                <div id="expenseList" class="expense-list"></div>
+            </div>
+
+            <!-- Expense Chart -->
+            <div id="expenseChartContainer" class="chart-container">
+                <h3>Category Breakdown</h3>
+                <canvas id="expensePieChart"></canvas>
+            </div>
+
+            <!-- Expense Edit Mode -->
+            <div id="expenseEdit" class="expense-edit" hidden>
+                <h3>Add/Edit Expenses</h3>
+                
+                <!-- CSV Import Section -->
+                <div class="expense-import-section" style="border: 1px solid var(--border); padding: 16px; border-radius: 8px; margin-bottom: 20px; background: var(--surf2);">
+                    <h4 style="margin-top: 0; font-size: 0.95rem; font-weight: 600;">Import from CSV or Bank Statement</h4>
+                    <p style="margin: 8px 0; font-size: 0.85rem; color: var(--dim);">
+                        Upload a CSV file with columns: Date, Category, Amount, Payment Method, TransactionType
+                    </p>
+                    <div style="display: flex; gap: 8px; align-items: center; flex-wrap: wrap;">
+                        <input type="file" id="expenseFileImport" accept=".csv,.xlsx" style="flex: 1; min-width: 200px;">
+                        <button type="button" id="expenseImportBtn" class="btn-add" style="white-space: nowrap;">Import</button>
+                        <button type="button" id="expenseFileClearBtn" class="btn-icon-only" style="white-space: nowrap; padding: 8px 16px;" aria-label="Clear file">✕</button>
+                        <a href="#" onclick="downloadExpenseTemplate(); return false;" style="font-size: 0.85rem; color: #3b82f6; text-decoration: underline;">Download Template</a>
+                    </div>
+                    <div id="importProgress" style="margin-top: 12px; display: none;">
+                        <div style="font-size: 0.85rem; margin-bottom: 6px;">Processing <span id="importedCount">0</span> expenses...</div>
+                        <div class="dash-progress-bar" style="height: 8px;">
+                            <div class="dash-progress-fill" id="importProgressBar" style="width: 0%; background: #3b82f6;"></div>
+                        </div>
+                    </div>
+                </div>
+                
+                <form id="expenseForm" class="expense-form">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="expenseCategory">Category *</label>
+                            <select id="expenseCategory" required>
+                                <option value="">Select category...</option>
+                                <option value="Food & Dining">Food & Dining</option>
+                                <option value="Transportation">Transportation</option>
+                                <option value="Shopping">Shopping</option>
+                                <option value="Entertainment">Entertainment</option>
+                                <option value="Healthcare">Healthcare</option>
+                                <option value="Education">Education</option>
+                                <option value="Personal Care">Personal Care</option>
+                                <option value="Home & Utilities">Home & Utilities</option>
+                                <option value="Travel">Travel</option>
+                                <option value="Gifts & Donations">Gifts & Donations</option>
+                                <option value="Others">Others</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="expenseAmount">Amount (₹) *</label>
+                            <input type="number" id="expenseAmount" min="0" step="0.01" required placeholder="0.00">
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="expenseDate">Date *</label>
+                            <input type="date" id="expenseDate" required>
+                            <small class="field-hint">Limited to current month</small>
+                        </div>
+                        <div class="form-group">
+                            <label for="expensePaymentMethod">Payment Method</label>
+                            <select id="expensePaymentMethod">
+                                <option value="UPI">UPI</option>
+                                <option value="Credit Card">Credit Card</option>
+                                <option value="Debit Card">Debit Card</option>
+                                <option value="Cash">Cash</option>
+                                <option value="Wallet">Wallet</option>
+                                <option value="Bank Transfer">Bank Transfer</option>
+                                <option value="Other">Other</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="expenseMerchant">Merchant</label>
+                            <input type="text" id="expenseMerchant" placeholder="e.g. Amazon, Swiggy">
+                        </div>
+                        <div class="form-group">
+                            <label for="expenseDescription">Description</label>
+                            <input type="text" id="expenseDescription" placeholder="Optional notes">
+                        </div>
+                    </div>
+                    <div class="field field-btn">
+                        <button type="submit" class="btn-add">Add Expense</button>
+                    </div>
+                </form>
+
+                <!-- Expense Table -->
+                <div class="expense-table-container">
+                    <table class="expense-table">
+                        <thead>
+                            <tr>
+                                <th>Date</th>
+                                <th>Category</th>
+                                <th>Amount</th>
+                                <th>Payment Method</th>
+                                <th>Merchant</th>
+                                <th>Description</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="expenseTableBody"></tbody>
+                    </table>
+                </div>
+            </div>
+        </div><!-- end expenseTrackingUI -->
+
+        <!-- Financial Goal Specific UI -->
+        <div id="financialGoalUI" class="financial-goal-ui" hidden>
+            <div class="goal-header">
+                <h2>Financial Goals</h2>
+                <button type="button" id="toggleGoalEdit" class="btn-nav btn-icon">Edit</button>
+            </div>
+
+            <!-- Goal Summary -->
+            <div class="goal-summary summary-strip">
+                <div class="goal-summary-item">
+                    <span class="goal-summary-label">Total Needed</span>
+                    <span class="goal-summary-desc">Total amount needed to achieve all goals</span>
+                    <strong id="totalGoalNeeded">₹0</strong>
+                </div>
+                <div class="goal-summary-item">
+                    <span class="goal-summary-label">Total Accumulated</span>
+                    <span class="goal-summary-desc">Total amount accumulated towards all goals</span>
+                    <strong id="totalGoalAccumulated">₹0</strong>
+                </div>
+                <div class="goal-summary-item">
+                    <span class="goal-summary-label">Amount Needed</span>
+                    <span class="goal-summary-desc">Additional amount needed to reach all goals</span>
+                    <strong id="amountMoreNeeded">₹0</strong>
+                </div>
+            </div>
+
+            <!-- Preview Mode -->
+            <div id="goalPreview" class="goal-preview">
+                <div id="goalSortFilter"></div>
+                <div id="goalsList" class="goals-list"></div>
+            </div>
+
+            <!-- Edit Mode -->
+            <div id="goalEdit" class="goal-edit" hidden>
+                <form class="entry-form" id="goalForm" autocomplete="off">
+                    <div id="goalDynamicFields"></div>
+                    <div class="field field-btn">
+                        <button type="submit" class="btn-add">Add Goal</button>
+                    </div>
+                </form>
+                <div class="table-wrap">
+                    <table>
+                        <thead id="goalTableHead"></thead>
+                        <tbody id="goalTableBody"></tbody>
+                    </table>
+                    <p class="empty-state" id="goalEmptyState">No goals yet. Add one above.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Investments Tab UI (was Inflow) -->
+        <div id="inflowUI" class="investments-ui" hidden>
+            <div class="goal-header">
+                <h2>Investments</h2>
+                <button type="button" id="toggleInflowEdit" class="btn-nav btn-icon">Edit</button>
+            </div>
+
+            <!-- Investment Summary -->
+            <div class="investment-summary summary-strip">
+                <div class="investment-summary-item">
+                    <span class="investment-summary-label">Total Invested</span>
+                    <span class="summary-hint">Sum of all investment amounts</span>
+                    <strong id="totalInflowAmount">₹0</strong>
+                </div>
+                <div class="investment-summary-item">
+                    <span class="investment-summary-label">Current Portfolio Value</span>
+                    <span class="summary-hint">Estimated value including growth</span>
+                    <strong id="totalInflowCurrentValue">₹0</strong>
+                </div>
+                <div class="investment-summary-item">
+                    <span class="investment-summary-label">Total Items</span>
+                    <strong id="totalInflowItems">0</strong>
+                </div>
+                <div class="investment-summary-item">
+                    <span class="investment-summary-label">Monthly Recurring Investments</span>
+                    <span class="summary-hint">All recurring investments prorated monthly</span>
+                    <strong id="totalMonthlyInvestments">₹0</strong>
+                </div>
+                <div class="investment-summary-item">
+                    <span class="investment-summary-label">Total Existing Asset Value</span>
+                    <span class="summary-hint">FDs, PPF, Stocks, Bonds, etc.</span>
+                    <strong id="totalExistingInvestments">₹0</strong>
+                </div>
+            </div>
+
+            <!-- Preview Mode -->
+            <div id="inflowTabPreview" class="investment-preview">
+                <div class="chart-section">
+                    <h3>Investment Values</h3>
+                    <div class="chart-wrapper">
+                        <canvas id="inflowBarChart"></canvas>
+                    </div>
+                </div>
+                <div class="investment-controls">
+                    <div id="inflowSortFilter"></div>
+                    <div class="investment-subsection-tabs" id="investmentSubTabs">
+                        <button type="button" class="inv-sub-tab active" data-inv-view="all">All</button>
+                        <button type="button" class="inv-sub-tab" data-inv-view="existing">One-time</button>
+                        <button type="button" class="inv-sub-tab" data-inv-view="monthly">Recurring</button>
+                        <button type="button" class="inv-sub-tab" data-inv-view="portfolio">Portfolio Summary</button>
+                    </div>
+                </div>
+                <div id="inflowList" class="investments-list"></div>
+                <!-- Portfolio Summary (shown when Portfolio tab selected) -->
+                <div id="portfolioSummary" class="portfolio-summary" hidden>
+                    <div class="portfolio-group">
+                        <h4>One-time Investments</h4>
+                        <div id="portfolioExisting" class="portfolio-list"></div>
+                        <div class="portfolio-subtotal">Subtotal: <strong id="portfolioExistingTotal">₹0</strong></div>
+                    </div>
+                    <div class="portfolio-group">
+                        <h4>Monthly Recurring Investments</h4>
+                        <div id="portfolioMonthly" class="portfolio-list"></div>
+                        <div class="portfolio-subtotal">Subtotal: <strong id="portfolioMonthlyTotal">₹0</strong></div>
+                    </div>
+                    <div class="portfolio-group">
+                        <h4>One-Time Investments (from Budget)</h4>
+                        <div id="portfolioOneTime" class="portfolio-list"></div>
+                        <div class="portfolio-subtotal">Subtotal: <strong id="portfolioOneTimeTotal">₹0</strong></div>
+                    </div>
+                    <div class="portfolio-grand-total">
+                        <span>Total Portfolio Value</span>
+                        <strong id="portfolioGrandTotal">₹0</strong>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Edit Mode -->
+            <div id="inflowTabEdit" class="investment-edit" hidden>
+                <form class="entry-form" id="inflowForm" autocomplete="off">
+                    <div id="inflowDynamicFields"></div>
+                    <div class="field field-btn">
+                        <button type="submit" class="btn-add">Add Investment</button>
+                    </div>
+                </form>
+                <div class="table-wrap">
+                    <table>
+                        <thead id="inflowTableHead"></thead>
+                        <tbody id="inflowTableBody"></tbody>
+                    </table>
+                    <p class="empty-state" id="inflowEmptyState">No investments yet. Add one above.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Outflow Tab UI (Liabilities + recurring deductions) -->
+        <div id="outflowUI" class="monthly-fixed-expense-ui" hidden>
+            <div class="goal-header">
+                <h2>Outflow</h2>
+                <button type="button" id="toggleOutflowEdit" class="btn-nav btn-icon">Edit</button>
+            </div>
+
+            <!-- Outflow Summary -->
+            <div class="expense-summary expense-summary-grid summary-strip">
+                <div class="expense-summary-item">
+                    <span class="expense-summary-label">Fixed Monthly Income</span>
+                    <span class="summary-hint">Your salary / primary income</span>
+                    <strong id="outflowDisplayIncome">₹0</strong>
+                </div>
+                <div class="expense-summary-item">
+                    <span class="expense-summary-label">Monthly Fixed Outflow</span>
+                    <span class="summary-hint">Total of all monthly frequency outflows</span>
+                    <strong id="totalOutflowDeductions">₹0</strong>
+                </div>
+                <div class="expense-summary-item">
+                    <span class="expense-summary-label">Remaining After Deductions</span>
+                    <span class="summary-hint">Income minus monthly fixed outflow</span>
+                    <strong id="outflowRemainingToSpend" class="remaining-amount">₹0</strong>
+                </div>
+                <div class="expense-summary-item">
+                    <span class="expense-summary-label">Total Items</span>
+                    <strong id="totalOutflowItems">0</strong>
+                </div>
+            </div>
+
+            <!-- Preview Mode -->
+            <div id="outflowTabPreview" class="expense-preview">
+                <div class="charts-container">
+                    <div class="chart-section">
+                        <h3>Amount by Bank</h3>
+                        <div class="chart-wrapper">
+                            <canvas id="outflowBankChart"></canvas>
+                        </div>
+                    </div>
+                    <div class="chart-section">
+                        <h3>Amount by Type</h3>
+                        <div class="chart-wrapper">
+                            <canvas id="outflowTypeChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+                <div id="outflowSortFilter"></div>
+                <div id="outflowList" class="expenses-list"></div>
+            </div>
+
+            <!-- Edit Mode -->
+            <div id="outflowTabEdit" class="expense-edit" hidden>
+                <div class="income-field-row">
+                    <label class="income-field-label" for="monthlyIncomeInput">Fixed Monthly Income</label>
+                    <input type="number" id="monthlyIncomeInput" class="income-field-input" min="0" step="1" placeholder="Enter your monthly income">
+                </div>
+                <form class="entry-form" id="outflowForm" autocomplete="off">
+                    <div id="outflowDynamicFields"></div>
+                    <div class="field field-btn">
+                        <button type="submit" class="btn-add">Add Outflow</button>
+                    </div>
+                </form>
+                <div class="table-wrap">
+                    <table>
+                        <thead id="outflowTableHead"></thead>
+                        <tbody id="outflowTableBody"></tbody>
+                    </table>
+                    <p class="empty-state" id="outflowEmptyState">No outflow items yet. Add one above.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Insurance Tab UI -->
+        <div id="insuranceUI" class="insurance-ui" hidden>
+            <div class="goal-header">
+                <h2>Insurance</h2>
+                <button type="button" id="toggleInsuranceEdit" class="btn-nav btn-icon">Edit</button>
+            </div>
+
+            <!-- Insurance Summary -->
+            <div class="insurance-summary summary-strip">
+                <div class="insurance-summary-item">
+                    <span class="insurance-summary-label">Total Policies</span>
+                    <strong id="totalPolicies">0</strong>
+                </div>
+                <div class="insurance-summary-item">
+                    <span class="insurance-summary-label">Annual Premium Total</span>
+                    <span class="summary-hint">Sum of all premiums annualized</span>
+                    <strong id="totalAnnualPremium">₹0</strong>
+                </div>
+                <div class="insurance-summary-item">
+                    <span class="insurance-summary-label">Monthly Premium Load</span>
+                    <span class="summary-hint">Annual premiums ÷ 12</span>
+                    <strong id="monthlyPremiumLoad">₹0</strong>
+                </div>
+                <div class="insurance-summary-item">
+                    <span class="insurance-summary-label">Total Sum Assured</span>
+                    <strong id="totalSumAssured">₹0</strong>
+                </div>
+            </div>
+
+            <!-- Preview Mode -->
+            <div id="insuranceTabPreview" class="insurance-preview">
+                <div id="insuranceSortFilter"></div>
+                <div id="insuranceList" class="insurance-list"></div>
+            </div>
+
+            <!-- Edit Mode -->
+            <div id="insuranceTabEdit" class="insurance-edit" hidden>
+                <form class="entry-form" id="insuranceForm" autocomplete="off">
+                    <div id="insuranceDynamicFields"></div>
+                    <div class="field field-btn">
+                        <button type="submit" class="btn-add">Add Policy</button>
+                    </div>
+                </form>
+                <div class="table-wrap">
+                    <table>
+                        <thead id="insuranceTableHead"></thead>
+                        <tbody id="insuranceTableBody"></tbody>
+                    </table>
+                    <p class="empty-state" id="insuranceEmptyState">No insurance policies yet. Add one above.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Cards Specific UI -->
+        <div id="cardsUI" class="cards-ui" hidden>
+            <div class="goal-header">
+                <h2 class="page-title-visually-hidden">Accounts</h2>
+                <button type="button" id="toggleCardEdit" class="btn-nav btn-icon">Edit</button>
+            </div>
+
+            <!-- Card Summary -->
+            <div class="card-summary summary-strip">
+                <div class="card-summary-item">
+                    <span class="card-summary-label">No of Accounts</span>
+                    <span class="card-summary-desc">Total number of bank accounts</span>
+                    <strong id="totalBanks">0</strong>
+                </div>
+                <div class="card-summary-item">
+                    <span class="card-summary-label">No of Debit Cards</span>
+                    <span class="card-summary-desc">Total number of debit cards linked to accounts</span>
+                    <strong id="totalDebitCards">0</strong>
+                </div>
+                <div class="card-summary-item">
+                    <span class="card-summary-label">Total Balance</span>
+                    <span class="card-summary-desc">Total balance across all bank accounts</span>
+                    <strong id="totalBalance">₹0</strong>
+                </div>
+                <div class="card-summary-item">
+                    <span class="card-summary-label">No of Credit Cards</span>
+                    <span class="card-summary-desc">Total number of credit cards</span>
+                    <strong id="totalCreditCards">0</strong>
+                </div>
+                <div class="card-summary-item">
+                    <span class="card-summary-label">Total Credit Limit</span>
+                    <span class="card-summary-desc">Total credit limit across all credit cards</span>
+                    <strong id="totalCreditLimit">₹0</strong>
+                </div>
+            </div>
+
+            <!-- Account Balance & Credit Limit Chart -->
+            <div class="chart-section" style="margin-top: 24px;">
+                <h3 style="font-size: 0.9rem; font-weight: 600; color: var(--text); margin-bottom: 12px;">Account Balance & Credit Limit</h3>
+                <div class="chart-wrapper">
+                    <canvas id="accountsChart"></canvas>
+                </div>
+            </div>
+
+            <!-- Preview Mode -->
+            <div id="cardPreview" class="card-preview">
+                <div id="cardsList" class="cards-list"></div>
+            </div>
+
+            <!-- Edit Mode -->
+            <div id="cardEdit" class="card-edit" hidden>
+                <form class="entry-form" id="cardForm" autocomplete="off">
+                    <div id="cardDynamicFields"></div>
+                    <div class="field field-btn">
+                        <button type="submit" class="btn-add">Add Card</button>
+                    </div>
+                </form>
+                <div class="table-wrap">
+                    <table>
+                        <thead id="cardTableHead"></thead>
+                        <tbody id="cardTableBody"></tbody>
+                    </table>
+                    <p class="empty-state" id="cardEmptyState">No cards yet. Add one above.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Net Worth Specific UI -->
+        <div id="netWorthUI" class="net-worth-ui" hidden>
+            <div class="goal-header">
+                <h2>Net Worth</h2>
+                <button type="button" id="toggleNetWorthEdit" class="btn-nav btn-icon">Edit</button>
+            </div>
+
+            <!-- Current Age Display (view mode) -->
+            <!-- Age Display & Net Worth Summary -->
+            <div id="netWorthSummaryCards" style="margin-bottom: var(--space-lg);">
+                <div class="age-display-section" id="ageDisplaySection" style="margin-bottom: var(--space-lg);">
+                    <div class="age-display-row">
+                        <div>
+                            <span class="age-display-label">Current Age</span>
+                            <strong id="currentAgeDisplay">—</strong>
+                        </div>
+                        <div class="age-display-divider">|</div>
+                        <div>
+                            <span class="age-display-label">Location</span>
+                            <strong id="currentLocationDisplay">—</strong>
+                        </div>
+                    </div>
+                    <span class="age-display-hint">(auto-calculated from Date of Birth & Registration)</span>
+                </div>
+
+                <!-- Net Worth Summary -->
+                <div id="netWorthSummary" class="net-worth-summary summary-strip">
+                    <div class="net-worth-summary-item">
+                        <span class="net-worth-summary-label">Total Assets</span>
+                        <span class="net-worth-summary-desc">Total value of all assets (property, investments, etc.)</span>
+                        <strong id="totalAssets">₹0</strong>
+                    </div>
+                    <div class="net-worth-summary-item">
+                        <span class="net-worth-summary-label">Total Liabilities</span>
+                        <span class="net-worth-summary-desc">Total value of all liabilities (loans, debts, etc.)</span>
+                        <strong id="totalLiabilities">₹0</strong>
+                    </div>
+                    <div class="net-worth-summary-item">
+                        <span class="net-worth-summary-label">Net Worth Today</span>
+                        <span class="net-worth-summary-desc">Current net worth (assets minus liabilities)</span>
+                        <strong id="netWorthToday">₹0</strong>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Preview Mode -->
+            <div id="netWorthPreview" class="net-worth-preview">
+                <div class="assets-liabilities-section">
+                    <h3>Assets</h3>
+                    <div id="assetsList" class="assets-liabilities-list"></div>
+                </div>
+                <div class="assets-liabilities-section">
+                    <h3>Liabilities</h3>
+                    <div id="liabilitiesList" class="assets-liabilities-list"></div>
+                </div>
+                <div class="chart-section">
+                    <h3>Net Worth Projection (Till Age 70)</h3>
+                    <div class="chart-wrapper" style="height: 280px;">
+                        <canvas id="netWorthProjectionChart"></canvas>
+                    </div>
+                </div>
+                <div class="projection-details">
+                    <div class="projection-detail-item">
+                        <span class="projection-detail-label">Projected Net Worth at Age 70</span>
+                        <strong id="projectedNetWorth">₹0</strong>
+                    </div>
+                    <div class="projection-detail-item">
+                        <span class="projection-detail-label">Inflation-Adjusted (6%)</span>
+                        <strong id="inflationAdjustedNetWorth">₹0</strong>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Edit Mode -->
+            <div id="netWorthEdit" class="net-worth-edit" hidden>
+                <form class="entry-form" id="netWorthForm" autocomplete="off">
+                    <div id="netWorthDynamicFields"></div>
+                    <div class="field field-btn">
+                        <button type="submit" class="btn-add">Add Asset/Liability</button>
+                    </div>
+                </form>
+                <div class="table-wrap">
+                    <table>
+                        <thead id="netWorthTableHead"></thead>
+                        <tbody id="netWorthTableBody"></tbody>
+                    </table>
+                    <p class="empty-state" id="netWorthEmptyState">No assets or liabilities yet. Add one above.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tax Plan Specific UI -->
+        <div id="taxPlanUI" class="tax-plan-ui" hidden>
+            <div class="goal-header">
+                <h2>Tax Plan</h2>
+                <button type="button" id="toggleTaxPlanEdit" class="btn-nav btn-icon">Edit</button>
+            </div>
+
+            <!-- Tax Regime Selection -->
+            <div class="tax-regime-section">
+                <div class="field">
+                    <label for="taxRegime">Tax Regime</label>
+                    <select id="taxRegime">
+                        <option value="new">New Tax Regime</option>
+                        <option value="old">Old Tax Regime</option>
+                    </select>
+                </div>
+                <div class="field">
+                    <label for="financialYear">Financial Year</label>
+                    <select id="financialYear">
+                        <option value="2024-25">2024-25</option>
+                        <option value="2025-26">2025-26</option>
+                    </select>
+                </div>
+            </div>
+
+            <!-- Tax Summary -->
+            <div id="taxSummary" class="tax-summary summary-strip">
+                <div class="tax-summary-item">
+                    <span class="tax-summary-label">Annual Income (from Budget)</span>
+                    <span class="tax-summary-desc">Annual income including salary and house property income</span>
+                    <strong id="annualIncome">₹0</strong>
+                </div>
+                <div class="tax-summary-item">
+                    <span class="tax-summary-label">Total Deductions (incl. auto)</span>
+                    <span class="tax-summary-desc">Total deductions including standard deduction and eligible tax-saving investments</span>
+                    <strong id="totalDeductions">₹0</strong>
+                </div>
+                <div class="tax-summary-item">
+                    <span class="tax-summary-label">Taxable Income</span>
+                    <span class="tax-summary-desc">Income after standard deduction and eligible tax deductions</span>
+                    <strong id="taxableIncome">₹0</strong>
+                </div>
+                <div class="tax-summary-item">
+                    <span class="tax-summary-label">Annual Tax Liability</span>
+                    <span class="tax-summary-desc">Annual tax liability including cess</span>
+                    <strong id="annualTaxLiability">₹0</strong>
+                </div>
+                <div class="tax-summary-item">
+                    <span class="tax-summary-label">Tax Liability YTD</span>
+                    <span class="tax-summary-desc">Tax liability year-to-date (proportional to months passed in financial year)</span>
+                    <strong id="taxLiabilityYTD">₹0</strong>
+                </div>
+                <div class="tax-summary-item regime-recommend-card">
+                    <span class="tax-summary-label">Recommended Regime</span>
+                    <span class="tax-summary-desc">Tax regime with lower tax liability based on your income and deductions</span>
+                    <strong id="recommendedRegime">—</strong>
+                    <span id="regimeSavingsNote" class="regime-savings-note"></span>
+                </div>
+            </div>
+
+            <!-- Preview Mode -->
+            <div id="taxPlanPreview" class="tax-plan-preview">
+                <div id="taxSavingBanner" class="tax-saving-banner" style="display:none;"></div>
+                
+                <!-- Salary Details Section -->
+                <div class="tax-deductions-section">
+                    <h3>Salary Details</h3>
+                    <div id="salaryDetailsList" class="tax-deductions-list"></div>
+                </div>
+                
+                <!-- House Property Section -->
+                <div class="tax-deductions-section">
+                    <h3>House Property</h3>
+                    <div id="housePropertyList" class="tax-deductions-list"></div>
+                </div>
+                
+                <div class="tax-deductions-section">
+                    <h3>Tax Deductions</h3>
+                    <div id="taxDeductionsList" class="tax-deductions-list"></div>
+                </div>
+                
+                <!-- Tax Deductions Chart -->
+                <div class="chart-section">
+                    <h3>Tax Deductions by Section</h3>
+                    <div class="chart-wrapper">
+                        <canvas id="taxDeductionsChart"></canvas>
+                    </div>
+                </div>
+                
+                <div class="tax-breakdown-section">
+                    <h3>Tax Breakdown</h3>
+                    <div id="taxBreakdown" class="tax-breakdown"></div>
+                </div>
+            </div>
+
+            <!-- Edit Mode -->
+            <div id="taxPlanEdit" class="tax-plan-edit" hidden>
+                <!-- Salary Details Form -->
+                <div class="tax-subsection">
+                    <h4>Salary Details (Optional - for HRA exemption)</h4>
+                    <div class="entry-form">
+                        <div class="field">
+                            <label for="basicSalary">Basic Salary (₹/year)</label>
+                            <input type="number" id="basicSalary" placeholder="0" min="0">
+                        </div>
+                        <div class="field">
+                            <label for="hraReceived">HRA Received (₹/year)</label>
+                            <input type="number" id="hraReceived" placeholder="0" min="0">
+                        </div>
+                        <div class="field">
+                            <label for="rentPaid">Rent Paid (₹/year)</label>
+                            <input type="number" id="rentPaid" placeholder="0" min="0">
+                        </div>
+                        <div class="field">
+                            <label for="isMetroCity">Metro City?</label>
+                            <select id="isMetroCity">
+                                <option value="yes">Yes (50% HRA exemption)</option>
+                                <option value="no">No (40% HRA exemption)</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- House Property Form -->
+                <div class="tax-subsection">
+                    <h4>House Property (Optional - for Section 24(b))</h4>
+                    <div class="entry-form">
+                        <div class="field">
+                            <label for="rentalIncome">Rental Income (₹/year)</label>
+                            <input type="number" id="rentalIncome" placeholder="0" min="0">
+                        </div>
+                        <div class="field">
+                            <label for="municipalTaxes">Municipal Taxes Paid (₹/year)</label>
+                            <input type="number" id="municipalTaxes" placeholder="0" min="0">
+                        </div>
+                        <div class="field">
+                            <label for="homeLoanInterest">Home Loan Interest (₹/year)</label>
+                            <input type="number" id="homeLoanInterest" placeholder="0" min="0">
+                        </div>
+                        <div class="field">
+                            <label for="isSelfOccupied">Property Type</label>
+                            <select id="isSelfOccupied">
+                                <option value="yes">Self-Occupied (Max ₹2L interest deduction)</option>
+                                <option value="no">Let Out (No interest limit)</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Tax Saving Items Form -->
+                <div class="tax-subsection">
+                    <h4>Tax Saving Items</h4>
+                    <form class="entry-form" id="taxPlanForm" autocomplete="off">
+                        <div id="taxPlanDynamicFields"></div>
+                        <div class="field field-btn">
+                            <button type="submit" class="btn-add">Add Tax Saving Item</button>
+                        </div>
+                    </form>
+                    <div class="table-wrap">
+                        <table>
+                            <thead id="taxPlanTableHead"></thead>
+                            <tbody id="taxPlanTableBody"></tbody>
+                        </table>
+                        <p class="empty-state" id="taxPlanEmptyState">No tax saving items yet. Add one above.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Gifts Specific UI -->
+        <div id="giftsUI" class="gifts-ui" hidden>
+            <div class="goal-header">
+                <h2 class="page-title-visually-hidden">Gifts</h2>
+                <button type="button" id="toggleGiftsEdit" class="btn-nav btn-icon">Edit</button>
+            </div>
+
+            <!-- Gifts Summary -->
+            <div class="gifts-summary summary-strip">
+                <div class="gifts-summary-item">
+                    <span class="gifts-summary-label">Total Gifts</span>
+                    <span class="gifts-summary-desc">Total number of gifts tracked</span>
+                    <strong id="totalGiftsCount">0</strong>
+                </div>
+                <div class="gifts-summary-item">
+                    <span class="gifts-summary-label">Fixed Every Year (Count)</span>
+                    <span class="gifts-summary-desc">Number of gifts that occur every year</span>
+                    <strong id="fixedEveryYearCount">0</strong>
+                </div>
+                <div class="gifts-summary-item">
+                    <span class="gifts-summary-label">Fixed Every Year (Amount)</span>
+                    <span class="gifts-summary-desc">Total amount of fixed yearly gifts</span>
+                    <strong id="fixedEveryYearAmount">₹0</strong>
+                </div>
+                <div class="gifts-summary-item">
+                    <span class="gifts-summary-label">Spent This Year</span>
+                    <span class="gifts-summary-desc">Total amount spent on gifts this financial year (April-March)</span>
+                    <strong id="thisYearSpent">₹0</strong>
+                </div>
+                <div class="gifts-summary-item">
+                    <span class="gifts-summary-label">Overall Total</span>
+                    <span class="gifts-summary-desc">Total amount of all gifts</span>
+                    <strong id="overallTotal">₹0</strong>
+                </div>
+            </div>
+
+            <!-- Monthly Spending Chart -->
+            <div id="giftsMonthlyChartContainer" class="chart-container gifts-chart-container">
+                <h3>Monthly Gift Spending</h3>
+                <p class="chart-subtitle">Current financial year</p>
+                <canvas id="giftsMonthlyChart"></canvas>
+            </div>
+
+            <!-- Preview Mode -->
+            <div id="giftsPreview" class="gifts-preview">
+                <div id="giftsSortFilter"></div>
+                <div id="giftsList" class="gifts-list"></div>
+            </div>
+
+            <!-- Edit Mode -->
+            <div id="giftsEdit" class="gifts-edit" hidden>
+                <form class="entry-form" id="giftsForm" autocomplete="off">
+                    <div id="giftsDynamicFields"></div>
+                    <div class="field field-btn">
+                        <button type="submit" class="btn-add">Add Gift</button>
+                    </div>
+                </form>
+                <div class="table-wrap">
+                    <table>
+                        <thead id="giftsTableHead"></thead>
+                        <tbody id="giftsTableBody"></tbody>
+                    </table>
+                    <p class="empty-state" id="giftsEmptyState">No gifts yet. Add one above.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Emergency Fund Specific UI -->
+        <div id="emergencyFundUI" class="emergency-fund-ui" hidden>
+            <div class="goal-header">
+                <h2>Emergency Fund</h2>
+                <button type="button" id="toggleEmergencyFundEdit" class="btn-nav btn-icon">Edit</button>
+            </div>
+
+            <!-- Preview Mode -->
+            <div id="emergencyFundPreview">
+                <!-- Emergency Fund Summary -->
+                <div class="emergency-fund-summary summary-strip">
+                    <div class="emergency-fund-summary-item">
+                        <span class="emergency-fund-summary-label">Current Emergency Fund</span>
+                        <strong id="currentEmergencyFundDisplay">₹0</strong>
+                        <span id="currentEmergencyFundNotes" class="summary-notes"></span>
+                    </div>
+                    <div class="emergency-fund-summary-item">
+                        <span class="emergency-fund-summary-label">Minimum Monthly Need</span>
+                        <span class="summary-hint">Fixed liabilities + expenditures + avg variable (no saving/investment)</span>
+                        <strong id="averageMonthlyExpenses">₹0</strong>
+                    </div>
+                    <div class="emergency-fund-summary-item">
+                        <span class="emergency-fund-summary-label">3 Months (Bare Minimum)</span>
+                        <strong id="threeMonthsNeeded">₹0</strong>
+                    </div>
+                    <div class="emergency-fund-summary-item">
+                        <span class="emergency-fund-summary-label">6 Months (Recommended)</span>
+                        <strong id="sixMonthsNeeded">₹0</strong>
+                    </div>
+                    <div class="emergency-fund-summary-item">
+                        <span class="emergency-fund-summary-label">12 Months (Ideal)</span>
+                        <strong id="twelveMonthsNeeded">₹0</strong>
+                    </div>
+                </div>
+
+                <!-- Monthly Need Breakdown -->
+                <div class="expense-transfer-section">
+                    <h3>Monthly Need Breakdown</h3>
+                    <div id="emergencyFundBreakdown" class="ef-breakdown"></div>
+                </div>
+
+                <!-- Status Display -->
+                <div class="emergency-fund-status" id="emergencyFundStatus">
+                    <div class="status-badge" id="statusBadge">-</div>
+                    <div class="status-details">
+                        <div class="status-detail">
+                            <span class="status-detail-label">Shortfall (vs 6 months)</span>
+                            <strong id="amountNeeded">₹0</strong>
+                        </div>
+                        <div class="status-detail">
+                            <span class="status-detail-label">Months Covered</span>
+                            <strong id="monthsCovered">0</strong>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Edit Mode -->
+            <div id="emergencyFundEdit" class="emergency-fund-edit" hidden>
+                <form class="entry-form" id="emergencyFundForm" autocomplete="off">
+                    <div id="emergencyFundDynamicFields"></div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Standard UI for other tabs -->
+        <div id="standardUI" hidden>
+            <form class="entry-form" id="entryForm" autocomplete="off">
+                <div id="dynamicFields"></div>
+                <div class="field field-btn">
+                    <button type="submit" class="btn-add">Add</button>
+                </div>
+            </form>
+
+            <div class="toolbar">
+                <input id="searchInput" type="search" placeholder="Search items…" class="search-box">
+                <button type="button" id="exportBtn" class="btn-export">Export Excel</button>
+                <button type="button" id="exportPdfBtn" class="btn-export">Export PDF</button>
+                <button type="button" id="clearTab" class="btn-danger">Clear Tab</button>
+                <button type="button" id="resetAllData" class="btn-danger">Reset All Data</button>
+            </div>
+
+            <div class="table-wrap">
+                <table>
+                    <thead id="tableHead"></thead>
+                    <tbody id="entryRows"></tbody>
+                </table>
+                <p class="empty-state" id="emptyState">No items yet. Add one above.</p>
+            </div>
+        </div>
+    </section>
+
+</main>
+
+<!-- ── SETTINGS PANEL ───────────────────────────────── -->
+<div id="settingsOverlay" class="settings-overlay" hidden></div>
+<div id="settingsPanel" class="settings-panel" aria-hidden="true">
+    <div class="settings-header">
+        <h2>Settings</h2>
+        <button type="button" id="closeSettingsBtn" class="btn-icon-only" aria-label="Close settings">
+            <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="6" y1="6" x2="18" y2="18"/><line x1="18" y1="6" x2="6" y2="18"/></svg>
+        </button>
+    </div>
+
+    <!-- App Information -->
+    <div class="settings-section">
+        <h3 class="settings-section-title">App Information</h3>
+        <div class="settings-row">
+            <div>
+                <div class="settings-row-label">Version</div>
+                <div class="settings-row-sub" id="settingsVersionDisplay">Loading...</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Appearance -->
+    <div class="settings-section">
+        <h3 class="settings-section-title">Appearance</h3>
+        <div class="settings-row">
+            <div>
+                <div class="settings-row-label">Theme</div>
+                <div class="settings-row-sub">Switch between dark and light mode</div>
+            </div>
+            <button type="button" id="themeToggle" class="theme-switch-btn">
+                <svg class="theme-icon sun-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16">
+                    <circle cx="12" cy="12" r="5"/>
+                    <line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/>
+                    <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/>
+                    <line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/>
+                    <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>
+                </svg>
+                <svg class="theme-icon moon-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16" hidden>
+                    <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
+                </svg>
+                <span id="themeLabel">Light Mode</span>
+            </button>
+        </div>
+    </div>
+
+    <!-- Account Settings -->
+    <div class="settings-section">
+        <h3 class="settings-section-title">Account Settings</h3>
+        <div class="settings-row">
+            <div>
+                <div class="settings-row-label">Your Name</div>
+                <div class="settings-row-sub" id="currentNameDisplay">Loading...</div>
+            </div>
+            <button type="button" id="editNameBtn" class="btn-settings-action">Edit</button>
+        </div>
+        <div class="settings-row" id="nameEditRow" hidden>
+            <input type="text" id="editNameInput" class="settings-input" placeholder="Enter your name">
+            <button type="button" id="saveNameBtn" class="btn-settings-action">Save</button>
+            <button type="button" id="cancelNameBtn" class="btn-settings-action" style="background:var(--dim)">Cancel</button>
+        </div>
+        <div class="settings-row">
+            <div>
+                <div class="settings-row-label">Location</div>
+                <div class="settings-row-sub" id="settingsLocationDisplay">Loading...</div>
+            </div>
+            <button type="button" id="editLocationBtn" class="btn-settings-action">Edit</button>
+        </div>
+        <div class="settings-row" id="locationEditRow" hidden>
+            <select id="editLocationInput" class="settings-input">
+                <option value="Bengaluru, Karnataka, India">Bengaluru, Karnataka, India</option>
+                <option value="Mumbai, Maharashtra, India">Mumbai, Maharashtra, India</option>
+                <option value="Delhi, Delhi, India">Delhi, Delhi, India</option>
+                <option value="Pune, Maharashtra, India">Pune, Maharashtra, India</option>
+                <option value="Hyderabad, Telangana, India">Hyderabad, Telangana, India</option>
+                <option value="Chennai, Tamil Nadu, India">Chennai, Tamil Nadu, India</option>
+                <option value="Kolkata, West Bengal, India">Kolkata, West Bengal, India</option>
+                <option value="Ahmedabad, Gujarat, India">Ahmedabad, Gujarat, India</option>
+                <option value="Jaipur, Rajasthan, India">Jaipur, Rajasthan, India</option>
+                <option value="Lucknow, Uttar Pradesh, India">Lucknow, Uttar Pradesh, India</option>
+                <option value="Chandigarh, Chandigarh, India">Chandigarh, Chandigarh, India</option>
+                <option value="Kochi, Kerala, India">Kochi, Kerala, India</option>
+                <option value="Indore, Madhya Pradesh, India">Indore, Madhya Pradesh, India</option>
+                <option value="Coimbatore, Tamil Nadu, India">Coimbatore, Tamil Nadu, India</option>
+                <option value="Bhopal, Madhya Pradesh, India">Bhopal, Madhya Pradesh, India</option>
+                <option value="Visakhapatnam, Andhra Pradesh, India">Visakhapatnam, Andhra Pradesh, India</option>
+                <option value="Nagpur, Maharashtra, India">Nagpur, Maharashtra, India</option>
+                <option value="Surat, Gujarat, India">Surat, Gujarat, India</option>
+                <option value="Gurgaon, Haryana, India">Gurgaon, Haryana, India</option>
+                <option value="Noida, Uttar Pradesh, India">Noida, Uttar Pradesh, India</option>
+                <option value="Other">Other (Custom City)</option>
+            </select>
+            <button type="button" id="saveLocationBtn" class="btn-settings-action">Save</button>
+            <button type="button" id="cancelLocationBtn" class="btn-settings-action" style="background:var(--dim)">Cancel</button>
+        </div>
+        <div class="settings-row" id="customLocationEditRow" hidden>
+            <input type="text" id="editCustomLocationInput" class="settings-input" placeholder="e.g. Mysore, Karnataka, India">
+            <button type="button" id="saveCustomLocationBtn" class="btn-settings-action">Save</button>
+            <button type="button" id="cancelCustomLocationBtn" class="btn-settings-action" style="background:var(--dim)">Cancel</button>
+        </div>
+    </div>
+
+    <!-- Data Management -->
+    <div class="settings-section">
+        <h3 class="settings-section-title">Data Management</h3>
+        <div class="settings-action-row">
+            <div>
+                <div class="settings-row-label">Download Dashboard Report</div>
+                <div class="settings-row-sub">Download comprehensive dashboard summary. Desktop: Open file and press Ctrl+P to save as PDF. Mobile: Use browser's share/print menu.</div>
+            </div>
+            <button type="button" id="downloadDashboardBtn" class="btn-settings-action">Download Report</button>
+        </div>
+        <div class="settings-action-row">
+            <div>
+                <div class="settings-row-label">Export All Data</div>
+                <div class="settings-row-sub">Download a backup of all your financial data</div>
+            </div>
+            <button type="button" id="exportDataBtn" class="btn-settings-action">Export (.json)</button>
+        </div>
+        <div class="settings-action-row">
+            <div>
+                <div class="settings-row-label">Import Data</div>
+                <div class="settings-row-sub">Restore from a previously exported backup</div>
+            </div>
+            <label class="btn-settings-action import-label">
+                Import File
+                <input type="file" id="importFileInput" accept=".json" hidden>
+            </label>
+        </div>
+        <div class="settings-action-row">
+            <div>
+                <div class="settings-row-label">App Logs</div>
+                <div class="settings-row-sub">View application logs and debug information</div>
+            </div>
+            <button type="button" id="logsBtn" class="btn-settings-action">View Logs</button>
+        </div>
+    </div>
+
+    <!-- Danger Zone -->
+    <div class="settings-section danger-section">
+        <h3 class="settings-section-title danger-title">Danger Zone</h3>
+        <div class="settings-action-row">
+            <div>
+                <div class="settings-row-label">Reset All Data</div>
+                <div class="settings-row-sub">Permanently delete all your data and start fresh</div>
+            </div>
+            <button type="button" id="resetDataBtn" class="btn-danger-action">Reset</button>
+        </div>
+        <div class="settings-action-row" style="margin-top:12px;">
+            <div>
+                <div class="settings-row-label">Delete Account</div>
+                <div class="settings-row-sub">Permanently delete your account, all financial data, and sign out. This cannot be recovered.</div>
+            </div>
+            <button type="button" id="deleteAccountBtn" class="btn-danger-action" style="background:#7f1d1d;">Delete Account</button>
+        </div>
+    </div>
+</div>
+
+</div>
+
+<!-- ── HELP PANEL ─────────────────────────────────────── -->
+<div id="helpOverlay" class="settings-overlay" hidden></div>
+<div id="helpPanel" class="settings-panel help-panel" aria-hidden="true">
+    <div class="settings-header">
+        <h2>Help & User Guide</h2>
+        <button type="button" id="closeHelpBtn" class="btn-icon-only" aria-label="Close help">
+            <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="6" y1="6" x2="18" y2="18"/><line x1="18" y1="6" x2="6" y2="18"/></svg>
+        </button>
+    </div>
+    <div class="help-content">
+
+        <!-- Quick Start -->
+        <details class="help-section" open>
+            <summary class="help-section-title">Quick Start Guide</summary>
+            <div class="help-body">
+                <ol>
+                    <li><strong>Accounts</strong> — Add a <em>Primary (Expenditure)</em> + <em>Salary</em> account to unlock all tabs</li>
+                    <li><strong>Accounts</strong> — Optionally add Saving &amp; Investment accounts</li>
+                    <li><strong>Outflow</strong> — Add ALL fixed deductions (EMIs, rent, insurance, savings, investments)</li>
+                    <li><strong>Budget</strong> — Enter Primary Income → Review breakdown → Execute Transfer</li>
+                    <li><strong>Mid-month</strong> — Quick Update: enter current expenditure balance + CC spending</li>
+                    <li><strong>Month end</strong> — Close Month → carries balance forward</li>
+                </ol>
+                <div class="help-warning">Important: Add all outflow items <strong>before</strong> Execute Transfer. Items added afterwards will not be deducted from salary.</div>
+            </div>
+        </details>
+
+        <!-- Network Status Indicator -->
+        <details class="help-section">
+            <summary class="help-section-title">Network Status Indicator</summary>
+            <div class="help-body">
+                <p>The network status indicator appears in the user bar (next to your email) and shows the Firebase save status.</p>
+                <h4>Status States</h4>
+                <table class="help-table">
+                    <tr><td>Green checkmark with circle</td><td>Data saved successfully (auto-hides after 2 seconds)</td></tr>
+                    <tr><td>Yellow refresh arrows (blinking)</td><td>Retrying save due to network issue (stays visible)</td></tr>
+                    <tr><td>Red circle with exclamation</td><td>Save failed (stays visible)</td></tr>
+                    <tr><td>Red WiFi with slash</td><td>Browser is offline (stays visible)</td></tr>
+                    <tr><td>Red triangle alert</td><td>Quota exceeded (stays visible)</td></tr>
+                    <tr><td>Yellow refresh arrows with slash</td><td>Reconnecting (stays visible)</td></tr>
+                </table>
+                <h4>Interaction</h4>
+                <p><strong>Desktop:</strong> Hover over the icon to see detailed status text</p>
+                <p><strong>Mobile:</strong> Tap the icon to see details (icon only shown for space efficiency)</p>
+                <h4>Auto-Hide Behavior</h4>
+                <p>Success state (green checkmark) automatically hides after 2 seconds. Warning and error states stay visible until resolved.</p>
+            </div>
+        </details>
+
+        <!-- Monthly Budget -->
+        <details class="help-section">
+            <summary class="help-section-title">Monthly Budget</summary>
+            <div class="help-body">
+                <h4>Flow</h4>
+                <p>Enter Income → Execute Transfer → Quick Update (mid-month) → Close Month</p>
+                <h4>Key Fields</h4>
+                <table class="help-table">
+                    <tr><td><strong>Total Inflow</strong></td><td>Sum of all Cash Inflow fields</td></tr>
+                    <tr><td><strong>Total Outflow</strong></td><td>Recurring outflow only (excludes On-Demand)</td></tr>
+                    <tr><td><strong>Total Spendable</strong></td><td>Inflow − Fixed Outflow</td></tr>
+                    <tr><td><strong>Variable Expenditure</strong></td><td>totalFunded − current exp balance (auto)</td></tr>
+                    <tr><td><strong>Variable Expenses</strong></td><td>Variable Expenditure + CC Spending</td></tr>
+                </table>
+                <h4>Transfer Mismatch</h4>
+                <p>If outflows change after transfer, a red warning appears. Click <strong>Recalculate Transfer</strong> to fix.</p>
+                <h4>Pie Chart</h4>
+                <p>6 categories: Investment, Liability, Savings, Expenditure, Insurance, Others. Recurring only — excludes one-time/on-demand.</p>
+            </div>
+        </details>
+
+        <!-- Accounts -->
+        <details class="help-section">
+            <summary class="help-section-title">Accounts</summary>
+            <div class="help-body">
+                <table class="help-table">
+                    <tr><td><strong>Primary (Expenditure)</strong></td><td>Exactly one account must be marked as primary.</td></tr>
+                    <tr><td><strong>Salary</strong></td><td>Exactly one transit account. This is auto-managed.</td></tr>
+                    <tr><td><strong>Saving</strong></td><td>At most one savings account. Credited on transfer.</td></tr>
+                    <tr><td><strong>Investment</strong></td><td>Credited on transfer</td></tr>
+                    <tr><td><strong>Others</strong></td><td>Custom purpose (Travel Fund, Family Fund, etc.)</td></tr>
+                </table>
+                <p><strong>Tip:</strong> Set balance to 0 if starting fresh. Enter actual bank balance otherwise.</p>
+            </div>
+        </details>
+
+        <!-- Outflow -->
+        <details class="help-section">
+            <summary class="help-section-title">Outflow (Fixed Deductions)</summary>
+            <div class="help-body">
+                <p>Recurring deductions auto-debited from Salary during Execute Transfer.</p>
+                <h4>Routing by Type</h4>
+                <table class="help-table">
+                    <tr><td>Liability</td><td>Leaves system (lender)</td></tr>
+                    <tr><td>Insurance</td><td>Leaves system (insurer)</td></tr>
+                    <tr><td>Saving</td><td>→ Saving account</td></tr>
+                    <tr><td>Investment</td><td>→ Investment account</td></tr>
+                    <tr><td>Expenditure</td><td>→ Primary account</td></tr>
+                </table>
+                <h4>Frequency Conversion</h4>
+                <p>Quarterly ÷ 3, Semi-Annual ÷ 6, Annual ÷ 12. <strong>One-Time items excluded</strong> from auto-debit.</p>
+            </div>
+        </details>
+
+        <!-- Variable Expenditure -->
+        <details class="help-section">
+            <summary class="help-section-title">Variable Expenditure Formula</summary>
+            <div class="help-body">
+                <pre class="help-formula">Variable Expenditure = totalFunded − current exp balance</pre>
+                <p>Where:</p>
+                <pre class="help-formula">totalFunded = carry forward + salary leftover + pre-existing balance</pre>
+                <p>This snapshot (<code>_initialBalance</code>) is captured at Execute Transfer and doesn't change during the month.</p>
+                <p>Click the <strong>auto</strong> badge to see the breakdown.</p>
+            </div>
+        </details>
+
+        <!-- Investments -->
+        <details class="help-section">
+            <summary class="help-section-title">Investments</summary>
+            <div class="help-body">
+                <p><strong>Existing</strong> — Lump sum (FDs, stocks, bonds, real estate)</p>
+                <p><strong>Monthly</strong> — Recurring (SIPs, RDs)</p>
+                <p><strong>Portfolio Summary</strong> — Consolidated view from all sources</p>
+                <p><strong>On-Demand Investment</strong> — Enter ad-hoc/one-time investments in the Budget edit page. This field is fully editable for flexible monthly investment planning.</p>
+            </div>
+        </details>
+
+        <!-- Financial Goals -->
+        <details class="help-section">
+            <summary class="help-section-title">Financial Goals</summary>
+            <div class="help-body">
+                <h4>Goal Type Auto-Selection</h4>
+                <p>The system automatically selects the goal type based on your target date:</p>
+                <table class="help-table">
+                    <tr><td>Short Term</td><td>≤ 1 year from today</td></tr>
+                    <tr><td>Mid Term</td><td>1-3 years from today</td></tr>
+                    <tr><td>Long Term</td><td>> 3 years from today</td></tr>
+                </table>
+                <p><strong>Default:</strong> Long Term if no target date is selected</p>
+                <h4>Manual Override</h4>
+                <p>You can manually change the goal type if needed. Once you manually change the type, the system will respect your choice and won't auto-select again for that goal.</p>
+                <h4>Status Auto-Calculation</h4>
+                <p>Status is automatically calculated based on progress and target date. You don't need to manually set it.</p>
+                <p><strong>Planned:</strong> No progress yet</p>
+                <p><strong>Ongoing:</strong> Progress started but not complete</p>
+                <p><strong>Achieved:</strong> Goal fully funded</p>
+                <p><strong>Missed:</strong> Target date passed without completion</p>
+                <p><strong>Covered:</strong> Goal funded from other sources</p>
+            </div>
+        </details>
+
+        <!-- Emergency Fund, Net Worth, etc. -->
+        <details class="help-section">
+            <summary class="help-section-title">Emergency Fund</summary>
+            <div class="help-body">
+                <p><strong>Minimum Monthly Need</strong> = Fixed Liabilities/Insurance + Fixed Expenditure + Avg Variable Expenses</p>
+                <p>Saving/Investment excluded (can be paused in emergency).</p>
+                <p>Status: EXCELLENT (≥12 mo), READY (6–12), ADEQUATE (3–6), LOW (&lt;3)</p>
+            </div>
+        </details>
+
+        <details class="help-section">
+            <summary class="help-section-title">Net Worth</summary>
+            <div class="help-body">
+                <p>Each item shows: <strong>Current</strong>, <strong>@ 70 yrs</strong> (projected), <strong>@ 70 yrs real</strong> (inflation-adjusted at 6%).</p>
+                <p>Auto-imports account balances and outflow liabilities.</p>
+            </div>
+        </details>
+
+        <!-- Precautions -->
+        <details class="help-section">
+            <summary class="help-section-title">Precautions</summary>
+            <div class="help-body">
+                <h4>Before Transfer</h4>
+                <ul>
+                    <li>Add ALL outflow items first — transfer uses items that exist at the moment</li>
+                    <li>Verify Primary Income matches actual salary</li>
+                    <li>Ensure Saving/Investment accounts exist if applicable</li>
+                </ul>
+                <h4>During Month</h4>
+                <ul>
+                    <li>Update expenditure balance regularly via Quick Update</li>
+                    <li>If outflows change after transfer → use Recalculate Transfer</li>
+                    <li>Don't manually edit salary account balance</li>
+                </ul>
+                <h4>Month End</h4>
+                <ul>
+                    <li>Always Close Month before starting next</li>
+                    <li>Update exp balance before closing (affects carry forward)</li>
+                    <li>Export backup monthly for safety</li>
+                </ul>
+                <h4>Data Safety</h4>
+                <ul>
+                    <li>Always Export Backup before Reset All Data or Delete Account</li>
+                    <li>Import overwrites ALL data — export current data first</li>
+                </ul>
+            </div>
+        </details>
+
+        <!-- FAQ -->
+        <details class="help-section">
+            <summary class="help-section-title">Frequently Asked Questions</summary>
+            <div class="help-body">
+                <div class="help-faq">
+                    <strong>Q: I added outflows after Execute Transfer. What do I do?</strong>
+                    <p>A: A red "Transfer Mismatch Detected" banner will appear. Click Recalculate Transfer to fix.</p>
+                </div>
+                <div class="help-faq">
+                    <strong>Q: What is Variable Expenditure?</strong>
+                    <p>A: Auto-calculated as totalFunded − current exp balance. It tracks how much has left your expenditure account since transfer.</p>
+                </div>
+                <div class="help-faq">
+                    <strong>Q: Are One-Time items included in budget?</strong>
+                    <p>A: No. One-Time frequency items are excluded from auto-debit, pie charts, and Total Outflow. Tracked for reference only.</p>
+                </div>
+                <div class="help-faq">
+                    <strong>Q: How do I fix wrong data?</strong>
+                    <p>A: Export backup → edit the JSON → import the corrected file. For transfer issues, use the Recalculate button.</p>
+                </div>
+                <div class="help-faq">
+                    <strong>Q: What's the difference between Outflow and Insurance tabs?</strong>
+                    <p>A: Outflow = premium payments (auto-debited from salary). Insurance = policy details (coverage, nominees). Both should have matching entries for active policies.</p>
+                </div>
+                <div class="help-faq">
+                    <strong>Q: Can multiple users use this app?</strong>
+                    <p>A: Yes. Each user has their own account. Data is completely separate per user.</p>
+                </div>
+            </div>
+        </details>
+
+        <!-- Contact -->
+        <details class="help-section">
+            <summary class="help-section-title">Contact & Support</summary>
+            <div class="help-body">
+                <p>Need help or have feedback? Get in touch with us:</p>
+                <div style="margin-top: 16px;">
+                    <div style="margin-bottom: 12px;">
+                        <strong>Email:</strong>
+                        <p style="margin-top: 4px; color: var(--muted);">support@smartfin.example.com</p>
+                    </div>
+                    <div style="margin-bottom: 12px;">
+                        <strong>Phone:</strong>
+                        <p style="margin-top: 4px; color: var(--muted);">+91 96638 65026</p>
+                    </div>
+                    <div style="margin-bottom: 12px;">
+                        <strong>Support Hours:</strong>
+                        <p style="margin-top: 4px; color: var(--muted);">Monday - Friday, 9:00 AM - 6:00 PM IST</p>
+                    </div>
+                </div>
+                <div class="help-warning" style="margin-top: 16px;">
+                    📧 For bug reports or feature requests, please include your browser version and a detailed description of the issue.
+                </div>
+            </div>
+        </details>
+
+    </div>
+</div>
+
+<!-- ── QUICK UPDATE POPUP ─────────────────────────────────────── -->
+<div id="quickUpdateOverlay" class="settings-overlay" hidden></div>
+<div id="quickUpdatePanel" class="settings-panel help-panel" aria-hidden="true">
+    <div class="settings-header">
+        <h2>Quick Update</h2>
+        <button type="button" id="closeQuickUpdateBtn" class="btn-icon-only" aria-label="Close quick update">
+            <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="6" y1="6" x2="18" y2="18"/><line x1="18" y1="6" x2="6" y2="18"/></svg>
+        </button>
+    </div>
+    <div class="help-content">
+        <div style="padding: 16px;">
+            <div class="mid-month-field" style="margin-bottom: 16px;">
+                <label for="popupExpBalance">Expenditure Account Balance</label>
+                <span class="field-hint">Current balance in your spending account today</span>
+                <input type="number" id="popupExpBalance" min="0" step="1" placeholder="Current expenditure balance" style="width: 100%; padding: 8px 12px; border: 1px solid var(--border); border-radius: 6px; background: var(--surf1); color: var(--text);">
+            </div>
+            <div class="mid-month-field" style="margin-bottom: 16px;">
+                <label for="popupCCOutstanding">Current Month CC Spending</label>
+                <span class="field-hint">Total credit card purchases made this month so far</span>
+                <input type="number" id="popupCCOutstanding" min="0" step="1" placeholder="This month's CC spending" style="width: 100%; padding: 8px 12px; border: 1px solid var(--border); border-radius: 6px; background: var(--surf1); color: var(--text);">
+            </div>
+            <div id="popupQuickUpdateResult" class="quick-update-result" hidden style="margin-top: 12px; padding: 12px; background: var(--surf3); border-radius: 6px;">
+                <div class="quick-update-result-item">
+                    <span>Variable Expenditure</span>
+                    <strong id="popupQuickUpdateUntracked" style="color:#eab308">₹0</strong>
+                </div>
+                <span class="field-hint">Amount spent from expenditure account (funded − current balance)</span>
+            </div>
+            <div style="margin-top: 16px; display: flex; gap: 8px;">
+                <button type="button" id="popupUpdateExpBalance" class="btn-do-transfer" style="flex: 1;">Update Balance</button>
+                <button type="button" id="popupUpdateCCOutstanding" class="btn-do-transfer" style="flex: 1;">Update CC</button>
+            </div>
+            <button type="button" id="popupUpdateBoth" class="btn-do-transfer" style="width: 100%; margin-top: 8px;">Update Both</button>
+        </div>
+    </div>
+</div>
+
+<!-- ── APP LOGS PANEL ─────────────────────────────────────── -->
+<div id="logsOverlay" class="settings-overlay" hidden></div>
+<div id="logsPanel" class="settings-panel help-panel" aria-hidden="true">
+    <div class="settings-header">
+        <h2>App Logs</h2>
+        <button type="button" id="closeLogsBtn" class="btn-icon-only" aria-label="Close logs">
+            <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="6" y1="6" x2="18" y2="18"/><line x1="18" y1="6" x2="6" y2="18"/></svg>
+        </button>
+    </div>
+    <div class="help-content">
+        <div class="logs-controls">
+            <div class="logs-filter-group">
+                <label for="logSearchInput">Search:</label>
+                <input type="text" id="logSearchInput" placeholder="Search logs..." style="padding: 6px 12px; border: 1px solid var(--border); border-radius: 6px; background: var(--surf1); color: var(--text); width: 200px;">
+            </div>
+            <div class="logs-filter-group">
+                <label for="logLevelFilter">Log Level:</label>
+                <select id="logLevelFilter">
+                    <option value="all">All</option>
+                    <option value="info">Info</option>
+                    <option value="warning">Warning</option>
+                    <option value="error">Error</option>
+                </select>
+            </div>
+            <div class="logs-filter-group">
+                <label for="logRefreshBtn">Auto-Refresh:</label>
+                <button type="button" id="logRefreshBtn" class="btn-secondary">Refresh Now</button>
+            </div>
+            <div class="logs-filter-group">
+                <label for="logExportBtn">Export:</label>
+                <button type="button" id="logExportBtn" class="btn-secondary">Export Logs</button>
+            </div>
+            <div class="logs-filter-group">
+                <label for="logClearBtn">Clear:</label>
+                <button type="button" id="logClearBtn" class="btn-danger">Clear Local Logs</button>
+            </div>
+        </div>
+        <div class="logs-stats">
+            <span id="logsTotalCount">Total: 0</span>
+            <span id="logsInfoCount">Info: 0</span>
+            <span id="logsWarningCount">Warning: 0</span>
+            <span id="logsErrorCount">Error: 0</span>
+        </div>
+        <div id="logsTable" class="logs-table">
+            <div class="logs-empty">Loading logs...</div>
+        </div>
+    </div>
+</div>
+
+<!-- ── FOOTER ───────────────────────────────────────────── -->
+<footer class="app-footer">
+    <div class="footer-content">
+        <p>&copy; 2024-2026 Mrunal Kanta Muduli. All rights reserved.</p>
+        <p class="app-version" id="appVersionDisplay"></p>
+    </div>
+</footer>
+
+</div>
+
+<!-- Firebase SDKs (compat build — no bundler needed) -->
+<script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-check-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore-compat.js"></script>
+<!-- SheetJS + Chart.js are lazy-loaded on demand (see app.js loadScript) -->
+<script src="assets/js/firebase-config.js?v=1785884544"></script>
+<script type="module" src="assets/js/app.js?v=1785884544"></script>
+</body>
+</html>
