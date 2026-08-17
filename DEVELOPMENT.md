@@ -1,4 +1,4 @@
-# SmartFin – Developer Guide (v4.0.5)
+# SmartFin – Developer Guide (v5.3.0)
 
 > Local development, testing, and deployment instructions.
 

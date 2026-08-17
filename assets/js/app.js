@@ -1,5 +1,12 @@
-// ── SmartFin v4.0.1 ──────────────────────────────────────────────────────────
+// ── SmartFin v5.3.0 ──────────────────────────────────────────────────────────
 // Major Architecture Redesign: Modular business logic, platform-independent code
+// v5.3.0: Dynamic notification system, modern dark theme, enhanced insights & triggers
+//
+// VERSION MANAGEMENT:
+// APP_VERSION below is the SINGLE SOURCE OF TRUTH for version across the entire app.
+// When bumping version, use bump-version.sh (Linux/Mac) or bump-version.bat (Windows)
+// or push to main branch to trigger GitHub Actions auto-bump workflow.
+// This will automatically update all documentation files to match this version.
 
 import { showAlert, showConfirm, showPrompt, showTypedConfirm, showToast } from './modules/modal.js';
 import { renderDashboard } from './modules/dashboard.js';
@@ -591,7 +598,7 @@ function semanticBadgeStyle(value, paid = false) {
 }
 
 // ── Version Info ──────────────────────────────────────────────────────────────
-const APP_VERSION = { major: 4, minor: 0, build: 8 };
+const APP_VERSION = { major: 5, minor: 3, build: 0 };
 function getAppVersion() {
     return `v${APP_VERSION.major}.${APP_VERSION.minor}.${APP_VERSION.build}`;
 }
@@ -621,8 +628,8 @@ const DEFAULT_TABS = [
     { id: "financialGoal",       label: "Goals",                 semantic: "Savings", core: true },
     { id: "netWorth",            label: "Net Worth",             semantic: "Others" },
     { id: "taxPlan",             label: "Tax Plan",              semantic: "Savings" },
-    { id: "gifts",               label: "Gifts",                 semantic: "Others" },
-    { id: "emergencyFund",       label: "Emergency",             semantic: "Savings" }
+    { id: "emergencyFund",       label: "Emergency",             semantic: "Savings" },
+    { id: "gifts",               label: "Gifts",                 semantic: "Others" }
 ];
 
 // ── Tab-specific field configurations ───────────────────────────────────────
@@ -781,6 +788,8 @@ const dobField          = document.getElementById("dobField");
 const locationField     = document.getElementById("locationField");
 const customLocationField = document.getElementById("customLocationField");
 const logoutBtn         = document.getElementById("logoutBtn");
+const notificationBtn   = document.getElementById("notificationBtn");
+const notificationBadge = document.getElementById("notificationBadge");
 const themeToggle       = document.getElementById("themeToggle");
 const tabMenuToggle     = document.getElementById("tabMenuToggle");
 const tabList           = document.getElementById("tabList");
@@ -938,6 +947,7 @@ const cardDynamicFields = document.getElementById("cardDynamicFields");
 const cardTableHead     = document.getElementById("cardTableHead");
 const cardTableBody     = document.getElementById("cardTableBody");
 const cardEmptyState    = document.getElementById("cardEmptyState");
+const accountsChartCanvas = document.getElementById("accountsChart");
 
 // Net Worth refs
 const netWorthUI        = document.getElementById("netWorthUI");
@@ -975,6 +985,7 @@ let taxPlanTableHead = null;
 let taxPlanTableBody = null;
 let taxPlanEmptyState = null;
 let taxSavingBanner = null;
+let taxDeductionsChartCanvas = null;
 
 // Initialize tax plan elements after DOM is loaded
 function initTaxPlanElements() {
@@ -996,6 +1007,7 @@ function initTaxPlanElements() {
     taxPlanTableBody = document.getElementById("taxPlanTableBody");
     taxPlanEmptyState = document.getElementById("taxPlanEmptyState");
     taxSavingBanner = document.getElementById("taxSavingBanner");
+    taxDeductionsChartCanvas = document.getElementById("taxDeductionsChart");
 }
 
 // Gifts refs
@@ -1064,6 +1076,8 @@ let pieChart       = null; // Chart.js instance
 let annualPieChart = null;
 let expensePieChart = null; // Expense tracking pie chart
 let expensePieChartResizeHandler = null; // Store resize handler
+let accountsChart = null; // Accounts balance & credit limit chart
+let taxDeductionsChart = null; // Tax deductions chart
 let isBudgetEditMode = false;
 let isAnnualBudgetView = false;
 
@@ -1136,6 +1150,18 @@ const sectionConfig = {
 // ── Firebase handles ──────────────────────────────────────────────────────────
 const auth = firebase.auth();
 const db   = firebase.firestore();
+
+// ── Handle window resize for mobile/desktop name display ───────────────────
+window.addEventListener('resize', () => {
+    if (currentUser && appData) {
+        const fullName = appData.userName || currentUser.email;
+        const isMobile = window.innerWidth < 768;
+        const displayName = isMobile && fullName.includes(' ') 
+            ? fullName.split(' ')[0] 
+            : fullName;
+        userEmailDisplay.textContent = displayName;
+    }
+});
 
 // ── Auth state listener ───────────────────────────────────────────────────────
 auth.onAuthStateChanged(user => {
@@ -1315,6 +1341,612 @@ logoutBtn.addEventListener("click", () => {
     auth.signOut();
 });
 
+// ── Notification System ───────────────────────────────────────────────────────
+let notificationState = JSON.parse(localStorage.getItem('notificationState') || '{}');
+let notificationDismissTime = 10000; // 10 seconds auto-dismiss
+let notificationTriggers = []; // Store trigger functions
+
+function updateNotificationBadge(count) {
+    if (!notificationBadge) return;
+    
+    // Show badge if there are unread notifications
+    const unreadCount = count - (notificationState.viewedCount || 0);
+    if (unreadCount > 0) {
+        notificationBadge.textContent = unreadCount;
+        notificationBadge.hidden = false;
+    } else {
+        notificationBadge.hidden = true;
+    }
+}
+
+function getNotificationState() {
+    const today = new Date().toDateString();
+    if (notificationState.date !== today) {
+        // Reset for new day
+        notificationState = {
+            date: today,
+            viewedCount: 0,
+            cleared: false,
+            lastAlertsHash: null
+        };
+        localStorage.setItem('notificationState', JSON.stringify(notificationState));
+    }
+    return notificationState;
+}
+
+function shouldRegenerateAlerts(newAlerts) {
+    const state = getNotificationState();
+    
+    // If cleared, don't regenerate unless it's a new day
+    if (state.cleared) {
+        return false;
+    }
+    
+    // If no alerts, nothing to do
+    if (!newAlerts || newAlerts.length === 0) {
+        return true;
+    }
+    
+    // Calculate hash of alerts to detect changes
+    const alertsHash = JSON.stringify(newAlerts);
+    
+    // If alerts haven't changed, don't regenerate
+    if (state.lastAlertsHash === alertsHash) {
+        return false;
+    }
+    
+    // New alerts detected
+    state.lastAlertsHash = alertsHash;
+    state.viewedCount = 0; // Reset viewed count for new alerts
+    localStorage.setItem('notificationState', JSON.stringify(state));
+    return true;
+}
+
+// ── Notification Triggers ─────────────────────────────────────────────────────
+function registerNotificationTrigger(triggerFn) {
+    notificationTriggers.push(triggerFn);
+}
+
+function checkNotificationTriggers() {
+    const alerts = [];
+    
+    // Run all registered triggers
+    notificationTriggers.forEach(trigger => {
+        try {
+            const triggerAlerts = trigger();
+            if (triggerAlerts && triggerAlerts.length > 0) {
+                alerts.push(...triggerAlerts);
+            }
+        } catch (err) {
+            console.error('Notification trigger error:', err);
+        }
+    });
+    
+    // Remove duplicates
+    const uniqueAlerts = [];
+    const seen = new Set();
+    alerts.forEach(alert => {
+        const key = `${alert.type}-${alert.message}`;
+        if (!seen.has(key)) {
+            seen.add(key);
+            uniqueAlerts.push(alert);
+        }
+    });
+    
+    // Update if alerts changed
+    if (shouldRegenerateAlerts(uniqueAlerts)) {
+        window.currentAlerts = uniqueAlerts;
+        updateNotificationBadge(uniqueAlerts.length);
+        
+        // Auto-show if this is first load and not cleared
+        const state = getNotificationState();
+        if (!state.cleared && uniqueAlerts.length > 0) {
+            setTimeout(() => {
+                showNotificationPopup(uniqueAlerts);
+                state.viewedCount = uniqueAlerts.length;
+                localStorage.setItem('notificationState', JSON.stringify(state));
+            }, 2000);
+        }
+    }
+}
+
+// Register default notification triggers
+registerNotificationTrigger(() => {
+    const alerts = [];
+    const now = new Date();
+    const monthKey = getMonthKey(currentMonth);
+    const monthData = (appData.monthlyBudgetData || {})[monthKey] || {};
+    
+    // Over budget trigger
+    const inflowTotal = Object.values(monthData.inflow || {}).reduce((s, v) => s + Number(v || 0), 0);
+    const allOutflows = (appData.tabData || {}).outflow || [];
+    let fixedMonthlyOutflow = 0;
+    allOutflows.forEach(e => {
+        const amount = Number(e.amount || 0);
+        if (amount <= 0) return;
+        const freq = e.frequency || "Monthly";
+        const monthlyAmt = freq === "Monthly" ? amount : freq === "Quarterly" ? amount / 3 : freq === "Semi-Annual" ? amount / 6 : freq === "Annual" ? amount / 12 : amount;
+        fixedMonthlyOutflow += monthlyAmt;
+    });
+    const variableExp = Number(monthData.outflow?.variableExpenditure || 0);
+    const midMonthCC = Number(monthData.outflow?.midMonthCCOutstanding || 0);
+    const totalExpenses = variableExp + midMonthCC;
+    const budgetBalance = inflowTotal - fixedMonthlyOutflow - totalExpenses;
+    
+    if (budgetBalance < 0) {
+        alerts.push({
+            type: 'warning',
+            icon: 'alertSmall',
+            message: `Over budget by ${formatMoney(Math.abs(budgetBalance))} this month`,
+            action: 'monthlyBudget'
+        });
+    }
+    
+    // Emergency fund trigger
+    const emergencyFund = Number(monthData.inflow?.emergencyFund || 0);
+    const idealEmergencyFund = fixedMonthlyOutflow * 6;
+    if (emergencyFund < idealEmergencyFund * 0.5 && idealEmergencyFund > 0) {
+        alerts.push({
+            type: 'warning',
+            icon: 'alertSmall',
+            message: `Emergency fund below 50% of ideal (${formatMoney(emergencyFund)} / ${formatMoney(idealEmergencyFund)})`,
+            action: 'emergencyFund'
+        });
+    }
+    
+    // Credit card usage trigger
+    const cards = (appData.tabData || {}).cards || [];
+    const totalCreditLimit = cards.filter(c => c.creditCardPresent?.toLowerCase() === "yes")
+        .reduce((s, c) => s + Number(c.creditLimit || 0), 0);
+    const totalCreditCardUsage = midMonthCC;
+    
+    if (totalCreditCardUsage > 50000) {
+        alerts.push({
+            type: 'info',
+            icon: 'creditCardSmall',
+            message: `High credit card usage: ${formatMoney(totalCreditCardUsage)}`,
+            action: 'monthlyBudget'
+        });
+    }
+    
+    // Low savings rate trigger
+    const savingsRate = inflowTotal > 0 ? (budgetBalance / inflowTotal) : 0;
+    if (savingsRate < 0.1 && inflowTotal > 0) {
+        alerts.push({
+            type: 'warning',
+            icon: 'alertSmall',
+            message: `Low savings rate: ${Math.round(savingsRate * 100)}%. Aim for at least 20%`,
+            action: 'monthlyBudget'
+        });
+    }
+    
+    // No investments trigger
+    const inflowItems = normalizeInvestmentEntries((appData.tabData || {}).inflow || []);
+    const hasInvestments = inflowItems.some(item => Number(item.amount || 0) > 0);
+    if (!hasInvestments && inflowTotal > 10000) {
+        alerts.push({
+            type: 'info',
+            icon: 'trendingUpSmall',
+            message: 'No investments found. Start investing to grow your wealth',
+            action: 'inflow'
+        });
+    }
+    
+    return alerts;
+});
+
+// Goals behind schedule trigger
+registerNotificationTrigger(() => {
+    const alerts = [];
+    const now = new Date();
+    const goals = (appData.tabData || {}).financialGoal || [];
+    const ongoingGoals = goals.filter(g => {
+        const targetDate = g.targetDate ? new Date(g.targetDate) : null;
+        return targetDate && targetDate > now;
+    });
+    
+    const behindGoals = ongoingGoals.filter(g => {
+        if (!g.targetDate) return false;
+        const targetDate = new Date(g.targetDate);
+        const needed = Number(g.amountNeeded || 0);
+        const accumulated = Number(g.amountAccumulated || 0);
+        const daysToTarget = Math.ceil((targetDate - now) / (1000 * 60 * 60 * 24));
+        const expectedProgress = needed > 0 ? (accumulated / needed) * 100 : 0;
+        const timeProgress = daysToTarget > 0 ? 100 - (daysToTarget / 365) * 100 : 100;
+        return expectedProgress < timeProgress - 10; // 10% tolerance
+    });
+    
+    if (behindGoals.length > 0) {
+        alerts.push({
+            type: 'info',
+            icon: 'trendingUpSmall',
+            message: `${behindGoals.length} goal${behindGoals.length > 1 ? 's' : ''} behind schedule`,
+            action: 'financialGoal'
+        });
+    }
+    
+    // Goals nearing deadline
+    const upcomingGoals = ongoingGoals.filter(g => {
+        if (!g.targetDate) return false;
+        const targetDate = new Date(g.targetDate);
+        const daysToTarget = Math.ceil((targetDate - now) / (1000 * 60 * 60 * 24));
+        return daysToTarget > 0 && daysToTarget <= 30;
+    });
+    
+    if (upcomingGoals.length > 0) {
+        alerts.push({
+            type: 'info',
+            icon: 'calendarSmall',
+            message: `${upcomingGoals.length} goal${upcomingGoals.length > 1 ? 's' : ''} due within 30 days`,
+            action: 'financialGoal'
+        });
+    }
+    
+    // No goals trigger
+    if (goals.length === 0) {
+        alerts.push({
+            type: 'info',
+            icon: 'trendingUpSmall',
+            message: 'No financial goals set. Define your goals to track progress',
+            action: 'financialGoal'
+        });
+    }
+    
+    return alerts;
+});
+
+// Insurance coverage trigger
+registerNotificationTrigger(() => {
+    const alerts = [];
+    const insurancePolicies = (appData.tabData || {}).insurance || [];
+    
+    // Calculate recommended coverage
+    const salaryAccount = ((appData.tabData || {}).cards || []).find(c => c.purpose === "Salary" && c.isPrimary !== "Yes");
+    const annualSalary = salaryAccount ? Number(salaryAccount.balance || 0) * 12 : 0;
+    const idealHealthInsurance = annualSalary * 0.5; // 50% of annual salary
+    const idealTermInsurance = annualSalary * 10; // 10x annual salary
+    
+    let healthInsurance = 0;
+    let termInsurance = 0;
+    
+    insurancePolicies.forEach(policy => {
+        const annualPremium = policy.premiumFrequency === "Annual" ? Number(policy.amount || 0) :
+                              policy.premiumFrequency === "Quarterly" ? Number(policy.amount || 0) * 4 :
+                              policy.premiumFrequency === "Half-Yearly" ? Number(policy.amount || 0) * 2 :
+                              Number(policy.amount || 0) * 12;
+        
+        if (policy.type === "Health" || policy.type === "Critical Illness") {
+            healthInsurance += annualPremium;
+        }
+        if (policy.type === "Term Life") {
+            termInsurance += Number(policy.sumAssured || 0);
+        }
+    });
+    
+    if (healthInsurance < idealHealthInsurance * 0.7 && idealHealthInsurance > 0) {
+        alerts.push({
+            type: 'warning',
+            icon: 'hospitalSmall',
+            message: `Health insurance below recommended level`,
+            action: 'insurance'
+        });
+    }
+    
+    if (termInsurance < idealTermInsurance * 0.7 && idealTermInsurance > 0) {
+        alerts.push({
+            type: 'warning',
+            icon: 'shieldCheckSmall',
+            message: `Term insurance below recommended level`,
+            action: 'insurance'
+        });
+    }
+    
+    // No insurance trigger
+    if (insurancePolicies.length === 0 && annualSalary > 0) {
+        alerts.push({
+            type: 'warning',
+            icon: 'hospitalSmall',
+            message: 'No insurance policies found. Protect yourself with health and term insurance',
+            action: 'insurance'
+        });
+    }
+    
+    // Policy expiring soon
+    const now = new Date();
+    const expiringPolicies = insurancePolicies.filter(p => {
+        if (!p.expiryDate) return false;
+        const expiry = new Date(p.expiryDate);
+        const daysToExpiry = Math.ceil((expiry - now) / (1000 * 60 * 60 * 24));
+        return daysToExpiry > 0 && daysToExpiry <= 60;
+    });
+    
+    if (expiringPolicies.length > 0) {
+        alerts.push({
+            type: 'warning',
+            icon: 'calendarSmall',
+            message: `${expiringPolicies.length} insurance polic${expiringPolicies.length > 1 ? 'ies' : 'y'} expiring within 60 days`,
+            action: 'insurance'
+        });
+    }
+    
+    return alerts;
+});
+
+// Recurring expenses trigger
+registerNotificationTrigger(() => {
+    const alerts = [];
+    const outflows = (appData.tabData || {}).outflow || [];
+    
+    const upcomingExpenses = outflows.filter(item => {
+        if ((item.frequency || 'Monthly') === 'One-Time') return false;
+        return Number(item.amount || 0) > 0;
+    });
+    
+    if (upcomingExpenses.length > 3) {
+        alerts.push({
+            type: 'info',
+            icon: 'calendarSmall',
+            message: `${upcomingExpenses.length} recurring commitments this month`,
+            action: 'outflow'
+        });
+    }
+    
+    // High fixed expenses trigger
+    const monthKey = getMonthKey(currentMonth);
+    const monthData = (appData.monthlyBudgetData || {})[monthKey] || {};
+    const inflowTotal = Object.values(monthData.inflow || {}).reduce((s, v) => s + Number(v || 0), 0);
+    let fixedMonthlyOutflow = 0;
+    outflows.forEach(e => {
+        const amount = Number(e.amount || 0);
+        if (amount <= 0) return;
+        const freq = e.frequency || "Monthly";
+        const monthlyAmt = freq === "Monthly" ? amount : freq === "Quarterly" ? amount / 3 : freq === "Semi-Annual" ? amount / 6 : freq === "Annual" ? amount / 12 : amount;
+        fixedMonthlyOutflow += monthlyAmt;
+    });
+    
+    const fixedExpenseRatio = inflowTotal > 0 ? fixedMonthlyOutflow / inflowTotal : 0;
+    if (fixedExpenseRatio > 0.6) {
+        alerts.push({
+            type: 'warning',
+            icon: 'alertSmall',
+            message: `Fixed expenses are ${Math.round(fixedExpenseRatio * 100)}% of income. Consider reducing commitments`,
+            action: 'outflow'
+        });
+    }
+    
+    return alerts;
+});
+
+// Net worth trigger
+registerNotificationTrigger(() => {
+    const alerts = [];
+    const assets = (appData.tabData || {}).cards || [];
+    const liabilities = (appData.tabData || {}).liability || [];
+    
+    const totalAssets = assets.reduce((s, a) => s + Number(a.balance || 0), 0);
+    const totalLiabilities = liabilities.reduce((s, l) => s + Number(l.amount || 0), 0);
+    const netWorth = totalAssets - totalLiabilities;
+    
+    // Negative net worth
+    if (netWorth < 0) {
+        alerts.push({
+            type: 'warning',
+            icon: 'alertSmall',
+            message: `Negative net worth: ${formatMoney(netWorth)}. Focus on reducing liabilities`,
+            action: 'netWorth'
+        });
+    }
+    
+    // Low asset diversification
+    const assetTypes = new Set(assets.map(a => a.purpose || 'Other'));
+    if (assetTypes.size < 3 && assets.length > 0) {
+        alerts.push({
+            type: 'info',
+            icon: 'trendingUpSmall',
+            message: 'Low asset diversification. Consider diversifying across different asset types',
+            action: 'netWorth'
+        });
+    }
+    
+    // High debt-to-asset ratio
+    const debtRatio = totalAssets > 0 ? totalLiabilities / totalAssets : 0;
+    if (debtRatio > 0.5) {
+        alerts.push({
+            type: 'warning',
+            icon: 'alertSmall',
+            message: `Debt-to-asset ratio is ${Math.round(debtRatio * 100)}%. Aim to keep it below 50%`,
+            action: 'netWorth'
+        });
+    }
+    
+    return alerts;
+});
+
+// Tax planning trigger
+registerNotificationTrigger(() => {
+    const alerts = [];
+    const taxPlan = (appData.tabData || {}).taxPlan || [];
+    
+    // No tax planning
+    if (taxPlan.length === 0) {
+        alerts.push({
+            type: 'info',
+            icon: 'calendarSmall',
+            message: 'No tax planning done. Plan your tax deductions to save more',
+            action: 'taxPlan'
+        });
+    }
+    
+    // Check if using optimal regime
+    const salaryAccount = ((appData.tabData || {}).cards || []).find(c => c.purpose === "Salary" && c.isPrimary !== "Yes");
+    const annualSalary = salaryAccount ? Number(salaryAccount.balance || 0) * 12 : 0;
+    
+    if (annualSalary > 500000 && taxPlan.length > 0) {
+        alerts.push({
+            type: 'info',
+            icon: 'calendarSmall',
+            message: 'Review your tax regime choice. Old regime may be better with deductions',
+            action: 'taxPlan'
+        });
+    }
+    
+    return alerts;
+});
+
+// Gifts trigger
+registerNotificationTrigger(() => {
+    const alerts = [];
+    const gifts = (appData.tabData || {}).gifts || [];
+    const now = new Date();
+    
+    // Upcoming birthdays/occasions
+    const upcomingGifts = gifts.filter(g => {
+        if (!g.date) return false;
+        const giftDate = new Date(g.date);
+        const daysToGift = Math.ceil((giftDate - now) / (1000 * 60 * 60 * 24));
+        return daysToGift > 0 && daysToGift <= 30;
+    });
+    
+    if (upcomingGifts.length > 0) {
+        alerts.push({
+            type: 'info',
+            icon: 'calendarSmall',
+            message: `${upcomingGifts.length} gift${upcomingGifts.length > 1 ? 's' : ''} due within 30 days`,
+            action: 'gifts'
+        });
+    }
+    
+    return alerts;
+});
+
+// Trigger notification check on data changes
+function triggerNotificationCheck() {
+    checkNotificationTriggers();
+}
+
+// Make function globally accessible for dashboard.js
+window.updateNotificationBadge = updateNotificationBadge;
+
+// Simple icon SVG paths for notification popup (inline to avoid module import issues)
+const NOTIFICATION_ICONS = {
+    alertSmall: '<path d="M12 4L5 18h14L12 4z"/><path d="M12 10v4"/><path d="M12 15v.01"/>',
+    trendingUpSmall: '<polyline points="4 20 12 10 20 4"/>',
+    hospitalSmall: '<rect x="4" y="4" width="16" height="16" rx="2"/><path d="M12 8v8"/><path d="M8 12h8"/>',
+    shieldCheckSmall: '<path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10Z"/><path d="M9 12l2 2 4-4"/>',
+    creditCardSmall: '<rect x="4" y="6" width="16" height="12" rx="2"/><line x1="4" y1="10" x2="20" y2="10"/>',
+    calendarSmall: '<rect x="4" y="4" width="16" height="16" rx="2"/><line x1="14" y1="2" x2="14" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/>',
+    targetSmall: '<circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/>',
+    piggyBankSmall: '<path d="M19 5c-1.5 0-2.8 1.4-3 2-2.1-1-5.2-1-7.3 0-.2-.6-1.5-2-3-2H5v2H4v3h1v1c0 2.8 2.2 5 5 5v2c0 1.7 1.3 3 3 3h6c1.7 0 3-1.3 3-3v-2c2.8 0 5-2.2 5-5v-1h1V7h-1V5z"/>',
+    walletSmall: '<path d="M20 7h-3V5c0-1.1-.9-2-2-2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h10c1.1 0 2-.9 2-2v-2h3c1.1 0 2-.9 2-2V9c0-1.1-.9-2-2-2z"/>'
+};
+
+function getNotificationIcon(name) {
+    const pathData = NOTIFICATION_ICONS[name] || NOTIFICATION_ICONS.alertSmall;
+    return `<svg class="notification-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${pathData}</svg>`;
+}
+
+function showNotificationPopup(alerts) {
+    if (!alerts || alerts.length === 0) return;
+    
+    // Create notification popup
+    const popup = document.createElement('div');
+    popup.className = 'notification-popup';
+    popup.innerHTML = `
+        <div class="notification-popup-header">
+            <h3>Alerts & Notifications</h3>
+            <button class="notification-close" onclick="clearNotifications(this)">Clear All</button>
+        </div>
+        <div class="notification-popup-content">
+            ${alerts.map(alert => `
+                <div class="notification-item notification-${alert.type}" onclick="switchToTab('${alert.action}'); this.closest('.notification-popup').remove();">
+                    <div class="notification-icon">${getNotificationIcon(alert.icon)}</div>
+                    <div class="notification-message">${alert.message}</div>
+                </div>
+            `).join('')}
+        </div>
+    `;
+    
+    document.body.appendChild(popup);
+    
+    // Close popup when clicking outside
+    const closeOnClickOutside = (e) => {
+        if (!popup.contains(e.target) && !notificationBtn.contains(e.target)) {
+            popup.remove();
+            document.removeEventListener('click', closeOnClickOutside);
+        }
+    };
+    
+    // Add click listener with slight delay to prevent immediate closing
+    setTimeout(() => {
+        document.addEventListener('click', closeOnClickOutside);
+    }, 100);
+    
+    // Auto-dismiss after time
+    setTimeout(() => {
+        if (popup && popup.parentNode) {
+            popup.remove();
+            document.removeEventListener('click', closeOnClickOutside);
+        }
+    }, notificationDismissTime);
+}
+
+function clearNotifications(button) {
+    const state = getNotificationState();
+    
+    // Mark as cleared for today
+    state.cleared = true;
+    state.viewedCount = window.currentAlerts.length; // Mark all as viewed
+    localStorage.setItem('notificationState', JSON.stringify(state));
+    
+    // Clear the alerts
+    window.currentAlerts = [];
+    updateNotificationBadge(0);
+    
+    // Close popup
+    button.closest('.notification-popup').remove();
+    
+    showToast('Notifications cleared', { variant: 'success' });
+}
+
+// Make clearNotifications globally accessible
+window.clearNotifications = clearNotifications;
+
+// Make shouldRegenerateAlerts globally accessible for dashboard.js
+window.shouldRegenerateAlerts = shouldRegenerateAlerts;
+
+if (notificationBtn) {
+    notificationBtn.addEventListener("click", () => {
+        const alerts = window.currentAlerts || [];
+        if (alerts.length > 0) {
+            showNotificationPopup(alerts);
+        } else {
+            showToast('No new notifications', { variant: 'info' });
+        }
+    });
+}
+
+// Show notifications on login if not dismissed
+function showNotificationsOnLogin() {
+    const alerts = window.currentAlerts || [];
+    const state = getNotificationState();
+    
+    if (alerts.length > 0 && !state.cleared) {
+        setTimeout(() => {
+            showNotificationPopup(alerts);
+            state.viewedCount = alerts.length; // Mark as viewed
+            localStorage.setItem('notificationState', JSON.stringify(state));
+        }, 2000); // Show 2 seconds after login
+    }
+}
+
+// Call on auth state change
+auth.onAuthStateChanged((user) => {
+    if (user) {
+        setTimeout(showNotificationsOnLogin, 1000);
+    }
+});
+
+
 // ── App Brand Logo Click (Navigate to Dashboard) ───────────────────────────
 const appBrandLogo = document.getElementById("appBrandLogo");
 if (appBrandLogo) {
@@ -1435,6 +2067,236 @@ if (helpBtn) helpBtn.addEventListener("click", openHelp);
 if (closeHelpBtn) closeHelpBtn.addEventListener("click", closeHelp);
 if (helpOverlay) helpOverlay.addEventListener("click", closeHelp);
 
+// ── Quick Update Popup ─────────────────────────────────────────────────────
+const quickUpdateOverlay = document.getElementById("quickUpdateOverlay");
+const quickUpdatePanel = document.getElementById("quickUpdatePanel");
+const closeQuickUpdateBtn = document.getElementById("closeQuickUpdateBtn");
+
+function openQuickUpdatePopup() {
+    quickUpdateOverlay.hidden = false;
+    quickUpdatePanel.classList.add("open");
+    quickUpdatePanel.setAttribute("aria-hidden", "false");
+    
+    // Pre-fill current values
+    const monthKey = getMonthKey(currentMonth);
+    const monthData = (appData.monthlyBudgetData || {})[monthKey] || {};
+    const cards = (appData.tabData || {}).cards || [];
+    const exp = cards.find(c => c.isPrimary === "Yes");
+    
+    // Use Number() to ensure we get the numeric value, not string
+    document.getElementById("popupExpBalance").value = exp?.balance !== undefined ? Number(exp.balance) : "";
+    document.getElementById("popupCCOutstanding").value = monthData.outflow?.midMonthCCOutstanding !== undefined ? Number(monthData.outflow.midMonthCCOutstanding) : "";
+    
+    // Hide result section initially
+    const resultEl = document.getElementById("popupQuickUpdateResult");
+    if (resultEl) resultEl.hidden = true;
+}
+
+function closeQuickUpdatePopup() {
+    quickUpdatePanel.classList.remove("open");
+    quickUpdatePanel.setAttribute("aria-hidden", "true");
+    setTimeout(() => { quickUpdateOverlay.hidden = true; }, PANEL_CLOSE_ANIMATION_MS);
+}
+
+if (closeQuickUpdateBtn) closeQuickUpdateBtn.addEventListener("click", closeQuickUpdatePopup);
+if (quickUpdateOverlay) quickUpdateOverlay.addEventListener("click", closeQuickUpdatePopup);
+
+// Popup update buttons
+const popupUpdateExpBalance = document.getElementById("popupUpdateExpBalance");
+const popupUpdateCCOutstanding = document.getElementById("popupUpdateCCOutstanding");
+const popupUpdateBoth = document.getElementById("popupUpdateBoth");
+
+if (popupUpdateExpBalance) {
+    popupUpdateExpBalance.addEventListener("click", () => {
+        const input = document.getElementById("popupExpBalance");
+        const newBalance = Number(input?.value);
+        if (isNaN(newBalance) || newBalance < 0) {
+            showAlert('Enter a valid expenditure balance.', { variant: 'warning' });
+            return;
+        }
+        
+        // Trigger the existing update logic (matching budget edit page implementation)
+        const cards = (appData.tabData || {}).cards || [];
+        const exp = cards.find(c => c.isPrimary === "Yes");
+        if (!exp) {
+            showAlert('No Primary (Expenditure) account found.', { variant: 'warning' });
+            return;
+        }
+        
+        const oldBalance = Number(exp.balance || 0);
+        exp.balance = newBalance;
+        appData.tabData.cards = cards.map(c => c.id === exp.id ? exp : c);
+        
+        // Calculate and update variable expenditure in monthData (matching budget edit page)
+        const monthKey = getMonthKey(currentMonth);
+        if (!appData.monthlyBudgetData) appData.monthlyBudgetData = {};
+        const monthData = appData.monthlyBudgetData[monthKey] || {
+            inflow: {},
+            outflow: {},
+            investing: {},
+            monthEndBalance: 0
+        };
+        appData.monthlyBudgetData[monthKey] = monthData;
+        
+        // Use the same calculation as budget edit page
+        const prevMonthForCarry = new Date(currentMonth);
+        prevMonthForCarry.setMonth(prevMonthForCarry.getMonth() - 1);
+        const prevKey = getMonthKey(prevMonthForCarry);
+        const { varExp, totalFunded } = calcVariableExpenditure(monthData, prevKey, newBalance);
+        
+        monthData.outflow.variableExpenditure = varExp;
+        monthData.autoLinkedFields = monthData.autoLinkedFields || {};
+        monthData.autoLinkedFields["outflow.variableExpenditure"] = true;
+        
+        // Show result
+        const resultEl = document.getElementById("popupQuickUpdateResult");
+        const untrackedEl = document.getElementById("popupQuickUpdateUntracked");
+        resultEl.hidden = false;
+        untrackedEl.textContent = formatMoney(varExp);
+        untrackedEl.style.color = varExp > 0 ? COLOR_WARNING : COLOR_POSITIVE;
+        
+        scheduleSave();
+        renderCards(); // Re-render accounts to show updated balance
+        showToast(`Expenditure balance updated to ${formatMoney(newBalance)}`, { variant: 'success' });
+        
+        // Auto-close popup after successful update
+        setTimeout(() => closeQuickUpdatePopup(), 1000);
+    });
+}
+
+if (popupUpdateCCOutstanding) {
+    popupUpdateCCOutstanding.addEventListener("click", () => {
+        const input = document.getElementById("popupCCOutstanding");
+        const newCC = Number(input?.value);
+        if (isNaN(newCC) || newCC < 0) {
+            showAlert('Enter a valid CC spending amount.', { variant: 'warning' });
+            return;
+        }
+        
+        const monthKey = getMonthKey(currentMonth);
+        if (!appData.monthlyBudgetData) appData.monthlyBudgetData = {};
+        if (!appData.monthlyBudgetData[monthKey]) appData.monthlyBudgetData[monthKey] = { inflow: {}, outflow: {}, investing: {} };
+        const monthData = appData.monthlyBudgetData[monthKey];
+        const oldCC = monthData.outflow.midMonthCCOutstanding || 0;
+        monthData.outflow.midMonthCCOutstanding = newCC;
+        
+        // Update breakdown for CC spending (matching budget edit page)
+        monthData.autoLinkedFields = monthData.autoLinkedFields || {};
+        monthData.autoLinkedFields["outflow.midMonthCCOutstanding"] = true;
+        monthData.autoLinkedBreakdown = monthData.autoLinkedBreakdown || {};
+        monthData.autoLinkedBreakdown["outflow.midMonthCCOutstanding"] = [
+            { name: "Current Month CC Spending", amount: newCC, source: "Quick Update (Mid-Month)" }
+        ];
+        
+        scheduleSave();
+        renderMonthlyBudget(); // Re-render budget to show updated CC spending
+        showToast(`Current month CC spending for ${currentMonth.toLocaleDateString("en-IN", { month: "long", year: "numeric" })} updated to ${formatMoney(newCC)}`, { variant: 'success' });
+        
+        // Auto-close popup after successful update
+        setTimeout(() => closeQuickUpdatePopup(), 1000);
+    });
+}
+
+if (popupUpdateBoth) {
+    popupUpdateBoth.addEventListener("click", () => {
+        // Trigger both updates and close popup after both complete
+        const expInput = document.getElementById("popupExpBalance");
+        const ccInput = document.getElementById("popupCCOutstanding");
+        const newBalance = Number(expInput?.value);
+        const newCC = Number(ccInput?.value);
+        
+        let updatesCompleted = 0;
+        const checkComplete = () => {
+            updatesCompleted++;
+            if (updatesCompleted === 2) {
+                setTimeout(() => closeQuickUpdatePopup(), 1000);
+            }
+        };
+        
+        // Update balance (matching budget edit page implementation)
+        if (!isNaN(newBalance) && newBalance >= 0) {
+            const cards = (appData.tabData || {}).cards || [];
+            const exp = cards.find(c => c.isPrimary === "Yes");
+            if (exp) {
+                exp.balance = newBalance;
+                appData.tabData.cards = cards.map(c => c.id === exp.id ? exp : c);
+                
+                const monthKey = getMonthKey(currentMonth);
+                if (!appData.monthlyBudgetData) appData.monthlyBudgetData = {};
+                const monthData = appData.monthlyBudgetData[monthKey] || {
+                    inflow: {},
+                    outflow: {},
+                    investing: {},
+                    monthEndBalance: 0
+                };
+                appData.monthlyBudgetData[monthKey] = monthData;
+                
+                const prevMonthForCarry = new Date(currentMonth);
+                prevMonthForCarry.setMonth(prevMonthForCarry.getMonth() - 1);
+                const prevKey = getMonthKey(prevMonthForCarry);
+                const { varExp } = calcVariableExpenditure(monthData, prevKey, newBalance);
+                
+                monthData.outflow.variableExpenditure = varExp;
+                monthData.autoLinkedFields = monthData.autoLinkedFields || {};
+                monthData.autoLinkedFields["outflow.variableExpenditure"] = true;
+                
+                const resultEl = document.getElementById("popupQuickUpdateResult");
+                const untrackedEl = document.getElementById("popupQuickUpdateUntracked");
+                resultEl.hidden = false;
+                untrackedEl.textContent = formatMoney(varExp);
+                untrackedEl.style.color = varExp > 0 ? COLOR_WARNING : COLOR_POSITIVE;
+                
+                scheduleSave();
+                renderCards();
+                showToast(`Expenditure balance updated to ${formatMoney(newBalance)}`, { variant: 'success' });
+                checkComplete();
+            } else {
+                checkComplete();
+            }
+        } else {
+            checkComplete();
+        }
+        
+        // Update CC (matching budget edit page implementation)
+        if (!isNaN(newCC) && newCC >= 0) {
+            const monthKey = getMonthKey(currentMonth);
+            if (!appData.monthlyBudgetData) appData.monthlyBudgetData = {};
+            const monthData = appData.monthlyBudgetData[monthKey] || {
+                inflow: {},
+                outflow: {},
+                investing: {}
+            };
+            appData.monthlyBudgetData[monthKey] = monthData;
+            const oldCC = monthData.outflow.midMonthCCOutstanding || 0;
+            monthData.outflow.midMonthCCOutstanding = newCC;
+            
+            monthData.autoLinkedFields = monthData.autoLinkedFields || {};
+            monthData.autoLinkedFields["outflow.midMonthCCOutstanding"] = true;
+            monthData.autoLinkedBreakdown = monthData.autoLinkedBreakdown || {};
+            monthData.autoLinkedBreakdown["outflow.midMonthCCOutstanding"] = [
+                { name: "Current Month CC Spending", amount: newCC, source: "Quick Update (Mid-Month)" }
+            ];
+            
+            scheduleSave();
+            renderMonthlyBudget();
+            showToast(`Current month CC spending for ${currentMonth.toLocaleDateString("en-IN", { month: "long", year: "numeric" })} updated to ${formatMoney(newCC)}`, { variant: 'success' });
+            checkComplete();
+        } else {
+            checkComplete();
+        }
+    });
+}
+
+// Expose quick update popup function globally for dashboard
+window.openQuickUpdatePopup = openQuickUpdatePopup;
+
+// Expose annual budget view functions globally for dashboard
+window.setAnnualBudgetView = () => {
+    isAnnualBudgetView = true;
+    renderBudgetViewToggle();
+    renderMonthlyBudget();
+};
+
 // Export
 exportDataBtn.addEventListener("click", () => {
     if (!currentUser) return;
@@ -1529,6 +2391,14 @@ if (saveNameBtn) {
             });
             appData.userName = newName;
             currentNameDisplay.textContent = newName;
+            
+            // Update user bar display with mobile consideration
+            const isMobile = window.innerWidth < 768;
+            const displayName = isMobile && newName.includes(' ') 
+                ? newName.split(' ')[0] 
+                : newName;
+            userEmailDisplay.textContent = displayName;
+            
             nameEditRow.hidden = true;
             editNameInput.value = '';
             scheduleSave();
@@ -2136,7 +3006,14 @@ function startListening() {
                 };
                 
                 console.log('Loaded appData.taxData:', appData.taxData);
-                userEmailDisplay.textContent = appData.userName || currentUser.email;
+                
+                // Show first name only on mobile, full name on desktop
+                const fullName = appData.userName || currentUser.email;
+                const isMobile = window.innerWidth < 768;
+                const displayName = isMobile && fullName.includes(' ') 
+                    ? fullName.split(' ')[0] 
+                    : fullName;
+                userEmailDisplay.textContent = displayName;
 
                 // Data migration: convert old tab structure on first load
                 if (!appData.dataMigrated) {
@@ -2161,7 +3038,14 @@ function startListening() {
                 }
             } else {
                 appData = { tabData: {}, customTabs: [], userName: "", monthlyBudgetData: {}, fixedMonthlyIncome: 0, dateOfBirth: "", currentAge: 0, onboardingComplete: false, onboardingDate: "", dataMigrated: false, taxData: {} };
-                userEmailDisplay.textContent = currentUser.email;
+                
+                // Show first name only on mobile, full name on desktop
+                const fullName = currentUser.email;
+                const isMobile = window.innerWidth < 768;
+                const displayName = isMobile && fullName.includes(' ') 
+                    ? fullName.split(' ')[0] 
+                    : fullName;
+                userEmailDisplay.textContent = displayName;
                 if (firstLoad) {
                     firstLoad = false;
                     activeTabId = "cards";
@@ -2223,10 +3107,6 @@ function doSave() {
             console.log('Saved successfully');
             logger.info('Data saved successfully', { userId: currentUser.uid });
             showNetworkStatus('online');
-            // Hide status after 2 seconds
-            setTimeout(() => {
-                hideNetworkStatus();
-            }, 2000);
         })
         .catch(err => {
             localWritePending = false;
@@ -2241,7 +3121,7 @@ function doSave() {
             else if (err.code === 'unavailable' || err.code === 'failed-precondition') {
                 logger.warning('Network issue detected, retrying save');
                 console.warn("Network issue detected. Data will be retried automatically.");
-                showNetworkStatus('retrying');
+                showNetworkStatus('reconnecting');
                 // Retry after 2 seconds
                 setTimeout(() => {
                     if (currentUser) {
@@ -2277,34 +3157,38 @@ function showNetworkStatus(status) {
     }
     
     // Remove all status classes
-    networkStatusEl.classList.remove('retrying', 'quota-exceeded', 'error', 'online', 'offline');
+    networkStatusEl.classList.remove('retrying', 'quota-exceeded', 'error', 'online', 'offline', 'reconnecting');
     
     // Add new status class
     networkStatusEl.classList.add(status);
     
-    // Set text and title based on status
+    // Set text and title based on status with detailed tooltips
     const textEl = networkStatusEl.querySelector('.network-status-text');
     if (textEl) {
         switch (status) {
             case 'retrying':
-                textEl.textContent = 'Retrying save...';
-                networkStatusEl.title = 'Retrying save...';
+                textEl.textContent = 'Retrying...';
+                networkStatusEl.title = 'Network issue detected. Retrying save automatically...';
                 break;
             case 'quota-exceeded':
-                textEl.textContent = 'Quota exceeded';
-                networkStatusEl.title = 'Quota exceeded';
+                textEl.textContent = 'Quota Full';
+                networkStatusEl.title = 'Firebase storage quota exceeded. Data will be saved when quota resets (daily at midnight Pacific time) or upgrade your Firebase plan.';
                 break;
             case 'error':
-                textEl.textContent = 'Save failed';
-                networkStatusEl.title = 'Save failed';
+                textEl.textContent = 'Save Failed';
+                networkStatusEl.title = 'Failed to save data. Check your internet connection and try again.';
                 break;
             case 'online':
                 textEl.textContent = 'Saved';
-                networkStatusEl.title = 'Saved';
+                networkStatusEl.title = 'Data saved successfully to cloud storage';
                 break;
             case 'offline':
                 textEl.textContent = 'Offline';
-                networkStatusEl.title = 'Offline';
+                networkStatusEl.title = 'No internet connection. Data will be saved when connection is restored.';
+                break;
+            case 'reconnecting':
+                textEl.textContent = 'Reconnecting...';
+                networkStatusEl.title = 'Connection lost. Attempting to reconnect...';
                 break;
             default:
                 textEl.textContent = '';
@@ -2314,6 +3198,14 @@ function showNetworkStatus(status) {
     
     // Show the indicator
     networkStatusEl.hidden = false;
+    
+    // Auto-hide only for success state (online)
+    // Warning and error states stay visible
+    if (status === 'online') {
+        networkStatusTimeout = setTimeout(() => {
+            hideNetworkStatus();
+        }, 2000);
+    }
 }
 
 function hideNetworkStatus() {
@@ -2321,16 +3213,13 @@ function hideNetworkStatus() {
     if (!networkStatusEl) return;
     
     networkStatusEl.hidden = true;
-    networkStatusEl.classList.remove('retrying', 'quota-exceeded', 'error', 'online', 'offline');
+    networkStatusEl.classList.remove('retrying', 'quota-exceeded', 'error', 'online', 'offline', 'reconnecting');
 }
 
 // ── Browser Online/Offline Detection ──────────────────────────────────
 window.addEventListener('online', () => {
     console.log('Browser is online');
     showNetworkStatus('online');
-    setTimeout(() => {
-        hideNetworkStatus();
-    }, 2000);
     // Retry any pending save
     if (localWritePending) {
         scheduleSave();
@@ -2748,12 +3637,35 @@ function populateSectionForm(tabId, entry) {
     fields.forEach(f => {
         const input = document.getElementById(`${cfg.prefix}_${f.id}`);
         if (!input) return;
-        input.value = entry[f.id] ?? "";
+        
+        // For financial goals, convert stored values to display values
+        let value = entry[f.id] ?? "";
+        if (tabId === "financialGoal" && f.id === "goalType") {
+            const goalTypeDisplayMap = {
+                "ShortTerm": "Short Term",
+                "MidTerm": "Mid Term",
+                "LongTerm": "Long Term"
+            };
+            value = goalTypeDisplayMap[value] || value;
+        }
+        
+        input.value = value;
         input.dispatchEvent(new Event("change", { bubbles: true }));
     });
     if (tabId === "cards") {
         document.getElementById("card_isPrimary")?.dispatchEvent(new Event("change", { bubbles: true }));
     }
+    
+    // For financial goals, if the goal type is already set, mark it as manually selected
+    // to prevent auto-selection from overriding it
+    if (tabId === "financialGoal" && entry.goalType) {
+        const goalTypeInput = document.getElementById("goal_goalType");
+        if (goalTypeInput) {
+            goalTypeInput.dataset.manuallySelected = 'true';
+            goalTypeInput.dataset.autoSelected = 'false';
+        }
+    }
+    
     updateSectionSubmitButton(tabId);
 }
 
@@ -2926,6 +3838,16 @@ function getDateProgress(startDate, endDate) {
 function normalizeEntry(tabId, entry) {
     if (tabId === "financialGoal") {
         entry.status = normalizeGoalStatus(entry);
+        
+        // Normalize goal type: convert display values to stored values
+        const goalTypeMap = {
+            "Short Term": "ShortTerm",
+            "Mid Term": "MidTerm",
+            "Long Term": "LongTerm"
+        };
+        if (entry.goalType && goalTypeMap[entry.goalType]) {
+            entry.goalType = goalTypeMap[entry.goalType];
+        }
     }
     if (tabId === "inflow") {
         entry = normalizeInvestmentEntry(entry);
@@ -4262,6 +5184,70 @@ function renderGoalDynamicFields() {
     });
 
     // Status is auto-calculated via normalizeGoalStatus() — no form input needed
+    
+    // Auto-select goal type based on target date
+    const targetDateInput = document.getElementById('goal_targetDate');
+    const goalTypeInput = document.getElementById('goal_goalType');
+    
+    if (targetDateInput && goalTypeInput) {
+        // Remove existing listener to avoid duplicates
+        const newTargetDateInput = targetDateInput.cloneNode(true);
+        targetDateInput.parentNode.replaceChild(newTargetDateInput, targetDateInput);
+        
+        newTargetDateInput.addEventListener('change', function() {
+            const targetDate = new Date(this.value);
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
+            
+            // Only auto-select if user hasn't manually selected a type yet
+            const isManuallySelected = goalTypeInput.dataset.manuallySelected === 'true';
+            
+            if (this.value && !isManuallySelected) {
+                const daysDiff = Math.ceil((targetDate - today) / (1000 * 60 * 60 * 24));
+                
+                // Auto-select goal type based on days difference
+                // Short Term: ≤ 1 year, Mid Term: 1-3 years, Long Term: > 3 years
+                let autoSelectedType;
+                if (daysDiff <= 365) {
+                    autoSelectedType = 'Short Term';
+                } else if (daysDiff <= 1095) {
+                    autoSelectedType = 'Mid Term';
+                } else {
+                    autoSelectedType = 'Long Term';
+                }
+                
+                // Only auto-select if the current value is empty or was auto-selected
+                if (!goalTypeInput.value || goalTypeInput.dataset.autoSelected === 'true') {
+                    goalTypeInput.value = autoSelectedType;
+                    goalTypeInput.dataset.autoSelected = 'true';
+                    
+                    // Show a brief toast to indicate auto-selection
+                    showToast(`Goal type auto-selected: ${autoSelectedType}`, { variant: 'info', duration: 2000 });
+                }
+            } else if (!this.value && !isManuallySelected) {
+                // If no date selected and not manually selected, default to Long Term
+                if (!goalTypeInput.value || goalTypeInput.dataset.autoSelected === 'true') {
+                    goalTypeInput.value = 'Long Term';
+                    goalTypeInput.dataset.autoSelected = 'true';
+                }
+            }
+        });
+        
+        // Allow manual override - user can change goal type after auto-selection
+        goalTypeInput.addEventListener('change', function() {
+            // User manually changed the goal type - mark as manually selected
+            // This ensures the selection is NEVER overridden by date changes
+            this.dataset.manuallySelected = 'true';
+            this.dataset.autoSelected = 'false';
+        });
+        
+        // Set default to Long Term on initial load if no value
+        if (!goalTypeInput.value) {
+            goalTypeInput.value = 'Long Term';
+            goalTypeInput.dataset.autoSelected = 'true';
+            goalTypeInput.dataset.manuallySelected = 'false';
+        }
+    }
 }
 
 function renderGoalTable(entries) {
@@ -4343,11 +5329,19 @@ function renderGoalPreviewCards(entries) {
         const status = normalizeGoalStatus(goal);
         const statusClass = status.toLowerCase();
         
+        // Convert stored goal type to display value
+        const goalTypeDisplayMap = {
+            "ShortTerm": "Short Term",
+            "MidTerm": "Mid Term",
+            "LongTerm": "Long Term"
+        };
+        const displayGoalType = goalTypeDisplayMap[goal.goalType] || goal.goalType || "Short Term";
+        
         card.innerHTML = `
             <div class="goal-card-header">
                 <span class="goal-card-title">${esc(goal.name)}</span>
                 <div style="display: flex; gap: 8px;">
-                    <span class="goal-card-type">${esc(goal.goalType || "Short Term")}</span>
+                    <span class="goal-card-type">${esc(displayGoalType)}</span>
                     <span class="goal-card-status ${statusClass}">${esc(status)}</span>
                 </div>
             </div>
@@ -4913,9 +5907,11 @@ function renderCards() {
     // Update toggle button text
     setToggleButtonIconText(toggleCardEdit, isCardEditMode, 'Edit');
     
-    // Hide card summary in edit mode
+    // Hide card summary and chart in edit mode
     const cardSummary = document.querySelector('.card-summary');
+    const chartSection = document.querySelector('.cards-ui .chart-section');
     if (cardSummary) cardSummary.hidden = isCardEditMode;
+    if (chartSection) chartSection.hidden = isCardEditMode;
     
     // Show/hide preview/edit modes
     if (isCardEditMode) {
@@ -4936,6 +5932,7 @@ function renderCards() {
         
         // Show summary in preview mode
         if (cardSummary) cardSummary.hidden = false;
+        if (chartSection) chartSection.hidden = false;
         
         // Render preview cards
         renderCardPreviewCards(entries);
@@ -5147,6 +6144,99 @@ function calculateCardSummary(entries) {
     document.getElementById("totalBalance").textContent = formatMoney(totalBalance);
     document.getElementById("totalCreditLimit").textContent = formatMoney(totalCreditLimit);
     document.getElementById("totalCreditCards").textContent = totalCreditCards;
+
+    // Render accounts chart
+    renderAccountsChart(entries);
+}
+
+async function renderAccountsChart(entries) {
+    if (accountsChart) { accountsChart.destroy(); accountsChart = null; }
+    if (!accountsChartCanvas || entries.length === 0) return;
+
+    // Lazy-load Chart.js if needed
+    if (typeof Chart === 'undefined') {
+        try {
+            await import('https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js');
+        } catch (err) {
+            console.error('Failed to load Chart.js:', err);
+            return;
+        }
+    }
+
+    // Prepare data for chart
+    const labels = [];
+    const balanceData = [];
+    const creditLimitData = [];
+
+    entries.forEach(card => {
+        const name = card.name || card.bankName || 'Unknown';
+        const hasAccount = card.accountPresent?.toLowerCase() === "yes";
+        const hasCreditCard = card.creditCardPresent?.toLowerCase() === "yes";
+
+        // Only add if account or credit card is present
+        if (hasAccount || hasCreditCard) {
+            labels.push(name);
+            balanceData.push(hasAccount ? Number(card.balance || 0) : 0);
+            creditLimitData.push(hasCreditCard ? Number(card.creditLimit || 0) : 0);
+        }
+    });
+
+    if (labels.length === 0) return;
+
+    const ctx = accountsChartCanvas.getContext("2d");
+    const themeColors = getChartThemeColors();
+
+    accountsChart = new Chart(ctx, {
+        type: "bar",
+        data: {
+            labels,
+            datasets: [
+                {
+                    label: "Balance",
+                    data: balanceData,
+                    backgroundColor: "#22c55e",
+                    borderWidth: 0,
+                    borderRadius: 6,
+                    borderSkipped: false,
+                    maxBarThickness: 36
+                },
+                {
+                    label: "Credit Limit",
+                    data: creditLimitData,
+                    backgroundColor: "#3b82f6",
+                    borderWidth: 0,
+                    borderRadius: 6,
+                    borderSkipped: false,
+                    maxBarThickness: 36
+                }
+            ]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    display: true,
+                    position: "top",
+                    labels: {
+                        color: themeColors.text,
+                        font: { size: 12 },
+                        padding: 12
+                    }
+                }
+            },
+            scales: {
+                x: {
+                    ticks: { color: themeColors.text, font: { size: 11 } },
+                    grid: { color: themeColors.grid }
+                },
+                y: {
+                    ticks: { color: themeColors.text },
+                    grid: { color: themeColors.grid }
+                }
+            }
+        }
+    });
 }
 
 function getAutoNetWorthEntries() {
@@ -5746,9 +6836,11 @@ function renderTaxPlan() {
             setToggleButtonIconText(toggleTaxPlanEdit, isTaxPlanEditMode, "Edit");
         }
         
-        // Hide tax summary in edit mode
+        // Hide tax summary and chart in edit mode
         const taxSummary = document.getElementById('taxSummary');
         if (taxSummary) taxSummary.hidden = isTaxPlanEditMode;
+        const taxChartSection = document.querySelector('.tax-plan-ui .chart-section');
+        if (taxChartSection) taxChartSection.hidden = isTaxPlanEditMode;
         
         // Show/hide preview/edit modes
         if (isTaxPlanEditMode) {
@@ -5787,6 +6879,9 @@ function renderTaxPlan() {
 
             // Render tax deductions list
             renderTaxDeductionsList();
+
+            // Render tax deductions chart
+            renderTaxDeductionsChart();
 
             // Render tax breakdown
             renderTaxBreakdown(taxRegime);
@@ -5991,6 +7086,140 @@ function renderTaxDeductionsList() {
         `;
         taxDeductionsList.appendChild(div);
     });
+}
+
+async function renderTaxDeductionsChart() {
+    if (taxDeductionsChart) { taxDeductionsChart.destroy(); taxDeductionsChart = null; }
+    if (!taxDeductionsChartCanvas) return;
+
+    // Lazy-load Chart.js if needed
+    if (typeof Chart === 'undefined') {
+        try {
+            await import('https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js');
+        } catch (err) {
+            console.error('Failed to load Chart.js:', err);
+            return;
+        }
+    }
+
+    try {
+        const allDeductions = getAllTaxDeductions();
+        if (allDeductions.length === 0) {
+            // Show empty state
+            taxDeductionsChartCanvas.style.display = 'none';
+            const emptyState = document.createElement('div');
+            emptyState.className = 'empty-state visible';
+            emptyState.textContent = 'No deductions to display';
+            emptyState.style.textAlign = 'center';
+            emptyState.style.padding = '40px 20px';
+            taxDeductionsChartCanvas.parentNode.insertBefore(emptyState, taxDeductionsChartCanvas);
+            return;
+        }
+
+        // Remove empty state if exists
+        const existingEmpty = taxDeductionsChartCanvas.parentNode.querySelector('.empty-state');
+        if (existingEmpty) existingEmpty.remove();
+        taxDeductionsChartCanvas.style.display = 'block';
+
+        // Group deductions by section
+        const deductionsBySection = {};
+        allDeductions.forEach(item => {
+            const section = item.section || 'Others';
+            deductionsBySection[section] = (deductionsBySection[section] || 0) + Number(item.amount || 0);
+        });
+
+        // Sort by amount (descending)
+        const sortedSections = Object.entries(deductionsBySection).sort((a, b) => b[1] - a[1]);
+        const labels = sortedSections.map(([section]) => section);
+        const values = sortedSections.map(([, value]) => value);
+
+        if (labels.length === 0) return;
+
+        const ctx = taxDeductionsChartCanvas.getContext("2d");
+        const themeColors = getChartThemeColors();
+
+        // Color palette for different sections (modern gradient-like colors)
+        const sectionColors = {
+            '80C': '#22c55e',
+            '80D': '#3b82f6',
+            '80CCD': '#8b5cf6',
+            '80E': '#f59e0b',
+            '80G': '#10b981',
+            '80TTA': '#ef4444',
+            '24(b)': '#ec4899',
+            'HRA': '#06b6d4',
+            'Others': '#6b7280'
+        };
+
+        const backgroundColors = labels.map(label => sectionColors[label] || sectionColors['Others']);
+
+        taxDeductionsChart = new Chart(ctx, {
+            type: "bar",
+            data: {
+                labels,
+                datasets: [{
+                    label: "Deduction Amount (₹)",
+                    data: values,
+                    backgroundColor: backgroundColors,
+                    borderWidth: 0,
+                    borderRadius: 6,
+                    borderSkipped: false,
+                    maxBarThickness: 40
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                indexAxis: 'y', // Horizontal bar chart for better label readability
+                plugins: {
+                    legend: {
+                        display: false
+                    },
+                    tooltip: {
+                        backgroundColor: themeColors.tooltip,
+                        titleColor: themeColors.text,
+                        bodyColor: themeColors.text,
+                        borderColor: themeColors.border,
+                        borderWidth: 1,
+                        padding: 12,
+                        callbacks: {
+                            label: function(context) {
+                                const value = context.raw;
+                                const total = values.reduce((a, b) => a + b, 0);
+                                const percentage = ((value / total) * 100).toFixed(1);
+                                return `${formatMoney(value)} (${percentage}%)`;
+                            }
+                        }
+                    }
+                },
+                scales: {
+                    x: {
+                        ticks: { 
+                            color: themeColors.text,
+                            font: { size: 11 },
+                            callback: function(value) {
+                                return formatMoney(value);
+                            }
+                        },
+                        grid: { color: themeColors.grid }
+                    },
+                    y: {
+                        ticks: { 
+                            color: themeColors.text,
+                            font: { size: 12 }
+                        },
+                        grid: { 
+                            color: themeColors.grid,
+                            display: false
+                        }
+                    }
+                }
+            }
+        });
+    } catch (error) {
+        console.error('Error rendering tax deductions chart:', error);
+        logger.error('Tax deductions chart render error', { error: error.message });
+    }
 }
 
 function renderTaxBreakdown(taxRegime) {
@@ -7317,12 +8546,72 @@ function showAutoCalcPopup(anchor, fieldLabel, breakdown) {
 
     document.body.appendChild(popup);
 
-    // Position near anchor
+    // Position near anchor with mobile-aware positioning
     const rect = anchor.getBoundingClientRect();
+    const screenWidth = window.innerWidth;
+    const screenHeight = window.innerHeight;
+    const isMobile = screenWidth < 768;
+
     popup.style.position = "fixed";
-    popup.style.top = (rect.bottom + 6) + "px";
-    popup.style.left = Math.max(8, rect.left - 80) + "px";
     popup.style.zIndex = "9999";
+
+    // Calculate horizontal position
+    let leftPosition;
+    
+    if (isMobile) {
+        // On mobile, center the popup
+        const popupWidth = Math.min(380, screenWidth - 16); // Max width with padding
+        leftPosition = (screenWidth - popupWidth) / 2;
+    } else {
+        // On desktop, use the original logic
+        leftPosition = Math.max(8, rect.left - 80);
+        
+        // Ensure it doesn't go off the right edge
+        const popupWidth = Math.min(380, screenWidth - 16);
+        if (leftPosition + popupWidth > screenWidth - 8) {
+            leftPosition = screenWidth - popupWidth - 8;
+        }
+    }
+    
+    popup.style.left = leftPosition + "px";
+
+    // Calculate vertical position
+    let topPosition = rect.bottom + 6;
+    
+    // Estimate popup height (rough estimate based on content)
+    const estimatedHeight = Math.min(300, screenHeight * 0.6);
+    
+    // Check if popup will go off the bottom edge
+    if (topPosition + estimatedHeight > screenHeight - 8) {
+        // Position above the anchor instead
+        topPosition = rect.top - estimatedHeight - 6;
+        
+        // Ensure it doesn't go off the top edge
+        if (topPosition < 8) {
+            topPosition = 8;
+        }
+    }
+    
+    popup.style.top = topPosition + "px";
+    
+    // After positioning, check if the popup is still off-screen and adjust
+    setTimeout(() => {
+        const popupRect = popup.getBoundingClientRect();
+        
+        // Adjust horizontal position if needed
+        if (popupRect.left < 8) {
+            popup.style.left = "8px";
+        } else if (popupRect.right > screenWidth - 8) {
+            popup.style.left = (screenWidth - popupRect.width - 8) + "px";
+        }
+        
+        // Adjust vertical position if needed
+        if (popupRect.top < 8) {
+            popup.style.top = "8px";
+        } else if (popupRect.bottom > screenHeight - 8) {
+            popup.style.top = (screenHeight - popupRect.height - 8) + "px";
+        }
+    }, 0);
 
     // Close handlers
     popup.querySelector(".auto-calc-popup-close").addEventListener("click", () => popup.remove());
@@ -7733,6 +9022,26 @@ function calculateAndDisplaySummary(monthData) {
 
     // Budget status banner — based on spendable vs untracked (hidden in edit mode)
     const isMonthClosed = Boolean(monthData._monthClosed);
+    
+    // Always calculate budget balance, even in edit mode, to ensure stored values are current
+    let budgetBalance = 0;
+    if (!salaryAccount || !expenditureAccount) {
+        budgetBalance = 0;
+    } else if (inflowTotal === 0 && fixedMonthlyOutflow === 0) {
+        budgetBalance = 0;
+    } else if (inflowTotal === 0) {
+        budgetBalance = 0;
+    } else {
+        // Exclude borrowing from spendable as it's not new income
+        const borrowing = Number(monthData.inflow?.borrowing || 0);
+        const spendableWithoutBorrowing = spendable - borrowing;
+        budgetBalance = spendableWithoutBorrowing - totalAllocated;
+    }
+    
+    // Store calculated values for Dashboard to use (single source of truth)
+    monthData._calculatedBudgetBalance = budgetBalance;
+    
+    // Only display budget status in preview mode (not edit mode)
     if (isBudgetEditMode) {
         // Completely hide budget status in edit mode
         if (budgetStatus) {
@@ -7757,14 +9066,6 @@ function calculateAndDisplaySummary(monthData) {
             budgetStatus.classList.add("neutral");
             budgetStatus.textContent = "Enter your Primary Income to see budget status";
         } else {
-            // Exclude borrowing from spendable as it's not new income
-            const borrowing = Number(monthData.inflow?.borrowing || 0);
-            const spendableWithoutBorrowing = spendable - borrowing;
-            const budgetBalance = spendableWithoutBorrowing - totalAllocated;
-            
-            // Store calculated values for Dashboard to use (single source of truth)
-            monthData._calculatedBudgetBalance = budgetBalance;
-            
             if (budgetBalance > 0) {
                 budgetStatus.classList.add("positive");
                 budgetStatus.textContent = `Budget Surplus: +${formatMoney(budgetBalance)} remaining`;
@@ -7900,29 +9201,42 @@ function renderPieChart(monthData) {
         } else if (label === "Others") {
             const fixedOthers = Number(monthData.outflow?.fixedOthers || 0);
             if (fixedOthers > 0) lines.push(`Fixed Others: ${formatMoney(fixedOthers)}`);
+        } else if (label === "Untracked") {
+            const untracked = dist.untracked || 0;
+            if (untracked > 0) lines.push(`Untracked: ${formatMoney(untracked)}`);
+            lines.push(`This is the difference between total income and all tracked outflows`);
         }
         return lines;
     };
     
+    // Filter out categories with zero values, but always include Untracked if > 0
+    const labels = [];
+    const dataValues = [];
+    const colors = [];
+    
+    const categories = [
+        { label: "Investment", value: dist.investment, color: "#3b82f6" },
+        { label: "Liability", value: dist.liability, color: COLOR_NEGATIVE },
+        { label: "Savings", value: dist.saving, color: COLOR_POSITIVE },
+        { label: "Expenditure", value: dist.expenditure, color: "#f97316" },
+        { label: "Insurance", value: dist.insurance, color: "#a855f7" },
+        { label: "Others", value: dist.other, color: COLOR_WARNING },
+        { label: "Untracked", value: dist.untracked || 0, color: "#94a3b8" }
+    ];
+    
+    categories.forEach(cat => {
+        if (cat.value > 0) {
+            labels.push(cat.label);
+            dataValues.push(cat.value);
+            colors.push(cat.color);
+        }
+    });
+    
     const data = {
-        labels: ["Investment", "Liability", "Savings", "Expenditure", "Insurance", "Others"],
+        labels: labels,
         datasets: [{
-            data: [
-                dist.investment,
-                dist.liability,
-                dist.saving,
-                dist.expenditure,
-                dist.insurance,
-                dist.other
-            ],
-            backgroundColor: [
-                "#3b82f6",      // Investment - blue
-                COLOR_NEGATIVE, // Liability - red
-                COLOR_POSITIVE, // Savings - green
-                "#f97316",      // Expenditure - orange
-                "#a855f7",      // Insurance - purple
-                COLOR_WARNING   // Others - yellow
-            ],
+            data: dataValues,
+            backgroundColor: colors,
             borderWidth: 0,
             hoverOffset: 6
         }]

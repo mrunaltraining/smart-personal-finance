@@ -5,6 +5,7 @@ const ICONS = {
     pencil: '<path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"/>',
     check: '<path d="M5 13l4 4L19 7"/>',
     close: '<line x1="6" y1="6" x2="18" y2="18"/><line x1="18" y1="6" x2="6" y2="18"/>',
+    refresh: '<path d="M23 4v6h-6"/><path d="M1 20v-6h6"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/>',
     
     // Finance & Money
     wallet: '<path d="M4 7h16a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V9a2 2 0 0 1 2-2Z"/><path d="M4 11h16"/>',
@@ -58,6 +59,7 @@ const ICONS = {
     // Shopping & Expenses
     shoppingBag: '<path d="M6 8h12l1 13H5L6 8Z"/><path d="M9 8a3 3 0 0 1 6 0"/>',
     shoppingCart: '<circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/>',
+    cart: '<circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/>',
     
     // Transportation
     car: '<path d="m5 17-1 2"/><path d="m19 17 1 2"/><path d="M5 17h14a2 2 0 0 0 2-2v-3l-3-5H6l-3 5v3a2 2 0 0 0 2 2Z"/><circle cx="7.5" cy="14" r="1"/><circle cx="16.5" cy="14" r="1"/>',
@@ -78,6 +80,7 @@ const ICONS = {
     // Gifts & Special
     gift: '<rect x="3" y="8" width="18" height="13" rx="1"/><path d="M12 8v13M3 12h18"/><path d="M12 8H8.5A2.5 2.5 0 1 1 11 5.5L12 8Zm0 0h3.5A2.5 2.5 0 1 0 13 5.5L12 8Z"/>',
     star: '<path d="M12 2l3.1 6.3L22 9.2l-5 4.9L18.2 22 12 18.3 5.8 22 7 14.1 2 9.2l6.9-1L12 2z"/>',
+    present: '<rect x="3" y="8" width="18" height="13" rx="1"/><path d="M12 8v13M3 12h18"/><path d="M12 8H8.5A2.5 2.5 0 1 1 11 5.5L12 8Zm0 0h3.5A2.5 2.5 0 1 0 13 5.5L12 8Z"/>',
     
     // Simplified Icons for Insights (more compact)
     starSmall: '<polygon points="12 2 15 9 22 9 17 13 18 21 12 17 6 21 7 13 2 9 9 2 12 2z"/>',

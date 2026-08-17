@@ -1,9 +1,10 @@
 # SmartFin – Architecture Document
 
-> Version 4.0.1 | August 2026
+> Version 5.3.0 | August 2026
 
 ## Version History
 
+- **v5.3.0** (Aug 2026): Dynamic Notification System with 7 triggers (Budget, Goals, Insurance, Expenses, Net Worth, Tax, Gifts), badge counter, Clear All action, click-outside-to-close popup, and daily state reset; Enhanced Insights engine covering 11 recommendation types (positive/suggestion/warning) with display limit raised from 4 to 6; Financial Health Score rebalanced (Emergency Fund 15 pts, Debt 20 pts, Savings & Investment 25 pts, Insurance 15 pts, Net Worth 15 pts with diversification bonus, Goals 10 pts with goal-defined bonus); Modern Dark Theme with indigo/slate palette (`--primary: #6366f1`); redesigned loading spinner (logo inside a rotating ring with counter-rotation); refreshed tags/badges for dark/light consistency (indigo, rose, emerald, amber, violet, cyan); horizontal bar chart for Tax Deductions; added `tests/sampledata.json` sample test dataset
 - **v4.0.1** (Aug 2026): Major architecture redesign with modular business logic - 13 platform-independent modules (2,780 lines), 64 comprehensive tests, enhanced maintainability and testability, foundation for mobile app development
 - **v2.4.0** (Aug 2026): Added Expense Tracking tab with category-wise breakdown, pie charts, budget comparison, mobile-friendly tooltips, responsive design improvements, dashboard layout reorganization
 - **v2.0.4** (Jan 2026): Enhanced dashboard with preparedness metrics, 6-month trend chart, location-based insurance calculations, gifts tracking improvements, PDF export, fixed tax calculations
@@ -29,7 +30,7 @@
 | Layer | Technology | Purpose |
 |-------|-----------|---------|
 | Markup | HTML5 | Single-page app shell, all UI panels |
-| Styling | CSS3 + CSS Variables | Dark theme, responsive grid layouts |
+| Styling | CSS3 + CSS Variables | Modern dark theme (indigo/slate palette, `--primary:#6366f1`) with light theme override, responsive grid layouts |
 | Logic | Vanilla JavaScript (ES2022, strict mode) | All app logic, rendering, calculations |
 | Auth | Firebase Authentication (Email/Password) | User login, registration, session |
 | Database | Firebase Firestore (NoSQL) | Real-time data sync across devices |
@@ -96,6 +97,16 @@ graph TD
     C --> C1[Default Tabs × 10]
     C --> C2[Custom Tabs]
     C --> C3[Tab Bar Renderer]
+
+    A --> N[Notification System v5.3.0]
+    N --> N1[7 Triggers: Budget/Goals/Insurance/Expenses/NetWorth/Tax/Gifts]
+    N --> N2[Badge Counter]
+    N --> N3[Popup + Clear All + Click-Outside-Close]
+    N --> N4[Daily Reset localStorage state]
+
+    A --> H[Dashboard Insights & Health Score]
+    H --> H1[generateInsights - 11 types, top 6 shown]
+    H --> H2[calculateFinancialHealthScore - 100 pt weighted model]
 
     D --> D1[Monthly Budget UI]
     D --> D2[Financial Goal UI]
@@ -423,6 +434,67 @@ appData.monthlyBudgetData[YYYY-MM][category][fieldId] = value
 
 Current and future monthly budget records also maintain `autoLinkedFields`, populated from Investments and Liabilities. Auto-linked budget fields are disabled in the monthly editor and should be changed only in their source tab. Historical months are not re-linked automatically, preserving older calculations after future source changes.
 
+### 4.4 Notification System Pipeline (v5.3.0)
+
+```
+registerNotificationTrigger(fn) × 7   ← Budget, Goals, Insurance, Expenses(Outflow), Net Worth, Tax, Gifts
+        │
+        ▼
+checkNotificationTriggers()
+        │  runs each trigger fn() → alerts[]
+        │  de-duplicates by `${type}-${message}`
+        ▼
+shouldRegenerateAlerts(uniqueAlerts)
+        │  compares hash vs notificationState.lastAlertsHash
+        │  skipped if state.cleared === true (unless new day)
+        ▼
+updateNotificationBadge(count)        window.currentAlerts = uniqueAlerts
+        │                                       │
+        ▼                                       ▼
+Bell icon badge (unread count)      showNotificationPopup(alerts) [auto after 2s on first load]
+                                                │
+                                                ├─ "Clear All" → clearNotifications() → state.cleared = true
+                                                └─ document click outside popup & bell → closes popup
+
+Daily reset: getNotificationState() compares stored `date` to today's date string;
+on mismatch resets { viewedCount: 0, cleared: false, lastAlertsHash: null } and persists to localStorage.
+```
+
+### 4.5 Dashboard Insights & Financial Health Score Pipeline (v5.3.0)
+
+```
+Dashboard render()
+        │
+        ▼
+generateInsights({ budgetBalance, emergencyFund, savingsRate, healthInsurance,
+                    termInsurance, ongoingGoals, monthlyInvestment, ... })
+        │  evaluates up to 11 recommendation types:
+        │    positive(5): surplus / savings-rate≥30% / EF funded / net-worth strong / consistent investing
+        │    suggestion(7): EF gap / low health ins / low term ins / no investing / goals behind /
+        │                    no goals / low diversification / no tax planning
+        │    warning(3): high debt ratio / low savings rate / negative net worth
+        ▼
+insights.slice(0, 6)   ← display limit raised from 4 to 6
+        │
+        ▼
+Rendered as insight cards/list on Dashboard
+
+calculateFinancialHealthScore({ emergencyFund, idealEmergencyFund, totalAssets, totalLiabilities,
+                                 usableIncome, monthlyCommitments, healthInsurance, termInsurance,
+                                 ongoingGoals, monthlyInvestment, monthData, assets })
+        │
+        ├─ Emergency Fund      → 15 pts (gradual ratio-based)
+        ├─ Debt Management     → 20 pts (debt-to-income bands)
+        ├─ Savings & Investment→ 25 pts (combined saving+investment rate)
+        ├─ Insurance Coverage  → 15 pts (Health 9 + Term 6, weighted 60/40)
+        ├─ Net Worth Position  → 15 pts (+2 diversification bonus, ≥3 asset types)
+        └─ Goal Progress       → 10 pts (8 pts progress + 2 pt bonus for goals defined)
+        ▼
+score (0-100) → healthLevel: Excellent(≥85)/Good(≥70)/Fair(≥50)/Needs Improvement(≥30)/Needs Work(<30)
+        ▼
+Rendered as circular progress ring + per-component breakdown bars with tooltips
+```
+
 ---
 
 ## 5. Sequence Diagrams
@@ -602,7 +674,7 @@ sequenceDiagram
     "financialGoal": [
       { "id": "1748374923001", "name": "Car", "amountNeeded": 800000,
         "amountAccumulated": 200000, "targetDate": "2027-06-01",
-        "goalType": "Mid Term", "status": "Ongoing", "details": "" }
+        "goalType": "MidTerm", "status": "Ongoing", "details": "" }
     ],
     "investments": [
       { "id": "1748374923002", "name": "HDFC SIP", "initialInvestment": 5000,
@@ -740,6 +812,9 @@ smart-financial-planning/
 │       ├── app.js          # All application logic (~3250 lines)
 │       └── firebase-config.js  # Firebase credentials (replace before deploy)
 ├── test.html               # Unit test runner (42 automated tests)
+├── tests/
+│   ├── tax-calculation.test.js
+│   └── sampledata.json     # NEW in v5.3.0 - sample dataset for manual/automated testing
 ├── architecture.md         # This document
 ├── README.md               # Project overview + setup guide
 └── USER_MANUAL.md          # End-user guide (~570 lines)

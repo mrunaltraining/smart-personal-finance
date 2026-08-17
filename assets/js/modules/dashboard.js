@@ -8,6 +8,18 @@ import { DateUtils, CurrencyFormatter } from '../../../src/core/index.js';
 // Global variable to track the dashboard trend chart instance
 let dashboardTrendChartInstance = null;
 
+// Helper to determine current month phase for context-aware quick actions
+function getMonthPhase(monthData) {
+    const day = new Date().getDate();
+    const transferDone = Boolean(monthData?._transferDone);
+    const monthClosed = Boolean(monthData?._monthClosed);
+    
+    if (monthClosed) return 'closed';
+    if (day <= 5) return transferDone ? 'beginning_done' : 'beginning_pending';
+    if (day <= 25) return 'mid_month';
+    return 'end_month';
+}
+
 // Helper to get auto tax deductions (calls the function from app.js)
 function getAutoTaxDeductionsFromAppData(appData) {
     // This function is defined in app.js and is available globally
@@ -279,16 +291,16 @@ function calculateIdealEmergencyFund(appData) {
     return ideal;
 }
 
-// Calculate Financial Health Score using existing data - more realistic scoring
+// Calculate Financial Health Score using existing data - updated with modern metrics
 function calculateFinancialHealthScore(data) {
     const { emergencyFund, idealEmergencyFund, totalAssets, totalLiabilities, 
             usableIncome, monthlyCommitments, healthInsurance, idealHealthInsurance,
-            termInsurance, idealTermInsurance, ongoingGoals, monthlyInvestment, monthData } = data;
+            termInsurance, idealTermInsurance, ongoingGoals, monthlyInvestment, monthData, assets } = data;
     
     let score = 0;
     const breakdown = [];
     
-    // 1. Emergency Fund Coverage (20 points) - More gradual scoring
+    // 1. Emergency Fund Coverage (15 points) - Reduced weight, still important
     let efCoverage = 0;
     if (idealEmergencyFund > 0) {
         const ratio = emergencyFund / idealEmergencyFund;
@@ -299,9 +311,9 @@ function calculateFinancialHealthScore(data) {
             efCoverage = 0.5 + (Math.min(1, ratio) - 0.5) * 1; // 50-100% coverage = 50-100% score
         }
     }
-    const efScore = Math.round(efCoverage * 20);
+    const efScore = Math.round(efCoverage * 15);
     score += efScore;
-    const efTooltip = `Emergency Fund (20 points max)
+    const efTooltip = `Emergency Fund (15 points max)
 Current: ₹${Math.round(emergencyFund).toLocaleString('en-IN')}
 Ideal: ₹${Math.round(idealEmergencyFund).toLocaleString('en-IN')}
 Coverage: ${Math.round(efCoverage * 100)}%
@@ -310,19 +322,19 @@ Scoring:
 • 0-50% coverage = 0-50% score (gradual)
 • 50-100% coverage = 50-100% score
 • Based on 6 months of expenses`;
-    breakdown.push({ label: 'Emergency Fund', score: efScore, max: 20, percentage: Math.round(efCoverage * 100), tooltip: efTooltip });
+    breakdown.push({ label: 'Emergency Fund', score: efScore, max: 15, percentage: Math.round(efCoverage * 100), tooltip: efTooltip });
     
-    // 2. Debt-to-Income Ratio (25 points) - More realistic thresholds
+    // 2. Debt-to-Income Ratio (20 points) - Reduced weight, added credit card consideration
     let debtScore = 0;
     if (usableIncome > 0) {
         const debtRatio = monthlyCommitments / usableIncome;
         // Excellent: <30%, Good: 30-40%, Fair: 40-50%, Poor: >50%
         if (debtRatio < 0.3) {
-            debtScore = 25; // Excellent
+            debtScore = 20; // Excellent
         } else if (debtRatio < 0.4) {
-            debtScore = 20; // Good
+            debtScore = 15; // Good
         } else if (debtRatio < 0.5) {
-            debtScore = 12; // Fair
+            debtScore = 10; // Fair
         } else if (debtRatio < 0.7) {
             debtScore = 5; // Poor
         } else {
@@ -331,66 +343,68 @@ Scoring:
     }
     score += debtScore;
     const debtRatio = usableIncome > 0 ? monthlyCommitments / usableIncome : 1;
-    const debtTooltip = `Debt Management (25 points max)
+    const debtTooltip = `Debt Management (20 points max)
 Monthly Commitments: ₹${Math.round(monthlyCommitments).toLocaleString('en-IN')}
 Usable Income: ₹${Math.round(usableIncome).toLocaleString('en-IN')}
 Debt-to-Income Ratio: ${Math.round(debtRatio * 100)}%
 
 Scoring:
-• <30% = 25 points (Excellent)
-• 30-40% = 20 points (Good)
-• 40-50% = 12 points (Fair)
+• <30% = 20 points (Excellent)
+• 30-40% = 15 points (Good)
+• 40-50% = 10 points (Fair)
 • 50-70% = 5 points (Poor)
 • ≥70% = 0 points (Critical)
 
-Note: Only includes liabilities & expenditures, NOT savings/investments`;
-    breakdown.push({ label: 'Debt Management', score: debtScore, max: 25, percentage: Math.round(Math.max(0, (1 - Math.min(1, debtRatio)) * 100)), tooltip: debtTooltip });
+Note: Includes liabilities, expenditures & credit card payments`;
+    breakdown.push({ label: 'Debt Management', score: debtScore, max: 20, percentage: Math.round(Math.max(0, (1 - Math.min(1, debtRatio)) * 100)), tooltip: debtTooltip });
     
-    // 3. Savings Rate (20 points) - Actual savings made (not just available)
+    // 3. Savings & Investment Rate (25 points) - Increased weight, combined metric
     let savingsScore = 0;
     if (usableIncome > 0) {
-        // The Budget page's Savings category is the actual saved amount.
-        const totalActualSavings = getMonthlyBudgetDistribution(monthData).saving;
-        const savingsRate = Math.max(0, totalActualSavings / usableIncome);
+        const { saving: totalActualSavings, investment: totalInvestment } = getMonthlyBudgetDistribution(monthData);
+        const totalSavingsAndInvestment = totalActualSavings + totalInvestment;
+        const savingsRate = Math.max(0, totalSavingsAndInvestment / usableIncome);
         
         // Excellent: >30%, Good: 20-30%, Fair: 10-20%, Poor: <10%
         if (savingsRate >= 0.3) {
-            savingsScore = 20;
+            savingsScore = 25;
         } else if (savingsRate >= 0.2) {
-            savingsScore = 15;
+            savingsScore = 20;
         } else if (savingsRate >= 0.1) {
-            savingsScore = 8;
+            savingsScore = 12;
         } else if (savingsRate > 0) {
-            savingsScore = 3;
+            savingsScore = 5;
         }
     }
     score += savingsScore;
-    const { saving: totalActualSavings } = getMonthlyBudgetDistribution(monthData);
-    const savingsRate = usableIncome > 0 ? Math.max(0, totalActualSavings / usableIncome) : 0;
-    const savingsTooltip = `Savings Rate (20 points max)
-Actual Savings: ₹${Math.round(totalActualSavings).toLocaleString('en-IN')}
-Usable Income: ₹${Math.round(usableIncome).toLocaleString('en-IN')}
-Savings Rate: ${Math.round(savingsRate * 100)}%
+    const { saving: totalActualSavings, investment: totalInvestment } = getMonthlyBudgetDistribution(monthData);
+    const totalSavingsAndInvestment = totalActualSavings + totalInvestment;
+    const savingsRate = usableIncome > 0 ? Math.max(0, totalSavingsAndInvestment / usableIncome) : 0;
+    const savingsTooltip = `Savings & Investment (25 points max)
+Savings: ₹${Math.round(totalActualSavings).toLocaleString('en-IN')}
+Investments: ₹${Math.round(totalInvestment).toLocaleString('en-IN')}
+Total: ₹${Math.round(totalSavingsAndInvestment).toLocaleString('en-IN')}
+Rate: ${Math.round(savingsRate * 100)}%
 
-Breakdown: the Budget page's Savings category (automatic/fixed saving plus on-demand saving).
+Combined metric: Savings + Investments for wealth building.
 
 Scoring:
-• ≥30% = 20 points (Excellent)
-• 20-30% = 15 points (Good)
-• 10-20% = 8 points (Fair)
-• <10% = 3 points (Poor)`;
-    breakdown.push({ label: 'Savings Rate', score: savingsScore, max: 20, percentage: Math.round(savingsRate * 100), tooltip: savingsTooltip });
+• ≥30% = 25 points (Excellent)
+• 20-30% = 20 points (Good)
+• 10-20% = 12 points (Fair)
+• <10% = 5 points (Poor)`;
+    breakdown.push({ label: 'Savings & Investment', score: savingsScore, max: 25, percentage: Math.round(savingsRate * 100), tooltip: savingsTooltip });
     
-    // 4. Insurance Coverage (20 points) - Weighted by importance
+    // 4. Insurance Coverage (15 points) - Reduced weight
     let insuranceScore = 0;
     const healthCoverage = idealHealthInsurance > 0 ? Math.min(1, healthInsurance / idealHealthInsurance) : 0;
     const termCoverage = idealTermInsurance > 0 ? Math.min(1, termInsurance / idealTermInsurance) : 0;
     
-    // Health insurance is critical (12 points), term insurance important (8 points)
-    insuranceScore += Math.round(healthCoverage * 12);
-    insuranceScore += Math.round(termCoverage * 8);
+    // Health insurance is critical (9 points), term insurance important (6 points)
+    insuranceScore += Math.round(healthCoverage * 9);
+    insuranceScore += Math.round(termCoverage * 6);
     score += insuranceScore;
-    const insuranceTooltip = `Insurance Coverage (20 points max)
+    const insuranceTooltip = `Insurance Coverage (15 points max)
 Health Insurance: ₹${Math.round(healthInsurance).toLocaleString('en-IN')}
 Ideal Health: ₹${Math.round(idealHealthInsurance).toLocaleString('en-IN')}
 Coverage: ${Math.round(healthCoverage * 100)}%
@@ -400,12 +414,12 @@ Ideal Term: ₹${Math.round(idealTermInsurance).toLocaleString('en-IN')}
 Coverage: ${Math.round(termCoverage * 100)}%
 
 Scoring:
-• Health Insurance: 12 points max (critical)
-• Term Insurance: 8 points max (important)
+• Health Insurance: 9 points max (critical)
+• Term Insurance: 6 points max (important)
 • Weighted by importance (60% health, 40% term)`;
-    breakdown.push({ label: 'Insurance Coverage', score: insuranceScore, max: 20, percentage: Math.round(((healthCoverage * 0.6) + (termCoverage * 0.4)) * 100), tooltip: insuranceTooltip });
+    breakdown.push({ label: 'Insurance Coverage', score: insuranceScore, max: 15, percentage: Math.round(((healthCoverage * 0.6) + (termCoverage * 0.4)) * 100), tooltip: insuranceTooltip });
     
-    // 5. Net Worth Position (10 points) - New realistic metric
+    // 5. Net Worth Position (15 points) - Increased weight, added asset diversification
     let netWorthScore = 0;
     const netWorth = totalAssets - totalLiabilities;
     if (netWorth > 0) {
@@ -414,53 +428,65 @@ Scoring:
         // Additional points if net worth > 6 months expenses
         const sixMonthsExpenses = monthlyCommitments * 6;
         if (netWorth > sixMonthsExpenses) {
-            netWorthScore = 10;
+            netWorthScore = 15;
         } else if (netWorth > sixMonthsExpenses * 0.5) {
-            netWorthScore = 7;
+            netWorthScore = 10;
         }
     }
+    
+    // Asset diversification bonus
+    const assetTypes = new Set(assets.map(a => a.purpose || 'Other'));
+    if (assetTypes.size >= 3 && netWorth > 0) {
+        netWorthScore = Math.min(15, netWorthScore + 2); // Bonus for diversification
+    }
+    
     score += netWorthScore;
     const sixMonthsExpenses = monthlyCommitments * 6;
-    const netWorthTooltip = `Net Worth Position (10 points max)
+    const netWorthTooltip = `Net Worth Position (15 points max)
 Net Worth: ₹${Math.round(netWorth).toLocaleString('en-IN')}
 Total Assets: ₹${Math.round(totalAssets).toLocaleString('en-IN')}
 Total Liabilities: ₹${Math.round(totalLiabilities).toLocaleString('en-IN')}
+Asset Types: ${assetTypes.size}
 
 6 Months Expenses: ₹${Math.round(sixMonthsExpenses).toLocaleString('en-IN')}
 
 Scoring:
-• Net Worth > 6 months expenses = 10 points
-• Net Worth > 3 months expenses = 7 points
+• Net Worth > 6 months expenses = 15 points
+• Net Worth > 3 months expenses = 10 points
 • Positive net worth = 5 points
-• Negative net worth = 0 points`;
-    breakdown.push({ label: 'Net Worth Position', score: netWorthScore, max: 10, percentage: netWorth > 0 ? Math.min(100, Math.round((netWorth / sixMonthsExpenses) * 100)) : 0, tooltip: netWorthTooltip });
+• Negative net worth = 0 points
+• +2 bonus for asset diversification (≥3 types)`;
+    breakdown.push({ label: 'Net Worth Position', score: netWorthScore, max: 15, percentage: netWorth > 0 ? Math.min(100, Math.round((netWorth / sixMonthsExpenses) * 100)) : 0, tooltip: netWorthTooltip });
     
-    // 6. Goal Progress & Planning (5 points) - Realistic expectations
+    // 6. Goal Progress & Planning (10 points) - Increased weight
     let goalScore = 0;
     if (ongoingGoals.length > 0) {
         const totalNeeded = ongoingGoals.reduce((sum, g) => sum + Number(g.amountNeeded || 0), 0);
         const totalAccumulated = ongoingGoals.reduce((sum, g) => sum + Number(g.amountAccumulated || 0), 0);
         const goalProgress = totalNeeded > 0 ? Math.min(1, totalAccumulated / totalNeeded) : 0;
-        goalScore = Math.round(goalProgress * 5);
+        goalScore = Math.round(goalProgress * 8);
+        
+        // Bonus for having goals defined
+        goalScore += 2;
     } else {
-        // Having goals defined is important
+        // No goals defined
         goalScore = 0;
     }
     score += goalScore;
     const goalProgress = ongoingGoals.length > 0 ? Math.min(1, ongoingGoals.reduce((sum, g) => sum + Number(g.amountAccumulated || 0), 0) / Math.max(1, ongoingGoals.reduce((sum, g) => sum + Number(g.amountNeeded || 0), 0))) : 0;
     const totalNeeded = ongoingGoals.reduce((sum, g) => sum + Number(g.amountNeeded || 0), 0);
     const totalAccumulated = ongoingGoals.reduce((sum, g) => sum + Number(g.amountAccumulated || 0), 0);
-    const goalTooltip = `Goal Progress (5 points max)
+    const goalTooltip = `Goal Progress (10 points max)
 Ongoing Goals: ${ongoingGoals.length}
 Total Needed: ₹${Math.round(totalNeeded).toLocaleString('en-IN')}
 Total Accumulated: ₹${Math.round(totalAccumulated).toLocaleString('en-IN')}
 Progress: ${Math.round(goalProgress * 100)}%
 
 Scoring:
-• Based on overall goal completion
-• Points = Progress % × 5
-• Having goals defined is important`;
-    breakdown.push({ label: 'Goal Progress', score: goalScore, max: 5, percentage: Math.round(goalProgress * 100), tooltip: goalTooltip });
+• Based on overall goal completion (8 points max)
+• +2 bonus for having goals defined
+• Points = Progress % × 8 + 2`;
+    breakdown.push({ label: 'Goal Progress', score: goalScore, max: 10, percentage: Math.round(goalProgress * 100), tooltip: goalTooltip });
     
     // Determine health level with more realistic thresholds
     let healthLevel = 'Needs Work';
@@ -487,7 +513,7 @@ function generateInsights(data) {
     const insights = [];
     const { budgetBalance, emergencyFund, idealEmergencyFund, savingsRate, healthInsurance, 
             idealHealthInsurance, termInsurance, idealTermInsurance, ongoingGoals, 
-            monthlyInvestment, usableIncome, monthlyCommitments } = data;
+            monthlyInvestment, usableIncome, monthlyCommitments, totalAssets, totalLiabilities, assets, taxPlan } = data;
     
     // Positive insights (encouragement)
     if (budgetBalance > 0) {
@@ -514,6 +540,22 @@ function generateInsights(data) {
         });
     }
     
+    if (totalAssets > totalLiabilities * 2) {
+        insights.push({
+            type: 'positive',
+            icon: 'checkSmall',
+            message: `Strong net worth position. Your assets are ${Math.round((totalAssets / totalLiabilities) * 100)}% of liabilities.`
+        });
+    }
+    
+    if (monthlyInvestment > 0 && savingsRate >= 0.2) {
+        insights.push({
+            type: 'positive',
+            icon: 'trendingUpSmall',
+            message: `Consistent investing! You're building wealth with ${fmtMoney(monthlyInvestment)} monthly investments.`
+        });
+    }
+    
     // Improvement suggestions
     if (emergencyFund < idealEmergencyFund && budgetBalance > 0) {
         const gap = idealEmergencyFund - emergencyFund;
@@ -529,6 +571,14 @@ function generateInsights(data) {
             type: 'suggestion',
             icon: 'hospitalSmall',
             message: `Consider increasing health insurance by ${fmtMoney(idealHealthInsurance - healthInsurance)} for better protection.`
+        });
+    }
+    
+    if (termInsurance < idealTermInsurance * 0.7) {
+        insights.push({
+            type: 'suggestion',
+            icon: 'shieldCheckSmall',
+            message: `Your term insurance is below recommended. Consider increasing coverage to protect your family.`
         });
     }
     
@@ -555,6 +605,24 @@ function generateInsights(data) {
         }
     }
     
+    if (ongoingGoals.length === 0) {
+        insights.push({
+            type: 'suggestion',
+            icon: 'targetSmall',
+            message: `Set financial goals to track progress and stay motivated. Start with short-term goals.`
+        });
+    }
+    
+    // Asset diversification
+    const assetTypes = new Set(assets.map(a => a.purpose || 'Other'));
+    if (assetTypes.size < 3 && assets.length > 0) {
+        insights.push({
+            type: 'suggestion',
+            icon: 'trendingUpSmall',
+            message: `Diversify your assets across different types (equity, debt, gold, real estate) to reduce risk.`
+        });
+    }
+    
     // Spending optimization
     const debtRatio = usableIncome > 0 ? monthlyCommitments / usableIncome : 0;
     if (debtRatio > 0.5) {
@@ -565,7 +633,32 @@ function generateInsights(data) {
         });
     }
     
-    return insights.slice(0, 4); // Limit to 4 most relevant insights
+    if (savingsRate < 0.1 && usableIncome > 0) {
+        insights.push({
+            type: 'warning',
+            icon: 'alertSmall',
+            message: `Low savings rate of ${Math.round(savingsRate * 100)}%. Aim to save at least 20% of your income.`
+        });
+    }
+    
+    if (totalLiabilities > totalAssets) {
+        insights.push({
+            type: 'warning',
+            icon: 'alertSmall',
+            message: `Negative net worth. Focus on reducing liabilities to improve your financial health.`
+        });
+    }
+    
+    // Tax planning
+    if (taxPlan && taxPlan.length === 0 && usableIncome > 500000) {
+        insights.push({
+            type: 'suggestion',
+            icon: 'calendarSmall',
+            message: `Plan your tax deductions under 80C, 80D, etc. to reduce your tax liability significantly.`
+        });
+    }
+    
+    return insights.slice(0, 6); // Limit to 6 most relevant insights
 }
 
 // Generate alerts based on existing data - no duplicate calculations
@@ -759,6 +852,32 @@ export function renderDashboard(appData, netWorthSummary = {}) {
         const needed = Number(goal.amountNeeded || 0);
         return needed > 0;
     });
+    
+    // Categorize goals by type (handle both formats: with/without spaces)
+    // Treat unspecified types as LongTerm (default)
+    const shortTermGoals = goals.filter(goal => {
+        const type = (goal.goalType || '').toLowerCase().trim();
+        return type === 'shortterm' || type === 'short term';
+    });
+    const midTermGoals = goals.filter(goal => {
+        const type = (goal.goalType || '').toLowerCase().trim();
+        return type === 'midterm' || type === 'mid term';
+    });
+    const longTermGoals = goals.filter(goal => {
+        const type = (goal.goalType || '').toLowerCase().trim();
+        // Include explicit longterm types and unspecified types (default to longterm)
+        return type === 'longterm' || type === 'long term' || !type;
+    });
+    
+    // Helper function to convert stored goal type to display value
+    const formatGoalType = (type) => {
+        const displayMap = {
+            'ShortTerm': 'Short Term',
+            'MidTerm': 'Mid Term',
+            'LongTerm': 'Long Term'
+        };
+        return displayMap[type] || type;
+    };
     const nextGoal = [...activeGoals].sort((a, b) => {
         const aDate = a.targetDate ? new Date(`${a.targetDate}T00:00:00`).getTime() : Infinity;
         const bDate = b.targetDate ? new Date(`${b.targetDate}T00:00:00`).getTime() : Infinity;
@@ -859,57 +978,27 @@ export function renderDashboard(appData, netWorthSummary = {}) {
     
     const maxValue = Math.max(...sixMonthData.flatMap(m => [m.investment, m.expenditure, m.saving, m.liability, m.others])) || 1;
 
-    // Generate alerts using existing calculations
-    const alerts = generateAlerts({
-        budgetBalance, emergencyFund, idealEmergencyFund, ongoingGoals, insurancePolicies,
-        idealHealthInsurance, idealTermInsurance, healthInsurance, termInsurance,
-        totalCreditCardUsage, outflows, now
-    });
-    
     // Calculate Financial Health Score using existing data
     const healthScore = calculateFinancialHealthScore({
         emergencyFund, idealEmergencyFund, totalAssets, totalLiabilities,
         usableIncome, monthlyCommitments, healthInsurance, idealHealthInsurance,
-        termInsurance, idealTermInsurance, ongoingGoals, monthlyInvestment, monthData
+        termInsurance, idealTermInsurance, ongoingGoals, monthlyInvestment, monthData,
+        assets: accounts
     });
     
     // Generate insights and recommendations
     const insights = generateInsights({
         budgetBalance, emergencyFund, idealEmergencyFund, savingsRate, healthInsurance,
         idealHealthInsurance, termInsurance, idealTermInsurance, ongoingGoals,
-        monthlyInvestment, usableIncome, monthlyCommitments
+        monthlyInvestment, usableIncome, monthlyCommitments, totalAssets, totalLiabilities,
+        assets: accounts, taxPlan: taxItems
     });
-
-    // Prepare Alerts HTML (to be placed after Insights)
-    const alertsHTML = alerts.length > 0 ? `
-        <article class="dash-card dash-alerts-carousel" style="grid-column: 1 / -1;">
-            <div class="dash-card-header">
-                <span class="dash-card-title">${iconSvg('bellSmall', 'dash-title-icon')} Alerts & Notifications</span>
-                <span class="dash-card-badge" style="background:#ef444422;color:#ef4444">${alerts.length} alert${alerts.length > 1 ? 's' : ''}</span>
-            </div>
-            <div class="dash-alerts-carousel-container">
-                <button class="dash-carousel-btn dash-carousel-prev" onclick="rotateAlert(-1)">‹</button>
-                <div class="dash-alerts-carousel-track">
-                    ${alerts.map((alert, index) => `
-                        <div class="dash-alert-card dash-alert-${alert.type} ${index === 0 ? 'active' : ''}" onclick="switchToTab('${alert.action}')">
-                            <div class="dash-alert-icon">${iconSvg(alert.icon, 'dash-alert-svg')}</div>
-                            <div class="dash-alert-content">
-                                <div class="dash-alert-message">${alert.message}</div>
-                                <div class="dash-alert-action">Tap to view →</div>
-                            </div>
-                        </div>
-                    `).join('')}
-                </div>
-                <button class="dash-carousel-btn dash-carousel-next" onclick="rotateAlert(1)">›</button>
-            </div>
-            <div class="dash-carousel-dots">
-                ${alerts.map((_, index) => `
-                    <span class="dash-carousel-dot ${index === 0 ? 'active' : ''}" onclick="goToAlert(${index})"></span>
-                `).join('')}
-            </div>
-        </article>
-    ` : '';
     
+    // Trigger notification check
+    if (window.triggerNotificationCheck) {
+        window.triggerNotificationCheck();
+    }
+
     // Prepare Health Score HTML (to be placed after Insights)
     const healthScoreHTML = `
         <article class="dash-card dash-health-score" style="grid-column: 1 / -1;">
@@ -946,27 +1035,35 @@ export function renderDashboard(appData, netWorthSummary = {}) {
         </article>
     `;
 
-    grid.innerHTML = `
-        <article class="dash-card dash-fy-overview" style="grid-column: 1 / -1;">
-            <div class="dash-card-header">
-                <span class="dash-card-title">${iconSvg('barChart', 'dash-title-icon')} Financial Year overview</span>
-                <span class="dash-card-badge" style="background:#3b82f622;color:#3b82f6">FY ${now.getMonth() >= 3 ? now.getFullYear() : now.getFullYear() - 1}-${String((now.getMonth() >= 3 ? now.getFullYear() : now.getFullYear() - 1) + 1).slice(-2)}</span>
-            </div>
-            <div class="dash-fy-kpis">
-                <div><span>Income</span><strong>${fmtMoney(financialYearTotals.income)}</strong></div>
-                <div><span>Invested</span><strong style="color:#3b82f6">${fmtMoney(financialYearTotals.investment)}</strong></div>
-                <div><span>Liabilities</span><strong style="color:#ef4444">${fmtMoney(financialYearTotals.liability)}</strong></div>
-                <div><span>Saved</span><strong style="color:#22c55e">${fmtMoney(financialYearTotals.saving)}</strong></div>
-                <div><span>Spent</span><strong style="color:#f97316">${fmtMoney(financialYearTotals.expenditure)}</strong></div>
-                <div><span>Insurance</span><strong style="color:#a855f7">${fmtMoney(financialYearTotals.insurance)}</strong></div>
-                <div><span>Others</span><strong style="color:#eab308">${fmtMoney(financialYearTotals.other)}</strong></div>
-            </div>
-        </article>
+    // Determine quick actions based on month phase
+    const phase = getMonthPhase(monthData);
+    const budgetActions = [];
+    
+    if (phase === 'beginning_pending') {
+        budgetActions.push({ icon: 'edit', label: 'Edit', action: "switchToTab('monthlyBudget'); setTimeout(() => document.getElementById('toggleBudgetEdit')?.click(), 100); return false;" });
+        budgetActions.push({ icon: 'check', label: 'Transfer', action: "switchToTab('monthlyBudget'); setTimeout(() => document.getElementById('btnDoTransfer')?.click(), 100); return false;" });
+    } else if (phase === 'beginning_done' || phase === 'mid_month') {
+        budgetActions.push({ icon: 'refresh', label: 'Update', action: "openQuickUpdatePopup(); return false;" });
+    } else if (phase === 'end_month') {
+        budgetActions.push({ icon: 'lock', label: 'Close', action: "switchToTab('monthlyBudget'); setTimeout(() => document.getElementById('btnCarryForward')?.click(), 100); return false;" });
+        budgetActions.push({ icon: 'refresh', label: 'Update', action: "openQuickUpdatePopup(); return false;" });
+    }
+    
+    // Always add Budget icon
+    budgetActions.push({ icon: 'wallet', label: 'Budget', action: "switchToTab('monthlyBudget'); return false;" });
 
+    grid.innerHTML = `
         <article class="dash-card dash-card-primary">
             <div class="dash-card-header">
                 <span class="dash-card-title">${iconSvg('calendar', 'dash-title-icon')} This month</span>
                 <span class="dash-card-badge" style="background:${budgetColor}22;color:${budgetColor}">${budgetState}</span>
+                <div class="dash-card-header-actions">
+                    ${budgetActions.map(a => `
+                        <button onclick="${a.action}" class="dash-card-action-btn" title="${a.label}">
+                            ${iconSvg(a.icon, 'dash-action-icon')}
+                        </button>
+                    `).join('')}
+                </div>
             </div>
             <div class="dash-primary-value" style="color:${spendable >= 0 ? COLOR_POSITIVE : COLOR_NEGATIVE}">${fmtMoney(spendable)}</div>
             <p class="dash-primary-label">available after recurring commitments</p>
@@ -977,13 +1074,21 @@ export function renderDashboard(appData, netWorthSummary = {}) {
             <div class="dash-stat-row"><span class="dash-stat-label">Variable Expenses</span><span class="dash-stat-value" style="color:${COLOR_NEGATIVE}">${fmtMoney(variableExpDisplay)}</span></div>
             <div class="dash-stat-row"><span class="dash-stat-label">On-Demand Expense</span><span class="dash-stat-value" style="color:${COLOR_WARNING}">${fmtMoney(totalOndemand)}</span></div>
             <div class="dash-stat-row"><span class="dash-stat-label">Credit card usage</span><span class="dash-stat-value" style="color:${totalCreditLimit > 0 ? (totalCreditCardUsage / totalCreditLimit > 0.5 ? '#ef4444' : totalCreditCardUsage / totalCreditLimit > 0.3 ? '#f97316' : totalCreditCardUsage / totalCreditLimit > 0.1 ? COLOR_WARNING : COLOR_POSITIVE) : COLOR_POSITIVE}">${fmtMoney(totalCreditCardUsage)}</span></div>
-            <div class="dash-card-note">Values from Budget tab · <a href="#" onclick="switchToTab('monthlyBudget'); return false;" style="color:#3b82f6;text-decoration:underline;cursor:pointer;">View Budget</a></div>
+            <div class="dash-card-note">Values from Budget tab</div>
         </article>
 
         <article class="dash-card">
             <div class="dash-card-header">
-                <span class="dash-card-title">${iconSvg('bank', 'dash-title-icon')} Accounts & Net Worth</span>
+                <span class="dash-card-title">${iconSvg('users', 'dash-title-icon')} Accounts & Net Worth</span>
                 <span class="dash-card-badge" style="background:${netWorth >= 0 ? COLOR_POSITIVE : COLOR_NEGATIVE}22;color:${netWorth >= 0 ? COLOR_POSITIVE : COLOR_NEGATIVE}">Current</span>
+                <div class="dash-card-header-actions">
+                    <button onclick="switchToTab('cards'); return false;" class="dash-card-action-btn" title="View Accounts">
+                        ${iconSvg('bank', 'dash-action-icon')}
+                    </button>
+                    <button onclick="switchToTab('netWorth'); return false;" class="dash-card-action-btn" title="View Net Worth">
+                        ${iconSvg('barChart', 'dash-action-icon')}
+                    </button>
+                </div>
             </div>
             <div class="dash-primary-value" style="color:${netWorth >= 0 ? COLOR_POSITIVE : COLOR_NEGATIVE}">${fmtMoney(netWorth)}</div>
             <p class="dash-primary-label">net worth (assets less liabilities)</p>
@@ -994,13 +1099,18 @@ export function renderDashboard(appData, netWorthSummary = {}) {
             <div class="dash-stat-row"><span class="dash-stat-label">Total credit limit</span><span class="dash-stat-value" style="color:#3b82f6">${fmtMoney(totalCreditLimit)}</span></div>
             <div class="dash-stat-row"><span class="dash-stat-label">Assets</span><span class="dash-stat-value" style="color:${COLOR_POSITIVE}">${fmtMoney(totalAssets)}</span></div>
             <div class="dash-stat-row"><span class="dash-stat-label">Liabilities</span><span class="dash-stat-value" style="color:${COLOR_NEGATIVE}">${fmtMoney(totalLiabilities)}</span></div>
-            <div class="dash-card-note">${accounts.length} account${accounts.length === 1 ? '' : 's'} · ${assetCount} asset${assetCount === 1 ? '' : 's'} tracked · <a href="#" onclick="switchToTab('netWorth'); return false;" style="color:#3b82f6;text-decoration:underline;cursor:pointer;">View Net Worth</a></div>
+            <div class="dash-card-note">${accounts.length} account${accounts.length === 1 ? '' : 's'} · ${assetCount} asset${assetCount === 1 ? '' : 's'} tracked</div>
         </article>
 
         <article class="dash-card dash-spend-breakdown">
             <div class="dash-card-header">
                 <span class="dash-card-title">${iconSvg('pieChart', 'dash-title-icon')} Spending breakdown</span>
                 <span class="dash-card-badge" style="background:#f9731622;color:#f97316">This month</span>
+                <div class="dash-card-header-actions">
+                    <button onclick="switchToTab('expenseTracking'); return false;" class="dash-card-action-btn" title="View Expenses">
+                        ${iconSvg('shoppingCart', 'dash-action-icon')}
+                    </button>
+                </div>
             </div>
             <div class="dash-distribution-section">
                 <span class="dash-distribution-heading">By category</span>
@@ -1011,7 +1121,7 @@ export function renderDashboard(appData, netWorthSummary = {}) {
                     <span class="dash-distribution-heading">By payment method</span>
                     ${renderDistributionRows(expensesByPaymentMethod, 0, true, false)}
                 </div>` : ''}
-            <div class="dash-card-note">Recorded transactions only · <a href="#" onclick="switchToTab('expenseTracking'); return false;" style="color:#3b82f6;text-decoration:underline;cursor:pointer;">View Expenses</a></div>
+            <div class="dash-card-note">Recorded transactions only</div>
         </article>
 
         <article class="dash-card dash-kpi-card">
@@ -1038,14 +1148,26 @@ export function renderDashboard(appData, netWorthSummary = {}) {
         <article class="dash-card">
             <div class="dash-card-header">
                 <span class="dash-card-title">${iconSvg('target', 'dash-title-icon')} Goals & Investment</span>
-                <span class="dash-card-badge" style="background:#3b82f622;color:#3b82f6">${totalGoals.length}</span>
+                <span class="dash-card-badge" style="background:#3b82f622;color:#3b82f6">${goals.length} total</span>
+                <div class="dash-card-header-actions">
+                    <button onclick="switchToTab('financialGoal'); return false;" class="dash-card-action-btn" title="View Goals">
+                        ${iconSvg('target', 'dash-action-icon')}
+                    </button>
+                    <button onclick="switchToTab('inflow'); return false;" class="dash-card-action-btn" title="View Investments">
+                        ${iconSvg('trendingUp', 'dash-action-icon')}
+                    </button>
+                    <button onclick="switchToTab('gifts'); return false;" class="dash-card-action-btn" title="View Gifts">
+                        ${iconSvg('star', 'dash-action-icon')}
+                    </button>
+                </div>
             </div>
             ${ongoingGoals.length > 0 ? `
                 <div class="dash-goal-focus">
                     <div style="display:grid;grid-template-columns:1fr auto 1fr;gap:16px;align-items:start;">
                         <div>
                             <div class="dash-goal-name">All Goals Combined</div>
-                            <div class="dash-goal-meta">${ongoingGoals.length} ongoing · ${plannedGoals.length} planned</div>
+                            <div class="dash-goal-meta">${ongoingGoals.length} ongoing · ${plannedGoals.length} planned · ${achievedGoals.length} achieved · ${missedGoals.length} missed${coveredGoals.length > 0 ? ` · ${coveredGoals.length} covered` : ''}</div>
+                            <div class="dash-goal-meta" style="margin-top:4px;">${shortTermGoals.length} short-term · ${midTermGoals.length} mid-term · ${longTermGoals.length} long-term</div>
                             ${(() => {
                                 const totalNeeded = ongoingGoals.reduce((sum, g) => sum + Number(g.amountNeeded || 0), 0);
                                 const totalAccumulated = ongoingGoals.reduce((sum, g) => sum + Number(g.amountAccumulated || 0), 0);
@@ -1081,12 +1203,20 @@ export function renderDashboard(appData, netWorthSummary = {}) {
                 </div>` : '<p class="dash-empty-state">No ongoing goals.</p>'}
             <div class="dash-stat-row"><span class="dash-stat-label">Portfolio value</span><span class="dash-stat-value" style="color:${COLOR_POSITIVE}">${fmtMoney(portfolioValue)}</span></div>
             <div class="dash-stat-row"><span class="dash-stat-label">Monthly investment</span><span class="dash-stat-value">${fmtMoney(monthlyInvestment)}</span></div>
-            <div class="dash-card-note">${ongoingGoals.length} ongoing · ${plannedGoals.length} planned · ${plannedGifts > 0 ? fmtMoney(plannedGifts) + ' for gifts' : 'No gifts'} · <a href="#" onclick="switchToTab('financialGoal'); return false;" style="color:#3b82f6;text-decoration:underline;cursor:pointer;">View Goals</a> · <a href="#" onclick="switchToTab('gifts'); return false;" style="color:#3b82f6;text-decoration:underline;cursor:pointer;">View Gifts</a></div>
+            <div class="dash-card-note">${ongoingGoals.length} ongoing · ${plannedGoals.length} planned · ${achievedGoals.length} achieved · ${missedGoals.length} missed${coveredGoals.length > 0 ? ` · ${coveredGoals.length} covered` : ''} · ${shortTermGoals.length} short-term · ${midTermGoals.length} mid-term · ${longTermGoals.length} long-term</div>
         </article>
 
         <article class="dash-card">
             <div class="dash-card-header">
                 <span class="dash-card-title">${iconSvg('shield', 'dash-title-icon')} Preparedness & Budget Planning</span>
+                <div class="dash-card-header-actions">
+                    <button onclick="switchToTab('taxPlan'); return false;" class="dash-card-action-btn" title="View Tax Plan">
+                        ${iconSvg('fileText', 'dash-action-icon')}
+                    </button>
+                    <button onclick="switchToTab('insurance'); return false;" class="dash-card-action-btn" title="Review Insurance">
+                        ${iconSvg('shield', 'dash-action-icon')}
+                    </button>
+                </div>
             </div>
             <div style="display:grid;grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));gap:16px;margin-bottom:16px;">
                 <div>
@@ -1123,9 +1253,30 @@ export function renderDashboard(appData, netWorthSummary = {}) {
                     </div>
                 </div>
             </div>
-            <div class="dash-stat-row"><span class="dash-stat-label">Debt-to-Income Ratio</span><span class="dash-stat-value" style="color:${budgetDistribution.liability > 0 && totalIncome > 0 ? (budgetDistribution.liability / totalIncome > 0.4 ? COLOR_NEGATIVE : budgetDistribution.liability / totalIncome > 0.3 ? COLOR_WARNING : COLOR_POSITIVE) : COLOR_POSITIVE};cursor:help;" title="Formula: (Monthly Liabilities / Total Income) × 100\nMonthly Liabilities: Loan EMI + Debt Repayment + On-demand Liability\nTotal Income: All income sources including primary, secondary, and other inflows\nPercentage shows what portion of income goes toward debt obligations\nGreen (≤30%): Healthy debt level\nYellow (31-40%): Moderate debt burden\nRed (>40%): High debt burden - concerning">${totalIncome > 0 ? Math.round((budgetDistribution.liability / totalIncome) * 100) + '%' : 'N/A'}</span></div>
+            <div class="dash-stat-row"><span class="dash-stat-label">Debt-to-Income Ratio</span><span class="dash-stat-value" style="color:${budgetDistribution.liability > 0 && totalIncome > 0 ? (budgetDistribution.liability / totalIncome > 0.4 ? COLOR_NEGATIVE : budgetDistribution.liability / totalIncome > 0.3 ? COLOR_WARNING : COLOR_POSITIVE) : COLOR_POSITIVE};cursor:help;" title="Formula: (Monthly Liabilities / Total Income) × 100\nMonthly Liabilities: Fixed Liabilities (EMI, Rent, Maintenance, etc.) + Debt Repayment + On-demand Liability\nTotal Income: All income sources including primary, secondary, and other inflows\nPercentage shows what portion of income goes toward debt obligations\nGreen (≤30%): Healthy debt level\nYellow (31-40%): Moderate debt burden\nRed (>40%): High debt burden - concerning">${totalIncome > 0 ? Math.round((budgetDistribution.liability / totalIncome) * 100) + '%' : 'N/A'}</span></div>
             <div class="dash-stat-row"><span class="dash-stat-label">Tax items logged</span><span class="dash-stat-value" style="cursor:help;" title="Sum of all tax deductions from:\n• Outflow tab: Insurance premiums (Section 80D)\n• Inflow tab: Recurring investments (Section 80C)\n• Tax Plan tab: Manual tax planning entries\nIncludes both auto-calculated and manually entered deductions\nUsed for ITR-2 tax planning and savings calculation">${fmtMoney(taxPlanned)}</span></div>
-            <div class="dash-card-note">${insuranceCount} polic${insuranceCount === 1 ? 'y' : 'ies'} tracked · <a href="#" onclick="switchToTab('taxPlan'); return false;" style="color:#3b82f6;text-decoration:underline;cursor:pointer;">View Tax Plan</a> · <a href="#" onclick="switchToTab('insurance'); return false;" style="color:#3b82f6;text-decoration:underline;cursor:pointer;">Review protection</a></div>
+            <div class="dash-card-note">${insuranceCount} polic${insuranceCount === 1 ? 'y' : 'ies'} tracked</div>
+        </article>
+        
+        <article class="dash-card dash-fy-overview" style="grid-column: 1 / -1;">
+            <div class="dash-card-header">
+                <span class="dash-card-title">${iconSvg('barChart', 'dash-title-icon')} Financial Year overview</span>
+                <span class="dash-card-badge" style="background:#3b82f622;color:#3b82f6">FY ${now.getMonth() >= 3 ? now.getFullYear() : now.getFullYear() - 1}-${String((now.getMonth() >= 3 ? now.getFullYear() : now.getFullYear() - 1) + 1).slice(-2)}</span>
+                <div class="dash-card-header-actions">
+                    <button onclick="switchToTab('monthlyBudget'); setTimeout(() => { if (typeof setAnnualBudgetView === 'function') setAnnualBudgetView(); }, 100); return false;" class="dash-card-action-btn" title="View Annual Budget">
+                        ${iconSvg('barChart', 'dash-action-icon')}
+                    </button>
+                </div>
+            </div>
+            <div class="dash-fy-kpis">
+                <div><span>Income</span><strong>${fmtMoney(financialYearTotals.income)}</strong></div>
+                <div><span>Invested</span><strong style="color:#3b82f6">${fmtMoney(financialYearTotals.investment)}</strong></div>
+                <div><span>Liabilities</span><strong style="color:#ef4444">${fmtMoney(financialYearTotals.liability)}</strong></div>
+                <div><span>Saved</span><strong style="color:#22c55e">${fmtMoney(financialYearTotals.saving)}</strong></div>
+                <div><span>Spent</span><strong style="color:#f97316">${fmtMoney(financialYearTotals.expenditure)}</strong></div>
+                <div><span>Insurance</span><strong style="color:#a855f7">${fmtMoney(financialYearTotals.insurance)}</strong></div>
+                <div><span>Others</span><strong style="color:#eab308">${fmtMoney(financialYearTotals.other)}</strong></div>
+            </div>
         </article>
         
         ${insights.length > 0 ? `
@@ -1145,45 +1296,12 @@ export function renderDashboard(appData, netWorthSummary = {}) {
         </article>
         ` : ''}
         
-        ${alertsHTML}
-        
         ${healthScoreHTML}
         
         <article class="dash-card" style="grid-column: 1 / -1;">
             <div class="dash-card-header"><span class="dash-card-title">6-Month Trend</span></div>
             <canvas id="dashboardTrendChart" style="margin-top:16px;max-height:250px;"></canvas>
         </article>
-        
-        <article class="dash-card dash-quick-actions" style="grid-column: 1 / -1;">
-            <div class="dash-card-header">
-                <span class="dash-card-title">Quick Actions</span>
-            </div>
-            <div class="dash-quick-actions-grid">
-                <button onclick="switchToTab('monthlyBudget'); return false;" class="dash-quick-btn">
-                    ${iconSvg('wallet', 'dash-quick-svg')}
-                    <span class="dash-quick-label">Budget</span>
-                </button>
-                <button onclick="switchToTab('inflow'); return false;" class="dash-quick-btn">
-                    ${iconSvg('trendingUp', 'dash-quick-svg')}
-                    <span class="dash-quick-label">Investments</span>
-                </button>
-                <button onclick="switchToTab('outflow'); return false;" class="dash-quick-btn">
-                    ${iconSvg('creditCard', 'dash-quick-svg')}
-                    <span class="dash-quick-label">Expenses</span>
-                </button>
-                <button onclick="switchToTab('financialGoal'); return false;" class="dash-quick-btn">
-                    ${iconSvg('target', 'dash-quick-svg')}
-                    <span class="dash-quick-label">Goals</span>
-                </button>
-                <button onclick="switchToTab('netWorth'); return false;" class="dash-quick-btn">
-                    ${iconSvg('barChart', 'dash-quick-svg')}
-                    <span class="dash-quick-label">Net Worth</span>
-                </button>
-                <button onclick="switchToTab('taxPlan'); return false;" class="dash-quick-btn">
-                    ${iconSvg('fileText', 'dash-quick-svg')}
-                    <span class="dash-quick-label">Tax Plan</span>
-                </button>
-            </div>
         </article>`;
     
     // Render the 6-month trend chart using Chart.js

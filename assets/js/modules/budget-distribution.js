@@ -24,6 +24,10 @@ export function getMonthlyBudgetDistribution(monthData = {}) {
     // Include fixedOthers explicitly in the calculation
     const fixedOthers = Number(monthData.outflow?.fixedOthers || 0);
     const other = Math.max(0, outflowTotal - liability - insurance - expenditure - saving - investment - fixedOthers) + fixedOthers;
+    
+    // Calculate untracked amount (difference between income and all tracked outflows)
+    const totalTracked = liability + insurance + expenditure + saving + investment + other;
+    const untracked = Math.max(0, inflowTotal - totalTracked);
 
-    return { income: inflowTotal, expenditure, saving, investment, liability, insurance, other, fixedOthers };
+    return { income: inflowTotal, expenditure, saving, investment, liability, insurance, other, fixedOthers, untracked };
 }

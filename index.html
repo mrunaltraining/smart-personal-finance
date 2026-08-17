@@ -25,8 +25,9 @@
 
 <!-- ── LOADING SPINNER ────────────────────────────────── -->
 <div id="loadingOverlay" class="sf-loading-overlay">
-    <img class="logo-img logo-img-lg" src="assets/logo.png" alt="SmartFin" style="width:56px;height:56px;">
-    <div class="sf-spinner"></div>
+    <div class="sf-spinner">
+        <img class="sf-spinner-logo" src="assets/logo.png" alt="SmartFin">
+    </div>
     <span class="sf-loading-text">Loading SmartFin...</span>
 </div>
 
@@ -123,22 +124,23 @@
                 <div class="network-status-icon">
                     <!-- Checkmark icon for online/saved -->
                     <svg class="icon-online" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="10"></circle>
                         <polyline points="20 6 9 17 4 12"></polyline>
                     </svg>
                     <!-- Refresh icon for retrying -->
-                    <svg class="icon-retrying" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" hidden>
+                    <svg class="icon-retrying" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                         <path d="M23 4v6h-6"></path>
                         <path d="M1 20v-6h6"></path>
                         <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path>
                     </svg>
-                    <!-- Error icon for error -->
-                    <svg class="icon-error" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" hidden>
+                    <!-- Error icon for error (circle with exclamation) -->
+                    <svg class="icon-error" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                         <circle cx="12" cy="12" r="10"></circle>
                         <line x1="12" y1="8" x2="12" y2="12"></line>
                         <line x1="12" y1="16" x2="12.01" y2="16"></line>
                     </svg>
-                    <!-- Offline icon -->
-                    <svg class="icon-offline" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" hidden>
+                    <!-- Offline icon (WiFi with slash) -->
+                    <svg class="icon-offline" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                         <path d="M1 1l22 22"></path>
                         <path d="M16.72 11.06A10.94 10.94 0 0 1 19 12.55"></path>
                         <path d="M5 12.55a10.94 10.94 0 0 1 5.17-2.39"></path>
@@ -146,6 +148,19 @@
                         <path d="M1.42 9a15.91 15.91 0 0 1 4.7-2.88"></path>
                         <path d="M8.53 16.11a6 6 0 0 1 6.95 0"></path>
                         <line x1="12" y1="20" x2="12.01" y2="20"></line>
+                    </svg>
+                    <!-- Quota exceeded icon (triangle alert) -->
+                    <svg class="icon-quota-exceeded" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M10.29 5.86L3.82 17a2 2 0 0 0 1.71 3h12.94a2 2 0 0 0 1.71-3L13.71 5.86a2 2 0 0 0-3.42 0Z"></path>
+                        <line x1="12" y1="10" x2="12" y2="13"></line>
+                        <line x1="12" y1="16" x2="12.01" y2="16"></line>
+                    </svg>
+                    <!-- Reconnecting icon (refresh with slash) -->
+                    <svg class="icon-reconnecting" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M1 1l22 22"></path>
+                        <path d="M23 4v6h-6"></path>
+                        <path d="M1 20v-6h6"></path>
+                        <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path>
                     </svg>
                 </div>
                 <div class="network-status-text">Saved</div>
@@ -156,6 +171,13 @@
                     <polyline points="16 17 21 12 16 7"/>
                     <line x1="21" y1="12" x2="9" y2="12"/>
                 </svg>
+            </button>
+            <button type="button" id="notificationBtn" class="btn-icon-only" aria-label="Notifications" title="Notifications">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="20" height="20">
+                    <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/>
+                    <path d="M13.73 21a2 2 0 0 1-3.46 0"/>
+                </svg>
+                <span id="notificationBadge" class="notification-badge" hidden>0</span>
             </button>
             <button type="button" id="settingsBtn" class="btn-icon-only" aria-label="Settings">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="20" height="20">
@@ -991,6 +1013,14 @@
                 </div>
             </div>
 
+            <!-- Account Balance & Credit Limit Chart -->
+            <div class="chart-section" style="margin-top: 24px;">
+                <h3 style="font-size: 0.9rem; font-weight: 600; color: var(--text); margin-bottom: 12px;">Account Balance & Credit Limit</h3>
+                <div class="chart-wrapper">
+                    <canvas id="accountsChart"></canvas>
+                </div>
+            </div>
+
             <!-- Preview Mode -->
             <div id="cardPreview" class="card-preview">
                 <div id="cardsList" class="cards-list"></div>
@@ -1185,6 +1215,15 @@
                     <h3>Tax Deductions</h3>
                     <div id="taxDeductionsList" class="tax-deductions-list"></div>
                 </div>
+                
+                <!-- Tax Deductions Chart -->
+                <div class="chart-section">
+                    <h3>Tax Deductions by Section</h3>
+                    <div class="chart-wrapper">
+                        <canvas id="taxDeductionsChart"></canvas>
+                    </div>
+                </div>
+                
                 <div class="tax-breakdown-section">
                     <h3>Tax Breakdown</h3>
                     <div id="taxBreakdown" class="tax-breakdown"></div>
@@ -1612,6 +1651,28 @@
             </div>
         </details>
 
+        <!-- Network Status Indicator -->
+        <details class="help-section">
+            <summary class="help-section-title">Network Status Indicator</summary>
+            <div class="help-body">
+                <p>The network status indicator appears in the user bar (next to your email) and shows the Firebase save status.</p>
+                <h4>Status States</h4>
+                <table class="help-table">
+                    <tr><td>Green checkmark with circle</td><td>Data saved successfully (auto-hides after 2 seconds)</td></tr>
+                    <tr><td>Yellow refresh arrows (blinking)</td><td>Retrying save due to network issue (stays visible)</td></tr>
+                    <tr><td>Red circle with exclamation</td><td>Save failed (stays visible)</td></tr>
+                    <tr><td>Red WiFi with slash</td><td>Browser is offline (stays visible)</td></tr>
+                    <tr><td>Red triangle alert</td><td>Quota exceeded (stays visible)</td></tr>
+                    <tr><td>Yellow refresh arrows with slash</td><td>Reconnecting (stays visible)</td></tr>
+                </table>
+                <h4>Interaction</h4>
+                <p><strong>Desktop:</strong> Hover over the icon to see detailed status text</p>
+                <p><strong>Mobile:</strong> Tap the icon to see details (icon only shown for space efficiency)</p>
+                <h4>Auto-Hide Behavior</h4>
+                <p>Success state (green checkmark) automatically hides after 2 seconds. Warning and error states stay visible until resolved.</p>
+            </div>
+        </details>
+
         <!-- Monthly Budget -->
         <details class="help-section">
             <summary class="help-section-title">Monthly Budget</summary>
@@ -1686,6 +1747,30 @@
                 <p><strong>Monthly</strong> — Recurring (SIPs, RDs)</p>
                 <p><strong>Portfolio Summary</strong> — Consolidated view from all sources</p>
                 <p><strong>On-Demand Investment</strong> — Enter ad-hoc/one-time investments in the Budget edit page. This field is fully editable for flexible monthly investment planning.</p>
+            </div>
+        </details>
+
+        <!-- Financial Goals -->
+        <details class="help-section">
+            <summary class="help-section-title">Financial Goals</summary>
+            <div class="help-body">
+                <h4>Goal Type Auto-Selection</h4>
+                <p>The system automatically selects the goal type based on your target date:</p>
+                <table class="help-table">
+                    <tr><td>Short Term</td><td>≤ 1 year from today</td></tr>
+                    <tr><td>Mid Term</td><td>1-3 years from today</td></tr>
+                    <tr><td>Long Term</td><td>> 3 years from today</td></tr>
+                </table>
+                <p><strong>Default:</strong> Long Term if no target date is selected</p>
+                <h4>Manual Override</h4>
+                <p>You can manually change the goal type if needed. Once you manually change the type, the system will respect your choice and won't auto-select again for that goal.</p>
+                <h4>Status Auto-Calculation</h4>
+                <p>Status is automatically calculated based on progress and target date. You don't need to manually set it.</p>
+                <p><strong>Planned:</strong> No progress yet</p>
+                <p><strong>Ongoing:</strong> Progress started but not complete</p>
+                <p><strong>Achieved:</strong> Goal fully funded</p>
+                <p><strong>Missed:</strong> Target date passed without completion</p>
+                <p><strong>Covered:</strong> Goal funded from other sources</p>
             </div>
         </details>
 
@@ -1793,6 +1878,43 @@
             </div>
         </details>
 
+    </div>
+</div>
+
+<!-- ── QUICK UPDATE POPUP ─────────────────────────────────────── -->
+<div id="quickUpdateOverlay" class="settings-overlay" hidden></div>
+<div id="quickUpdatePanel" class="settings-panel help-panel" aria-hidden="true">
+    <div class="settings-header">
+        <h2>Quick Update</h2>
+        <button type="button" id="closeQuickUpdateBtn" class="btn-icon-only" aria-label="Close quick update">
+            <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="6" y1="6" x2="18" y2="18"/><line x1="18" y1="6" x2="6" y2="18"/></svg>
+        </button>
+    </div>
+    <div class="help-content">
+        <div style="padding: 16px;">
+            <div class="mid-month-field" style="margin-bottom: 16px;">
+                <label for="popupExpBalance">Expenditure Account Balance</label>
+                <span class="field-hint">Current balance in your spending account today</span>
+                <input type="number" id="popupExpBalance" min="0" step="1" placeholder="Current expenditure balance" style="width: 100%; padding: 8px 12px; border: 1px solid var(--border); border-radius: 6px; background: var(--surf1); color: var(--text);">
+            </div>
+            <div class="mid-month-field" style="margin-bottom: 16px;">
+                <label for="popupCCOutstanding">Current Month CC Spending</label>
+                <span class="field-hint">Total credit card purchases made this month so far</span>
+                <input type="number" id="popupCCOutstanding" min="0" step="1" placeholder="This month's CC spending" style="width: 100%; padding: 8px 12px; border: 1px solid var(--border); border-radius: 6px; background: var(--surf1); color: var(--text);">
+            </div>
+            <div id="popupQuickUpdateResult" class="quick-update-result" hidden style="margin-top: 12px; padding: 12px; background: var(--surf3); border-radius: 6px;">
+                <div class="quick-update-result-item">
+                    <span>Variable Expenditure</span>
+                    <strong id="popupQuickUpdateUntracked" style="color:#eab308">₹0</strong>
+                </div>
+                <span class="field-hint">Amount spent from expenditure account (funded − current balance)</span>
+            </div>
+            <div style="margin-top: 16px; display: flex; gap: 8px;">
+                <button type="button" id="popupUpdateExpBalance" class="btn-do-transfer" style="flex: 1;">Update Balance</button>
+                <button type="button" id="popupUpdateCCOutstanding" class="btn-do-transfer" style="flex: 1;">Update CC</button>
+            </div>
+            <button type="button" id="popupUpdateBoth" class="btn-do-transfer" style="width: 100%; margin-top: 8px;">Update Both</button>
+        </div>
     </div>
 </div>
 

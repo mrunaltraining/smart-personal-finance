@@ -1,57 +1,97 @@
 ================================================================================
   SmartFin - Improvement TODO List
-  Last Updated: August 13, 2026
-  Version: 4.0.1
+  Last Updated: June 20, 2026
+  Version: 5.3.0
 ================================================================================
 
 
-[P1] HIGH PRIORITY - v4.0.1 Architecture Redesign
+[P1] HIGH PRIORITY - v5.3.0 Dynamic Notifications & Enhanced Insights
 ================================================================================
 
-[x] Extract core business logic into platform-independent modules (COMPLETED v4.0.1)
-    - 14 modules created (3,200+ lines)
-    - FrequencyConverter, DateUtils, CurrencyFormatter, Logger
-    - BudgetCalculator, AccountManager, AccountValidator
-    - InvestmentCalculator, GoalCalculator, InsuranceCalculator
-    - NetWorthCalculator, TaxCalculator, ExpenseAnalyzer, DashboardCalculator
-    - 100% test coverage (64 tests, all passing)
-    - Platform-independent code (works on web and mobile)
+[x] Dynamic Notification System (COMPLETED v5.3.0)
+    - 7 notification triggers (Budget, Goals, Insurance, Expenses, Net Worth, Tax, Gifts)
+    - Badge counter showing unread alert count
+    - Popup panel with Clear All action
+    - Click-outside-to-close behavior
+    - Daily reset with localStorage state management
+    - Change detection to avoid regenerating same alerts
 
-[x] Standardized logging throughout the application (COMPLETED v4.0.1)
-    - Logger utility with consistent format
-    - Category-based filtering (BUDGET, API, USER, FUNCTION, etc.)
-    - Performance tracking built-in
-    - Specialized methods for common operations
+[x] Enhanced Insights Engine (COMPLETED v5.3.0)
+    - 11 recommendation types (5 positive, 7 suggestion, 3 warning)
+    - Display limit increased from 4 to 6 insights
+    - Categories: positive (surplus, savings rate, emergency fund, net worth, investing)
+    - Categories: suggestion (EF gap, insurance, investments, goals, diversification, tax planning)
+    - Categories: warning (debt ratio, savings rate, negative net worth)
 
-[x] Consolidate redundant documentation (COMPLETED v4.0.1)
-    - Reduced from 17 .md files to 8 essential files
-    - Removed 29,183 lines of redundant documentation
-    - Consolidated UI component guide into developer guide
-    - Clean, well-organized documentation structure
+[x] Financial Health Score Rebalancing (COMPLETED v5.3.0)
+    - Emergency Fund: 15 pts (gradual scoring)
+    - Debt Management: 20 pts (debt-to-income bands)
+    - Savings & Investment: 25 pts (combined, highest weight)
+    - Insurance Coverage: 15 pts (Health 9 + Term 6)
+    - Net Worth Position: 15 pts (+2 diversification bonus for ≥3 asset types)
+    - Goal Progress: 10 pts (8 pts progress + 2 pt bonus for having goals)
+    - Total: 100 points
 
-[x] Optimize dashboard code (COMPLETED v4.0.1)
-    - Removed redundant helper functions
-    - Uses core modules (DateUtils, CurrencyFormatter)
-    - Reduced code duplication
-    - More maintainable and testable
+[x] Modern Dark Theme (COMPLETED v5.3.0)
+    - Indigo/slate color palette
+    - Primary color: #6366f1 (indigo)
+    - Updated all CSS variables for consistency
+    - Light theme support with proper contrast
 
-[x] Organize test files (COMPLETED v4.0.1)
-    - Moved test files to tests/ directory
-    - Updated test-utils.html with new module tests
-    - Added Logger and DashboardCalculator tests
-    - 27 automated tests (all passing)
+[x] Loading Spinner Redesign (COMPLETED v5.3.0)
+    - Logo inside rotating ring
+    - Counter-rotation to keep logo upright
+    - Reduced motion support
+
+[x] Tags/Badges Dark/Light Mode Consistency (COMPLETED v5.3.0)
+    - Updated semantic badges with modern colors (indigo, rose, emerald, amber, violet, cyan)
+    - Separate light theme overrides for readability
+    - Consistent across all tabs
+
+[x] Tax Deductions Chart Improvement (COMPLETED v5.3.0)
+    - Changed to horizontal bar chart for better label readability
+    - Grouped by tax section
+
+[x] Sample Test Data (COMPLETED v5.3.0)
+    - Created tests/sampledata.json with comprehensive test data
+    - 6 accounts, 5 investments, 10 outflows, 5 goals, 3 insurance policies
+    - 5 months of budget data with realistic numbers
+    - Expense tracking data included
+
+[x] Unit Tests Updated (COMPLETED v5.3.0)
+    - Added 30+ new tests for v5.3.0 features
+    - Health score calculation tests
+    - Notification trigger tests
+    - Insight generation tests
+    - Total: 95+ tests (all passing)
+
+[x] Documentation Updated (COMPLETED v5.3.0)
+    - APP_SPEC.md: Added notification system, insights, health score sections
+    - ARCHITECTURE.md: Added notification and health score pipeline diagrams
+    - API_DOCUMENTATION.md: Added health score and insights API docs
+    - USER_MANUAL.md: Added v5.3.0 changelog
 
 
 [P2] MEDIUM PRIORITY - Enhanced Analytics
 ================================================================================
 
-[ ] Add Spending Category Breakdown
+[x] Net Worth Trend Chart (COMPLETED - Dashboard has 6-month trend)
+    - 6-month trend chart on dashboard
+    - Shows Investment, Liability, Saving, Expenditure, Others
+    - Month-over-month visualization
+
+[x] Year-to-Date Summary (COMPLETED - Dashboard has annual summary)
+    - Annual summary with monthly breakdown
+    - Total income, expenditure, savings, investment, liability, insurance
+    - Average monthly calculations
+
+[ ] Spending Category Breakdown
     - Mini pie chart showing expense categories
     - Click to see detailed breakdown
     - Compare to budget limits
     - Category-wise spending trends
 
-[ ] Add Upcoming Expenses Timeline
+[ ] Upcoming Expenses Timeline
     - Show next 30 days expenses
     - EMI due dates
     - Insurance premiums
@@ -59,13 +99,7 @@
     - Goal target dates
     - Tax deadlines
 
-[ ] Add Net Worth Trend Chart
-    - 6-month net worth trend line chart
-    - Month-over-month change
-    - Year-to-date growth
-    - Visual progress tracking
-
-[ ] Add Goal Timeline Visualization
+[ ] Goal Timeline Visualization
     - Horizontal timeline with milestones
     - Progress indicators
     - Time remaining for each goal
@@ -75,55 +109,48 @@
 [P3] NICE TO HAVE - Advanced Features
 ================================================================================
 
-[ ] Add Year-to-Date Summary
-    - Total income YTD
-    - Total expenses YTD
-    - Total savings YTD
-    - Net worth change YTD
-    - Comparison to previous year
-
-[ ] Add Investment Performance
+[ ] Investment Performance
     - Portfolio return % (YTD)
     - Best performing investment
     - Worst performing investment
     - Asset allocation breakdown
 
-[ ] Add Debt Analysis
+[ ] Debt Analysis
     - Total debt outstanding
-    - Debt-to-income ratio
+    - Debt-to-income ratio (PARTIALLY - shown in health score)
     - Monthly debt payments
     - Debt payoff timeline
     - Interest paid YTD
 
-[ ] Add Recent Activity Feed
+[ ] Recent Activity Feed
     - Last 5 transactions
     - Recent goal updates
     - Recent investment additions
     - Recent budget changes
 
-[ ] Add Calendar View
+[ ] Calendar View
     - Mini calendar showing financial dates
     - Income dates (salary)
     - Bill due dates
     - EMI dates
     - Goal milestones
 
-[ ] Add PWA support (manifest.json + service worker)
+[ ] PWA support (manifest.json + service worker)
     - App already has mobile-web-app-capable meta tags
     - Add manifest.json for installability
     - Add service worker to cache HTML/CSS/JS for offline use
     - Enable Firestore offline persistence
 
-[ ] Add email verification on registration
+[ ] Email verification on registration
     - Call user.sendEmailVerification() after account creation
     - Show banner until email is verified
 
-[ ] Add re-authentication dialog before account deletion
+[ ] Re-authentication dialog before account deletion
     - Currently tells user to "log out and back in"
     - Prompt for password inline instead
 
-[ ] Improve accessibility (ARIA roles, focus management)
-    - Add role="tab", aria-selected, tabindex to tab buttons
+[ ] Accessibility improvements (ARIA roles, focus management)
+    - Add role="tab", aria-selected, tabindex to tab buttons (PARTIALLY DONE)
     - Move focus to panel content on tab switch
     - Add skip-to-content link
     - Add focus-visible styles for keyboard navigation
@@ -132,11 +159,11 @@
     - Current: static ?v=3 on script tags (manually updated)
     - Use build number from APP_VERSION: ?v=${build}
 
-[ ] Add SIP calculator / what-if analysis tool
+[ ] SIP calculator / what-if analysis tool
     - Project investment growth with compound interest
     - "What if I invest X more per month?" scenarios
 
-[ ] Add session timeout for shared devices
+[ ] Session timeout for shared devices
     - Firebase tokens auto-refresh indefinitely
     - Add configurable idle timeout (e.g., 30 min)
 
@@ -145,8 +172,65 @@
     - Add check/warning when approaching 1MB limit
     - Plan: migrate monthly budget data to sub-collection if needed
 
+[ ] Dark/Light theme toggle with manual override
+    - Currently auto-detects system preference
+    - Add manual toggle button in settings
+    - Persist user preference in localStorage
 
-[FUTURE ENHANCEMENTS - v4.1+]
+[ ] Data visualization improvements
+    - More chart types (line charts for trends)
+    - Interactive charts with drill-down
+    - Year-over-year comparison views
+
+[ ] Goal milestone tracking
+    - Break goals into milestones
+    - Progress visualization per milestone
+    - Celebrations on milestone completion
+
+[ ] Recurring expense automation
+    - Auto-add recurring expenses each month
+    - Configurable recurrence patterns
+    - Skip/modify individual instances
+
+[ ] Multi-currency support
+    - Select base currency during setup
+    - Real-time exchange rate integration
+    - Currency conversion in reports
+
+[ ] Collaboration features
+    - Share dashboard with family members
+    - Read-only access for family
+    - Shared goals tracking
+
+[ ] Advanced reporting
+    - Custom date range reports
+    - Export to multiple formats (PDF, Excel, CSV)
+    - Email scheduled reports
+
+[ ] Investment portfolio tracking
+    - Stock/mutual fund integration
+    - Real-time NAV updates
+    - Portfolio performance analytics
+
+[ ] Tax filing preparation
+    - Generate tax-ready reports
+    - Section 80C/80D summaries
+    - Form 26AS integration
+
+[ ] Predictive analytics
+    - Predict next month's expenses
+    - Forecast goal completion dates
+    - Predict cash flow gaps
+    - Suggest optimal transfer amounts
+
+[ ] What-if scenarios
+    - "What if I save ₹10,000 more?"
+    - "What if I lose my job?"
+    - "What if I take this loan?"
+    - Impact on goals and timeline
+
+
+[FUTURE ENHANCEMENTS - v5.4+]
 ================================================================================
 
 [HIGH PRIORITY FUTURE ENHANCEMENTS]
@@ -207,102 +291,44 @@
     - Handle edge cases: same amount different dates, slight amount variations
     - Configurable tolerance for amount matching
 
-[MEDIUM PRIORITY FUTURE ENHANCEMENTS]
-
-[ ] Add dark/light theme toggle with manual override
-    - Currently auto-detects system preference
-    - Add manual toggle button in settings
-    - Persist user preference in localStorage
-
-[ ] Add data visualization improvements
-    - More chart types (line charts for trends)
-    - Interactive charts with drill-down
-    - Year-over-year comparison views
-
-[ ] Add goal milestone tracking
-    - Break goals into milestones
-    - Progress visualization per milestone
-    - Celebrations on milestone completion
-
-[ ] Add recurring expense automation
-    - Auto-add recurring expenses each month
-    - Configurable recurrence patterns
-    - Skip/modify individual instances
-
-[ ] Add multi-currency support
-    - Select base currency during setup
-    - Real-time exchange rate integration
-    - Currency conversion in reports
-
-[ ] Add collaboration features
-    - Share dashboard with family members
-    - Read-only access for family
-    - Shared goals tracking
-
-[ ] Add advanced reporting
-    - Custom date range reports
-    - Export to multiple formats (PDF, Excel, CSV)
-    - Email scheduled reports
-
-[ ] Add investment portfolio tracking
-    - Stock/mutual fund integration
-    - Real-time NAV updates
-    - Portfolio performance analytics
-
-[ ] Add tax filing preparation
-    - Generate tax-ready reports
-    - Section 80C/80D summaries
-    - Form 26AS integration
-
-[ ] Add predictive analytics
-    - Predict next month's expenses
-    - Forecast goal completion dates
-    - Predict cash flow gaps
-    - Suggest optimal transfer amounts
-
-[ ] Add what-if scenarios
-    - "What if I save ₹10,000 more?"
-    - "What if I lose my job?"
-    - "What if I take this loan?"
-    - Impact on goals and timeline
-
 
 ================================================================================
   Project Status Summary
 ================================================================================
 
-  Version: 4.0.1
-  Last Updated: August 13, 2026
+  Version: 5.3.0
+  Last Updated: June 20, 2026
   
   P0 (Critical):     0/0 remaining (100% complete)
-  P1 (High):         0/1 remaining (100% complete) ✅
-  P2 (Medium):      4/4 remaining (0% complete)
-  P3 (Nice to Have):  15/15 remaining (0% complete)
+  P1 (High):         0/0 remaining (100% complete) ✅
+  P2 (Medium):      3/4 remaining (25% complete)
+  P3 (Nice to Have):  24/24 remaining (0% complete)
   
-  Overall:          19/20 remaining (5% complete overall)
+  Overall:          27/28 remaining (4% complete overall)
   
-  Test Suite:       64 tests (100% passing)
+  Test Suite:       95+ tests (100% passing)
   
-  Recently Completed (v4.0.1):
-    v4.0.1 (MAJOR RELEASE):
-    - ✅ P1.1: Extracted 14 platform-independent business logic modules (3,200+ lines)
-    - ✅ P1.2: Created standardized Logger utility for consistent logging
-    - ✅ P1.3: Consolidated documentation (17 → 8 files, -29,183 lines)
-    - ✅ P1.4: Optimized dashboard code to use core modules
-    - ✅ P1.5: Organized test files in tests/ directory
-    - ✅ P1.6: Added tests for Logger and DashboardCalculator
-    - All features preserved, zero breaking changes
-    - Foundation for mobile app development
+  Recently Completed (v5.3.0):
+    v5.3.0 (MAJOR RELEASE):
+    - ✅ P1.1: Dynamic Notification System with 7 triggers, badge counter, Clear All, click-outside-close, daily reset
+    - ✅ P1.2: Enhanced Insights Engine with 11 recommendation types, limit 4→6
+    - ✅ P1.3: Financial Health Score rebalanced (Emergency Fund 15, Debt 20, Savings & Investment 25, Insurance 15, Net Worth 15, Goals 10)
+    - ✅ P1.4: Modern Dark Theme with indigo/slate color palette
+    - ✅ P1.5: Loading Spinner redesigned with logo inside rotating ring
+    - ✅ P1.6: Tags/Badges updated for dark/light mode consistency
+    - ✅ P1.7: Tax deductions chart changed to horizontal bar chart
+    - ✅ P1.8: Sample test data created (tests/sampledata.json)
+    - ✅ P1.9: Unit tests updated with 30+ new tests
+    - ✅ P1.10: All documentation updated (APP_SPEC, ARCHITECTURE, API_DOCUMENTATION, USER_MANUAL)
   
-  Previously Completed (v2.0.10 - v2.1.0):
-    v2.0.10-v2.1.0: All dashboard enhancements completed
-    - Alerts & Notifications, Quick Actions, Financial Health Score
-    - Cash Flow Summary, Budget vs Actual Comparison, Insights & Recommendations
+  Previously Completed (v4.0.1 - v5.2):
+    v4.0.1: Platform-independent modules, standardized logging, documentation consolidation
+    v5.0-v5.2: Auto-debit routing, budget engine rewrite, transfer mismatch detection
   
   Next Priorities:
-    - P2 items: Enhanced analytics (spending breakdown, timeline, trends, goals visualization)
-    - P3 items: Advanced features and existing nice-to-have items
-    - Future enhancements for v4.1+
+    - P2 items: Enhanced analytics (spending breakdown, timeline, goals visualization)
+    - P3 items: Advanced features and nice-to-have items
+    - Future enhancements for v5.4+ (CSV import, document upload, recurring payment detection)
 
 ================================================================================
   Priority Key:

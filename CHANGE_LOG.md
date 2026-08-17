@@ -5,6 +5,71 @@ All notable changes to SmartFin will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [5.3.0] - 2026-06-20 - Dynamic Notifications & Enhanced Insights
+
+### Added
+- **Dynamic Notification System**: Bell icon with live badge counter in header
+  - 7 smart triggers: Budget, Goals, Insurance, Expenses, Net Worth, Tax, Gifts
+  - Popup panel showing all active alerts with icons, messages, and quick navigation
+  - "Clear All" button to dismiss all alerts for the day
+  - Click-outside-to-close behavior for popup
+  - Daily reset: notification state resets automatically at start of new day
+  - Badge counter shows unread alert count, auto-hides when count is zero
+  - Change detection to avoid regenerating same alerts
+- **Enhanced Insights Engine**: 11 recommendation types across 3 categories
+  - Positive (5): Budget surplus, savings rate ≥30%, emergency fund funded, net worth strong, consistent investing
+  - Suggestion (7): Emergency fund gap, low health/term insurance, no investments, goals behind schedule, no goals set, low asset diversification, no tax planning
+  - Warning (3): High debt ratio, low savings rate, negative net worth
+  - Display limit increased from 4 to 6 most relevant insights
+- **Financial Health Score Rebalancing**: New weight distribution out of 100 points
+  - Emergency Fund: 15 pts (gradual scoring based on months-of-expenses ratio)
+  - Debt Management: 20 pts (debt-to-income ratio bands: <30%/20pts, <40%/15pts, <50%/10pts, <70%/5pts)
+  - Savings & Investment: 25 pts (combined rate vs usable income, highest weight)
+  - Insurance Coverage: 15 pts (Health 9pts + Term 6pts, weighted 60/40)
+  - Net Worth Position: 15 pts (+2 diversification bonus for ≥3 distinct asset types)
+  - Goal Progress: 10 pts (8pts for progress + 2pt bonus for having goals defined)
+- **Modern Dark Theme**: Indigo/slate color palette
+  - Primary color: #6366f1 (indigo) throughout the app
+  - Updated all CSS variables for consistency
+  - Light theme support with proper contrast
+- **Loading Spinner Redesign**: Logo inside rotating ring
+  - App logo displays inside the rotating spinner ring
+  - Counter-rotation animation keeps logo upright while ring spins
+  - Respects prefers-reduced-motion setting
+- **Tags/Badges Dark/Light Mode Consistency**: Modern color refresh
+  - Updated semantic badges with modern colors (indigo, rose, emerald, amber, violet, cyan)
+  - Separate light theme overrides for readability
+  - Consistent across all tabs (Tax Plan, Budget, Goals, Insurance, etc.)
+- **Tax Deductions Chart**: Horizontal bar chart
+  - Changed from vertical to horizontal bar chart for better label readability
+  - Grouped by tax section (80C, 80D, 24(b), etc.)
+- **Sample Test Data**: Created tests/sampledata.json
+  - Comprehensive test data with 6 accounts, 5 investments, 10 outflows
+  - 5 financial goals, 3 insurance policies, 2 liabilities
+  - 5 months of budget data with realistic numbers
+  - Expense tracking data included
+
+### Changed
+- **Unit Tests**: Added 30+ new tests for v5.3.0 features
+  - Health score calculation tests (6 tests)
+  - Notification trigger tests (4 tests)
+  - Goal trigger tests (2 tests)
+  - Insurance trigger tests (3 tests)
+  - Net worth trigger tests (4 tests)
+  - Insights generation tests (3 tests)
+  - Total: 95+ tests (all passing)
+- **Documentation**: Updated all documentation files
+  - APP_SPEC.md: Added notification system, insights, health score sections
+  - ARCHITECTURE.md: Added notification and health score pipeline diagrams
+  - API_DOCUMENTATION.md: Added health score and insights API docs
+  - USER_MANUAL.md: Added v5.3.0 changelog
+  - README.md: Added v5.3.0 features
+  - TO-DO.txt: Updated to reflect v5.3.0 completion
+
+### Fixed
+- **Version Constant**: Updated APP_VERSION from v4.0.7 to v5.3.0 in app.js
+- **Version References**: Updated version numbers in all documentation files
+
 ## [4.0.5] - 2026-08-15 - Error Handling & Network Status Improvements
 
 ### Added

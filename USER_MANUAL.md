@@ -1,16 +1,60 @@
-# SmartFin – User Manual (v4.0.5)
+# SmartFin – User Manual (v5.3.0)
 
 A comprehensive guide to using SmartFin for personal financial planning.
+
+## What's New in v5.3.0
+
+### 🔔 Dynamic Notification System
+- **Bell Icon with Badge Counter**: Shows unread alert count in header
+- **7 Smart Triggers**: Budget, Goals, Insurance, Expenses, Net Worth, Tax, Gifts
+- **Popup Panel**: View all alerts with icons, messages, and quick navigation
+- **Clear All**: Dismiss all alerts for the day with one click
+- **Daily Reset**: Notifications automatically reset at the start of each day
+- **Click-Outside-Close**: Click anywhere outside popup to close it
+
+### 💡 Enhanced Insights & Recommendations
+- **11 Insight Types**: More comprehensive financial recommendations
+- **3 Categories**: Positive (5), Suggestion (7), Warning (3)
+- **Display Limit**: Shows up to 6 most relevant insights (increased from 4)
+- **Real-time Updates**: Insights update dynamically with your data
+
+### 📊 Financial Health Score Rebalancing
+- **New Weights**: Emergency Fund (15pts), Debt Management (20pts), Savings & Investment (25pts), Insurance (15pts), Net Worth (15pts), Goals (10pts)
+- **Diversification Bonus**: +2 points for having 3+ asset types
+- **Goal Planning Bonus**: +2 points simply for having goals defined
+- **Better Scoring**: More emphasis on wealth-building and risk management
+
+### 🎨 Modern Dark Theme
+- **Indigo/Slate Palette**: New modern color scheme
+- **Primary Color**: #6366f1 (indigo) throughout the app
+- **Better Contrast**: Improved readability in both dark and light modes
+
+### ⏳ Loading Spinner Redesign
+- **Logo Inside Ring**: App logo now displays inside the rotating spinner
+- **Counter-Rotation**: Logo stays upright while ring spins
+- **Reduced Motion**: Respects prefers-reduced-motion setting
+
+### 🏷️ Tags & Badges Refresh
+- **Modern Colors**: Indigo, rose, emerald, amber, violet, cyan
+- **Dark/Light Consistency**: Proper contrast in both themes
+- **Updated Everywhere**: All semantic badges and tags refreshed
+
+### 📈 Tax Deductions Chart
+- **Horizontal Layout**: Changed to horizontal bar chart for better label readability
+- **Grouped by Section**: Deductions organized by tax section (80C, 80D, etc.)
 
 ## What's New in v4.0.5
 
 ### 🔧 Error Handling & Network Status
 - **Network Status Indicator**: Visual indicator in user bar (next to your email) showing Firebase save status
-  - ✅ Green checkmark: Data saved successfully
-  - 🔄 Yellow blinking refresh: Retrying save due to network issue
-  - ⚠️ Red warning: Save failed or connection lost
-  - 📶 Red WiFi slash: Browser is offline
-  - Hover over the icon to see status text
+  - **Green checkmark with circle**: Data saved successfully (auto-hides after 2 seconds)
+  - **Yellow refresh arrows (blinking)**: Retrying save due to network issue (stays visible)
+  - **Red circle with exclamation**: Save failed (stays visible)
+  - **Red WiFi with slash**: Browser is offline (stays visible)
+  - **Red triangle alert**: Quota exceeded (stays visible)
+  - **Yellow refresh arrows with slash**: Reconnecting (stays visible)
+  - Hover over the icon on desktop or tap on mobile to see detailed status text
+  - Mobile view: Shows only the icon for space efficiency
   - Indicator automatically hides after successful save
 - **Better Error Messages**: Clear, specific messages for different error types
   - Quota exceeded: Informs you about quota reset timing and upgrade options
@@ -187,6 +231,36 @@ All tabs use the **Edit/Done toggle** pattern:
 - **Settings Icon**: Access settings panel
 - **Sign Out Icon**: Log out of the app (icon button)
 
+### Context-Aware Quick Actions
+
+The Dashboard includes context-aware action buttons (small icons) in the top-right corner of each card:
+
+**"This Month" Card Actions:**
+- **Beginning (Days 1-5, Transfer Not Done):** Edit, Transfer, Budget
+- **Beginning (Days 1-5, Transfer Done):** Update, Budget
+- **Mid-Month (Days 6-25):** Update, Budget
+- **End-Month (Days 26-31):** Close, Update, Budget
+
+**"Accounts & Net Worth" Card Actions:**
+- Net Worth - Navigates to Net Worth tab
+
+**"Spending Breakdown" Card Actions:**
+- Expenses - Navigates to Expense Tracking tab
+
+**"Goals & Investment" Card Actions:**
+- Goals - Navigates to Goals tab
+- Investments - Navigates to Investments tab
+- Gifts - Navigates to Gifts tab
+
+**"Preparedness & Budget Planning" Card Actions:**
+- Tax Plan - Navigates to Tax Plan tab
+- Insurance - Navigates to Insurance tab
+
+**"Financial Year Overview" Card Actions:**
+- Annual Budget - Navigates to Budget tab in annual view (shows yearly graph)
+
+**Note:** Action buttons are positioned in the top-right corner of each card header for easy access. The Quick Update popup handles both expenditure balance and CC spending in one place for efficiency.
+
 ---
 
 ## Accounts (Setup)
@@ -225,6 +299,18 @@ Manage your bank/NBFC accounts. The account system is the foundation — other t
 ### Onboarding
 
 The app marks onboarding complete when **both** Primary and Salary accounts exist. Until then, other tabs are hidden.
+
+### Account Balance & Credit Limit Chart
+
+The Accounts tab includes a bar chart showing:
+- **Balance** (green bars) - Account balance for each account
+- **Credit Limit** (blue bars) - Credit card limit for each account
+
+**Notes:**
+- Only accounts with `Account Present = Yes` or `Credit Card Present = Yes` are shown
+- If an account has no balance or no credit card, the corresponding bar shows 0
+- Chart is hidden in edit mode
+- Uses modern Chart.js styling with rounded bars
 
 ---
 
@@ -577,12 +663,23 @@ Dedicated tab for tracking insurance policies — separate from Outflow premium 
 | Amount Accumulated (₹) | Saved so far |
 | Target Date | Deadline |
 | Details | Optional notes |
-| Goal Type | Short Term, Mid Term, Long Term |
+| Goal Type | Short Term, Mid Term, Long Term (auto-selected based on target date) |
 | Status | Planned, Ongoing, Achieved, Missed |
 
 ### Preview Cards
 
 Each goal shows a progress bar with percentage and status badge.
+
+### Goal Type Auto-Selection
+
+The system automatically selects the goal type based on your target date:
+
+- **Short Term**: ≤ 1 year from today
+- **Mid Term**: 1-3 years from today
+- **Long Term**: > 3 years from today
+- **Default**: Long Term if no target date is selected
+
+You can manually override the auto-selected type if needed. Once you manually change the type, the system will respect your choice and won't auto-select again for that goal.
 
 ---
 
@@ -616,6 +713,7 @@ Each goal shows a progress bar with percentage and status badge.
 - **Auto-calculated deductions**: Pulls EPF, PPF, NPS, insurance premiums from Outflow and Investments
 - **Manual deductions**: Add additional 80C, 80D, 80CCD, etc.
 - **Tax breakdown**: Shows taxable income, slab-wise tax, cess
+- **Tax Deductions Chart**: Doughnut chart showing deductions grouped by tax section (80C, 80D, 80CCD, 80E, 80G, 80TTA, Others)
 
 ---
 
@@ -920,6 +1018,7 @@ The dashboard report is a comprehensive snapshot of your financial status includ
 
 | Version | Date | Changes |
 |---------|------|---------|
+| 5.3.0 | 2026-06-20 | **Dynamic Notification System**: Replaced static alerts carousel with dynamic popup notifications triggered by real-time financial data. Added 7 comprehensive triggers (budget, goals, insurance, expenses, net worth, tax, gifts). Enhanced insights system with 11 recommendation types. Modern dark theme with indigo/slate color palette. Updated Financial Health Score with rebalanced weights (savings & investment 25pts, net worth 15pts, goals 10pts). Loading spinner redesigned with logo inside rotating ring. Dashboard styling modernized to match other tabs. Tax deductions chart changed to horizontal bar chart. All tags/badges updated for dark and light mode consistency. Added sampledata.json for testing. |
 | 5.2 | 2026-06-18 | **Transfer Mismatch Detection**: red warning banner when outflows change after Execute Transfer, with Recalculate Transfer button to fix `_transferDone` and `_initialBalance`. **Outflow snapshot**: `_transferOutflowSnapshot` stored at transfer time for audit trail. **Variable Expenditure breakdown**: popup now shows individual components (Carry Forward, Salary Leftover, Pre-existing Balance) instead of combined total. **Recalculate formula**: correctly handles pre-existing account balance + carry forward without double-counting. |
 | 5.1 | 2026-06-18 | **Pie chart fix**: 6 categories (added Insurance); excludes on-demand/one-time items from monthly & annual distribution. **Total Outflow fix**: shows recurring outflow only (excludes On-Demand investing). **One-Time exclusion**: One-Time frequency outflow and inflow items excluded from `buildMonthlyAutoValues` auto-calculation. **Transfer message**: restructured confirm dialog showing salary leftover explicitly. **Net worth display**: each item shows Current, @ 70 yrs, @ 70 yrs real (inflation-adjusted). **Emergency fund fix**: Details text field preserved on edit (pre-fills all fields, not just currentFund). |
 | 5.0 | 2026-06-09 | **Auto-debit routing**: fixedSaving/fixedInvestment/fixedExpenditure/insurancePremiums moved to outflow; variableExpenditure auto-calculated; creditCardOutstanding auto from previous closed month; salary is transit-only account (no manual edit); Execute Transfer deducts full salary, credits all accounts; replaced Carry Forward with Close Current Month Budget (read-only months); updated emergency fund calculation (fixed obligations + avg variable, excludes saving/investment); budget status handles no-data/no-accounts/no-income edge cases; transfer section responsive for mobile; monthly need breakdown in emergency fund |

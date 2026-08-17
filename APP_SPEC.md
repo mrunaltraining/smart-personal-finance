@@ -1,4 +1,4 @@
-# SmartFin – Application Specification (v4.0.5)
+# SmartFin – Application Specification (v5.3.0)
 
 > **Purpose**: Single source of truth for the app's architecture, data models, business logic, and UI structure.
 > Use this file as context when making future modifications. Update it after every significant change.
@@ -23,6 +23,28 @@
 > - Test with different screen orientations (portrait/landscape)
 > - Verify smooth performance on lower-end mobile devices
 > - Use passive event listeners for scroll/touch events to improve performance
+>
+> **Version 5.3.0 Updates - Dynamic Notifications, Enhanced Insights & Modern Dark Theme**:
+> - **Dynamic Notification System**: Bell icon with live badge counter driven by 7 registered triggers (Budget, Goals, Insurance, Expenses/Recurring Outflows, Net Worth, Tax, Gifts)
+>   - Popup panel lists all active alerts with icon, message, and quick-navigation action
+>   - "Clear All" button dismisses all alerts for the day (`clearNotifications()`)
+>   - Click-outside-to-close behavior (clicking anywhere outside the popup and bell button closes it)
+>   - Daily reset: notification state (`viewedCount`, `cleared`, `lastAlertsHash`) resets automatically at the start of a new day, stored in `localStorage` under `notificationState`
+>   - Badge counter shows unread alert count on the bell icon, auto-hides when count is zero
+> - **Enhanced Insights (Dashboard)**: `generateInsights()` now evaluates 11 recommendation types across three categories — **positive** (surplus, savings rate, emergency fund funded, net worth strength, consistent investing), **suggestion** (emergency fund gap, low health/term insurance, no investments, goals behind schedule, no goals set, low asset diversification, no tax planning), and **warning** (high debt ratio, low savings rate, negative net worth)
+>   - Display limit increased from 4 to 6 most relevant insights (`insights.slice(0, 6)`)
+> - **Financial Health Score – Rebalanced Weights**: `calculateFinancialHealthScore()` now scores out of 100 using:
+>   - Emergency Fund Coverage — 15 pts (gradual scoring based on months-of-expenses ratio)
+>   - Debt Management — 20 pts (debt-to-income ratio bands: <30% / <40% / <50% / <70% / ≥70%)
+>   - Savings & Investment — 25 pts (combined Savings + Investment rate vs usable income; highest-weighted component)
+>   - Insurance Coverage — 15 pts (Health 9 pts + Term 6 pts, weighted 60/40)
+>   - Net Worth Position — 15 pts (base points for positive net worth, scaled by months-of-expenses covered, **+2 asset diversification bonus** for ≥3 distinct asset types)
+>   - Goal Progress & Planning — 10 pts (8 pts for progress + **2 pt bonus** simply for having goals defined)
+> - **Modern Dark Theme**: Indigo/slate color palette applied across the UI; `--primary` and `--investment` CSS variables set to `#6366f1` (indigo), replacing the previous accent color
+> - **Loading Spinner Redesign**: App logo now renders inside a rotating ring (`.sf-spinner`), with the logo counter-rotating (`.sf-spinner-logo`, `sf-spin-reverse` keyframes) so it stays upright while the ring spins; `prefers-reduced-motion` disables both animations
+> - **Tags/Badges Refresh**: Semantic badges (`.semantic-investment`, `.policy-badge`, `.premium-badge`, tab pills, etc.) updated with modern colors — indigo, rose, emerald, amber, violet, cyan — tuned for both dark and light theme consistency
+> - **Tax Deductions Chart**: `renderTaxDeductionsChart()` now renders a horizontal bar chart (Chart.js `indexAxis: 'y'`) grouped by tax section for improved label readability
+> - **Sample Test Data**: Added `tests/sampledata.json` — a representative dataset for exercising dashboard, budget, and insights logic during manual/automated testing
 >
 > **Version 4.0.3 Updates - Error Handling & Network Status Improvements**:
 > - **Network Status Indicator**: Visual indicator in user bar showing Firebase save status
@@ -147,7 +169,7 @@ element.addEventListener('mousedown', handleStart);
 
 ---
 
-## 2. Architecture & Modular Design (v4.0.1)
+## 2. Architecture & Modular Design (v5.3.0)
 
 ### Core Business Logic Modules
 
@@ -427,7 +449,7 @@ Every entry has:
 | amountAccumulated | Amount Accumulated (₹) | number | — | — |
 | targetDate | Target Date | date | — | — |
 | details | Details | text | — | — |
-| goalType | Goal Type | select | Short Term, Mid Term, Long Term | — |
+| goalType | Goal Type | select | ShortTerm, MidTerm, LongTerm | — |
 | status | Status | select | Planned, Ongoing, Achieved, Missed | — |
 
 ### netWorth
@@ -454,6 +476,8 @@ Every entry has:
 | details | Details | text | — | — |
 
 **Auto-deductions:** EPF, PPF, NPS, Insurance premiums auto-pulled from Outflow and Investments.
+
+**Tax Deductions Chart (v5.3.0):** `renderTaxDeductionsChart()` renders deductions grouped by section as a **horizontal bar chart** (Chart.js `indexAxis: 'y'`) for improved label readability, replacing the previous vertical bar layout. Falls back to an empty-state message when no deductions exist.
 
 ### gifts
 
@@ -687,7 +711,7 @@ When a Budget month is closed:
 - `isExpenseEditMode` - Edit mode toggle (boolean)
 - `expensePieChart` - Chart.js instance for pie chart
 
-### New Features in v4.0.2
+### New Features in v5.3.0
 
 #### CSV/Bank Statement Import
 - **File Format**: CSV with columns: Date, Category, Amount, Payment Method (optional)
@@ -709,7 +733,7 @@ When a Budget month is closed:
 
 ---
 
-## 5.6. Global Period Selector (NEW in v4.0.2)
+## 5.6. Global Period Selector
 
 ### Location
 - Header bar (top of application), centered between logo and user controls
@@ -744,7 +768,7 @@ When a Budget month is closed:
 
 ---
 
-## 5.7. Dashboard Enhancements (NEW in v4.0.2)
+## 5.7. Dashboard Enhancements
 
 ### Savings Rate KPI Card
 - **Location**: Dashboard grid, positioned after Accounts & Net Worth card
@@ -772,6 +796,65 @@ When a Budget month is closed:
   - HTML: Icon and text now wrapped in separate spans
   - Consistency: Icon always visible and properly aligned
   - Responsive: Works on mobile, tablet, and desktop
+
+---
+
+## 5.8. Dynamic Notification System (NEW in v5.3.0)
+
+### Overview
+A bell-icon notification center in the header that surfaces actionable alerts sourced from live app data, without duplicating any calculations (reuses existing budget/goal/insurance/net worth/tax/gifts logic).
+
+### Triggers (7 total)
+Registered via `registerNotificationTrigger(triggerFn)` in `app.js`, each returning zero or more alert objects `{ type, icon, message, action }`:
+
+| # | Trigger | Source Data | Example Alert |
+|---|---------|-------------|---------------|
+| 1 | Budget | `monthlyBudgetData` | Over budget this month, transfer pending |
+| 2 | Goals | `tabData.financialGoal` | Goal behind schedule |
+| 3 | Insurance | `tabData.insurance` | Health/Term insurance below recommended level |
+| 4 | Expenses (Recurring Outflows) | `tabData.outflow` | Upcoming/overdue recurring payment |
+| 5 | Net Worth | `tabData.cards` + liabilities | Negative or declining net worth |
+| 6 | Tax | `tabData.taxPlan` | No tax planning done, deadline approaching |
+| 7 | Gifts | `tabData.gifts` | Upcoming occasion/gift reminder |
+
+### Behavior
+- `checkNotificationTriggers()` runs all registered triggers, merges results, and de-duplicates by `type-message` key
+- **Badge Counter**: `updateNotificationBadge(count)` shows unread count on the bell icon; hidden when `unreadCount <= 0`
+- **Popup Panel** (`showNotificationPopup(alerts)`): renders header ("Alerts & Notifications"), a **Clear All** button (`clearNotifications()`), and the alert list with icons/messages/quick actions
+- **Click-Outside-Close**: a document-level click listener closes the popup when the click target is outside both the popup and the notification bell button
+- **Daily Reset**: `getNotificationState()` compares stored `date` to `new Date().toDateString()`; on a new day it resets `{ viewedCount: 0, cleared: false, lastAlertsHash: null }`
+- **Change Detection**: `shouldRegenerateAlerts()` hashes the current alert set (`JSON.stringify`) and skips regeneration if unchanged or if the user already cleared alerts for the day
+- **Persistence**: State stored in `localStorage` under key `notificationState`
+
+---
+
+## 5.9. Enhanced Dashboard Insights & Financial Health Score (v5.3.0)
+
+### Insights Engine (`generateInsights()`)
+Evaluates account/budget/goal/insurance/net-worth/tax data and returns up to **11 possible recommendation types**, capped at **6 displayed** (`insights.slice(0, 6)`, increased from the previous limit of 4):
+
+| Type | Examples |
+|------|----------|
+| `positive` | Budget surplus this month; savings rate ≥30%; emergency fund fully funded; net worth ≥2× liabilities; consistent monthly investing |
+| `suggestion` | Emergency fund gap with monthly target; health/term insurance below 70% of ideal; no investments while income allows; goals behind schedule; no goals defined; low asset diversification (<3 types); no tax planning above ₹5L income |
+| `warning` | Debt-to-income ratio >50%; savings rate <10%; negative net worth (liabilities > assets) |
+
+Each insight has `{ type, icon, message }` and is rendered on the Dashboard beneath the summary cards.
+
+### Financial Health Score (`calculateFinancialHealthScore()`)
+Score out of 100, rebalanced in v5.3.0 to weight wealth-building more heavily:
+
+| Component | Max Points | Scoring Basis |
+|-----------|-----------|---------------|
+| Emergency Fund | 15 | Gradual score from ratio of current fund to ideal (6 months expenses) |
+| Debt Management | 20 | Monthly commitments ÷ usable income band: <30%→20, <40%→15, <50%→10, <70%→5, ≥70%→0 |
+| Savings & Investment | 25 | Combined (Saving + Investment) ÷ usable income: ≥30%→25, ≥20%→20, ≥10%→12, >0%→5 |
+| Insurance Coverage | 15 | Health coverage ratio × 9 + Term coverage ratio × 6 |
+| Net Worth Position | 15 | 5 pts if positive; 10 pts if >3 months' commitments; 15 pts if >6 months'; **+2 diversification bonus** if ≥3 distinct asset `purpose` types |
+| Goal Progress | 10 | Up to 8 pts from overall goal completion % + **2 pt bonus** for having any ongoing goals defined |
+
+- Health levels: **Excellent** (≥85, green), **Good** (≥70, blue), **Fair** (≥50, amber), **Needs Improvement** (≥30, orange), **Needs Work** (<30, red)
+- Displayed on Dashboard as a circular progress ring plus a per-component breakdown bar list, each with a hover tooltip explaining the scoring logic
 
 ---
 
@@ -947,6 +1030,8 @@ previewMap = {
 
 - CSS variables on `:root` and `[data-theme="light"]`
 - Key variables: `--bg`, `--surf1`, `--surf2`, `--text`, `--dim`, `--muted`, `--border`, `--border2`, `--accent`, `--shadow`
+- **Modern Dark Theme (v5.3.0)**: Indigo/slate color palette; `--primary` and `--investment` set to `#6366f1` (indigo), `--primary-hover: #4f46e5`, `--liability: #f43f5e` (rose). Semantic badges/tags (`.semantic-investment`, `.policy-badge`, `.premium-badge`/`.no-premium-badge`, tab pills) restyled with a modern accent set — indigo, rose, emerald, amber, violet, cyan — tuned separately for `[data-theme="light"]` to keep contrast/readability consistent between dark and light modes
+- **Loading Spinner (v5.3.0)**: `.sf-spinner` — a rotating ring (`border-top-color: var(--primary)`, `sf-spin` keyframe) containing `.sf-spinner-logo`, the app logo, which counter-rotates (`sf-spin-reverse` keyframe) so it appears stationary while the ring spins around it. Both animations are disabled under `prefers-reduced-motion`
 
 ### Key CSS Classes
 
@@ -1153,6 +1238,9 @@ When implementing changes to SmartFin, follow this systematic approach:
 ```
 tests/
 ├── tax-calculation.test.js    # Tax calculation logic tests
+├── sampledata.json             # NEW in v5.3.0 - representative sample dataset for
+│                                #   manually/automatically exercising dashboard,
+│                                #   budget, insights, and health-score logic
 ├── [future-test-files].test.js
 ```
 
@@ -1217,4 +1305,6 @@ When modifying the app, check these areas:
 
 ---
 
-*Last updated: 2026-08-05 (v2.3.15 — Tax data persistence fix: Added taxData to default appData structure and Firestore loading, ensures persistence after refresh)*
+*Last updated: v5.3.0 — Dynamic Notification System (7 triggers, badge counter, Clear All, click-outside-close, daily reset), Enhanced Insights (11 recommendation types, limit 4→6), rebalanced Financial Health Score weights, Modern Dark Theme (indigo/slate palette), redesigned Loading Spinner, refreshed Tags/Badges, horizontal Tax Deductions chart, and tests/sampledata.json.*
+
+*Previous update: 2026-08-05 (v2.3.15 — Tax data persistence fix: Added taxData to default appData structure and Firestore loading, ensures persistence after refresh)*

@@ -839,7 +839,7 @@ Promise<Array<Goal>>
   amountAccumulated: number,
   targetDate: string,  // YYYY-MM-DD
   details: string,
-  goalType: "Short Term" | "Mid Term" | "Long Term",
+  goalType: "ShortTerm" | "MidTerm" | "LongTerm",
   status: "Planned" | "Ongoing" | "Achieved" | "Missed"
 }
 ```
@@ -930,7 +930,7 @@ Promise<Array<Goal>>
 Filter goals by type.
 
 **Parameters:**
-- `goalType` (string): "Short Term" | "Mid Term" | "Long Term"
+- `goalType` (string): "ShortTerm" | "MidTerm" | "LongTerm"
 
 **Returns:**
 ```javascript
@@ -1654,6 +1654,84 @@ metrics.goalsInvestments.activeGoals.forEach(goal => {
 // Preparedness
 console.log('Emergency fund:', metrics.preparedness.emergencyFund.progress, '%');
 console.log('Health insurance:', metrics.preparedness.healthInsurance.progress, '%');
+```
+
+##### `calculateFinancialHealthScore(data)` *(v5.3.0)*
+Calculate comprehensive financial health score.
+
+**Parameters:**
+- `data` (object): Financial data including:
+  - `emergencyFund`, `idealEmergencyFund` (number)
+  - `totalAssets`, `totalLiabilities` (number)
+  - `usableIncome`, `monthlyCommitments` (number)
+  - `healthInsurance`, `idealHealthInsurance` (number)
+  - `termInsurance`, `idealTermInsurance` (number)
+  - `ongoingGoals` (Array): Goals with `amountNeeded` and `amountAccumulated`
+  - `monthlyInvestment` (number)
+  - `monthData` (object): Current month budget data
+  - `assets` (Array): Account objects with `purpose` field
+
+**Returns:**
+```javascript
+{
+  score: number,          // 0-100
+  breakdown: Array<{
+    label: string,        // Category name
+    score: number,        // Points earned
+    max: number,          // Maximum points
+    percentage: number,   // Coverage percentage
+    tooltip: string       // Detailed tooltip text
+  }>,
+  healthLevel: string,    // "Excellent" | "Good" | "Fair" | "Needs Improvement" | "Needs Work"
+  healthColor: string     // Hex color for display
+}
+```
+
+**Scoring Weights (v5.3.0):**
+| Category | Max Points | Description |
+|----------|-----------|-------------|
+| Emergency Fund | 15 | Based on coverage vs 6-month ideal |
+| Debt Management | 20 | Based on debt-to-income ratio |
+| Savings & Investment | 25 | Combined savings + investment rate |
+| Insurance Coverage | 15 | Health (9pts) + Term (6pts) |
+| Net Worth Position | 15 | Net worth vs expenses + diversification bonus |
+| Goal Progress | 10 | Goal completion + planning bonus |
+
+##### `generateInsights(data)` *(v5.3.0)*
+Generate insights and recommendations.
+
+**Parameters:**
+- `data` (object): Same as health score plus `assets`, `taxPlan`
+
+**Returns:**
+```javascript
+Array<{
+  type: "positive" | "suggestion" | "warning",
+  icon: string,
+  message: string
+}>  // Limited to 6 items
+```
+
+##### Notification Triggers *(v5.3.0)*
+Registered via `registerNotificationTrigger(fn)`. Each trigger returns an array of alerts.
+
+**7 Built-in Triggers:**
+1. **Budget & Expense**: Over budget, low emergency fund, high CC usage, low savings rate, no investments
+2. **Goals**: Behind schedule, due within 30 days, no goals set
+3. **Insurance**: Below recommended, no policies, expiring within 60 days
+4. **Recurring Expenses**: High commitments, fixed expenses > 60% of income
+5. **Net Worth**: Negative net worth, low diversification, high debt-to-asset ratio
+6. **Tax Planning**: No tax planning, regime review suggestion
+7. **Gifts**: Gifts due within 30 days
+
+**Alert structure:**
+```javascript
+{
+  type: "warning" | "info",
+  icon: string,           // Icon name for display
+  message: string,        // Alert text
+  action: string          // Tab ID to navigate on click
+}
 ```
 
 ---

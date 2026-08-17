@@ -9,6 +9,8 @@
 
 A comprehensive dark-themed personal finance app with login/register, cross-device sync via Firebase, and tabbed sections for complete financial management.
 
+**v5.3.0 - Dynamic Notifications & Enhanced Insights**: Added dynamic notification system with 7 smart triggers (Budget, Goals, Insurance, Expenses, Net Worth, Tax, Gifts), badge counter, popup panel with Clear All, click-outside-close, and daily reset. Enhanced insights engine with 11 recommendation types (5 positive, 7 suggestion, 3 warning) and display limit increased from 4 to 6. Rebalanced Financial Health Score weights (Emergency Fund 15pts, Debt 20pts, Savings & Investment 25pts, Insurance 15pts, Net Worth 15pts with diversification bonus, Goals 10pts with goal-defined bonus). Modern dark theme with indigo/slate color palette (#6366f1). Redesigned loading spinner with logo inside rotating ring. Refreshed tags/badges for dark/light mode consistency. Changed tax deductions chart to horizontal bar chart. Added sample test data (tests/sampledata.json).
+
 **v4.0.5 - Error Handling & Network Status Improvements**: Added network status indicator, enhanced Firebase error handling with specific user notifications, automatic retry logic for network errors, and browser online/offline detection.
 
 **v4.0.2 - Dashboard Enhancements & Bug Fixes**: Enhanced 6-month trend chart, improved spending breakdown, added variable expenses display, and fixed Chart.js canvas errors.
@@ -40,6 +42,47 @@ A comprehensive dark-themed personal finance app with login/register, cross-devi
 - 🛡️ **Insurance Management**: Track insurance policies and coverage
 - 🎁 **Gifts & Donations**: Track charitable giving
 - 💸 **Expense Tracking**: Category-wise expense tracking with visual breakdowns
+
+## 🚀 What's New in v5.3.0
+
+### 🔔 Dynamic Notification System
+- **Bell Icon with Badge Counter**: Shows unread alert count in header
+- **7 Smart Triggers**: Budget, Goals, Insurance, Expenses, Net Worth, Tax, Gifts
+- **Popup Panel**: View all alerts with icons, messages, and quick navigation
+- **Clear All**: Dismiss all alerts for the day with one click
+- **Daily Reset**: Notifications automatically reset at the start of each day
+- **Click-Outside-Close**: Click anywhere outside popup to close it
+
+### 💡 Enhanced Insights & Recommendations
+- **11 Insight Types**: More comprehensive financial recommendations
+- **3 Categories**: Positive (5), Suggestion (7), Warning (3)
+- **Display Limit**: Shows up to 6 most relevant insights (increased from 4)
+- **Real-time Updates**: Insights update dynamically with your data
+
+### 📊 Financial Health Score Rebalancing
+- **New Weights**: Emergency Fund (15pts), Debt Management (20pts), Savings & Investment (25pts), Insurance (15pts), Net Worth (15pts), Goals (10pts)
+- **Diversification Bonus**: +2 points for having 3+ asset types
+- **Goal Planning Bonus**: +2 points simply for having goals defined
+- **Better Scoring**: More emphasis on wealth-building and risk management
+
+### 🎨 Modern Dark Theme
+- **Indigo/Slate Palette**: New modern color scheme
+- **Primary Color**: #6366f1 (indigo) throughout the app
+- **Better Contrast**: Improved readability in both dark and light modes
+
+### ⏳ Loading Spinner Redesign
+- **Logo Inside Ring**: App logo now displays inside the rotating spinner
+- **Counter-Rotation**: Logo stays upright while ring spins
+- **Reduced Motion**: Respects prefers-reduced-motion setting
+
+### 🏷️ Tags & Badges Refresh
+- **Modern Colors**: Indigo, rose, emerald, amber, violet, cyan
+- **Dark/Light Consistency**: Proper contrast in both themes
+- **Updated Everywhere**: All semantic badges and tags refreshed
+
+### 📈 Tax Deductions Chart
+- **Horizontal Layout**: Changed to horizontal bar chart for better label readability
+- **Grouped by Section**: Deductions organized by tax section (80C, 80D, etc.)
 
 ## 🚀 What's New in v4.0.3
 
