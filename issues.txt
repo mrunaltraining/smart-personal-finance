@@ -79,3 +79,14 @@ remove sort by details ad that doe s not needed
 under tax paln tab, make this more comprehensive for tax calulation and retirement corpus calulation in future or pension calulation
 let the user give option al inputs here have most common salary bearkdown components 
 Salary Details (Optional - for HRA exemption)
+
+change the goal ststus to "Completed" instaed of "Covered"
+
+we can use colorcoding here too 
+planned yellow
+Ongoing blue
+Achieved green
+Missed Red
+completed gray/white which ever suuport both darka nd light mode
+
+mak eteh colour selection like this symantic but more modern palate
