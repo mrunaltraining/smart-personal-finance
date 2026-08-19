@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SmartFin Module Tests (v5.4.7)</title>
+    <title>SmartFin Module Tests (v5.4.8)</title>
     <style>
         body {
             font-family: 'Inter', sans-serif;
@@ -48,7 +48,7 @@
     </style>
 </head>
 <body>
-    <h1>SmartFin Module Tests (v5.4.7)</h1>
+    <h1>SmartFin Module Tests (v5.4.8)</h1>
     <div id="test-results"></div>
 
     <script>
@@ -111,19 +111,19 @@
             typeof icons.alert !== 'undefined',
             'Result: Core icons available');
 
-        addTestResult('Compact icons defined (v5.4.7)', 
+        addTestResult('Compact icons defined (v5.4.8)', 
             typeof icons !== 'undefined' && 
             typeof icons.starSmall !== 'undefined' && 
             typeof icons.checkSmall !== 'undefined' &&
             typeof icons.lightbulbSmall !== 'undefined',
             'Result: Compact icons available');
 
-        addTestResult('New icons for v5.4.7', 
+        addTestResult('New icons for v5.4.8', 
             typeof icons !== 'undefined' && 
             typeof icons.targetSmall !== 'undefined' && 
             typeof icons.piggyBankSmall !== 'undefined' &&
             typeof icons.walletSmall !== 'undefined',
-            'Result: v5.4.7 icons available');
+            'Result: v5.4.8 icons available');
 
         // ── Budget Distribution Module Tests ───────────────────────────────────
         const budgetSection = addSection('Budget Distribution Module Tests');
@@ -150,8 +150,8 @@
                 `Result: ${toMonthlyAmount(12000, 'One-Time')}`);
         }
 
-        // ── Dashboard Module Tests (v5.4.7) ─────────────────────────────────────
-        const dashboardSection = addSection('Dashboard Module Tests (v5.4.7)');
+        // ── Dashboard Module Tests (v5.4.8) ─────────────────────────────────────
+        const dashboardSection = addSection('Dashboard Module Tests (v5.4.8)');
         
         addTestResult('calculateFinancialHealthScore function exists', 
             typeof calculateFinancialHealthScore === 'function',
