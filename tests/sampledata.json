@@ -1,521 +1,1268 @@
 {
-  "tabData": {
-    "cards": [
-      {
-        "id": "acc_1",
-        "name": "HDFC Salary Account",
-        "purpose": "Salary",
-        "balance": 150000,
-        "isPrimary": "Yes",
-        "accountType": "Savings"
-      },
-      {
-        "id": "acc_2",
-        "name": "ICICI Expenditure Account",
-        "purpose": "Expenditure",
-        "balance": 25000,
-        "isPrimary": "No",
-        "accountType": "Current"
-      },
-      {
-        "id": "acc_3",
-        "name": "SBI Savings Account",
-        "purpose": "Savings",
-        "balance": 500000,
-        "isPrimary": "No",
-        "accountType": "Savings"
-      },
-      {
-        "id": "acc_4",
-        "name": "Kotak Investment Account",
-        "purpose": "Investment",
-        "balance": 750000,
-        "isPrimary": "No",
-        "accountType": "Demat"
-      },
-      {
-        "id": "acc_5",
-        "name": "HDFC Credit Card",
-        "purpose": "Credit Card",
-        "balance": -45000,
-        "creditCardPresent": "Yes",
-        "creditLimit": 200000,
-        "accountType": "Credit Card"
-      },
-      {
-        "id": "acc_6",
-        "name": "Axis Emergency Fund",
-        "purpose": "Emergency Fund",
-        "balance": 300000,
-        "isPrimary": "No",
-        "accountType": "Savings"
-      }
-    ],
-    "inflow": [
-      {
-        "id": "inv_1",
-        "name": "SIP - HDFC Flexi Cap Fund",
-        "amount": 10000,
-        "frequency": "Monthly",
-        "startDate": "2024-01-01",
-        "type": "Equity",
-        "category": "Mutual Funds"
-      },
-      {
-        "id": "inv_2",
-        "name": "SIP - PPF",
-        "amount": 5000,
-        "frequency": "Monthly",
-        "startDate": "2024-01-01",
-        "type": "Debt",
-        "category": "PPF"
-      },
-      {
-        "id": "inv_3",
-        "name": "Lumpsum - SBI Blue Chip Fund",
-        "amount": 100000,
-        "frequency": "One-Time",
-        "startDate": "2024-03-15",
-        "type": "Equity",
-        "category": "Mutual Funds"
-      },
-      {
-        "id": "inv_4",
-        "name": "Sovereign Gold Bonds",
-        "amount": 25000,
-        "frequency": "Annual",
-        "startDate": "2024-01-01",
-        "type": "Gold",
-        "category": "Gold"
-      },
-      {
-        "id": "inv_5",
-        "name": "Fixed Deposit - SBI",
-        "amount": 200000,
-        "frequency": "Quarterly",
-        "startDate": "2024-01-01",
-        "type": "Debt",
-        "category": "FD"
-      }
-    ],
-    "outflow": [
-      {
-        "id": "out_1",
-        "name": "Home Loan EMI",
-        "amount": 35000,
-        "frequency": "Monthly",
-        "type": "Liability",
-        "category": "Housing"
-      },
-      {
-        "id": "out_2",
-        "name": "Car Loan EMI",
-        "amount": 15000,
-        "frequency": "Monthly",
-        "type": "Liability",
-        "category": "Transport"
-      },
-      {
-        "id": "out_3",
-        "name": "Health Insurance - Star Health",
-        "amount": 25000,
-        "frequency": "Annual",
-        "type": "Insurance",
-        "category": "Health"
-      },
-      {
-        "id": "out_4",
-        "name": "Term Insurance - LIC",
-        "amount": 15000,
-        "frequency": "Annual",
-        "type": "Insurance",
-        "category": "Life Insurance"
-      },
-      {
-        "id": "out_5",
-        "name": "Internet - Airtel",
-        "amount": 1200,
-        "frequency": "Monthly",
-        "type": "Fixed Expenditure",
-        "category": "Utilities"
-      },
-      {
-        "id": "out_6",
-        "name": "Mobile Postpaid",
-        "amount": 800,
-        "frequency": "Monthly",
-        "type": "Fixed Expenditure",
-        "category": "Utilities"
-      },
-      {
-        "id": "out_7",
-        "name": "Electricity",
-        "amount": 2500,
-        "frequency": "Monthly",
-        "type": "Fixed Expenditure",
-        "category": "Utilities"
-      },
-      {
-        "id": "out_8",
-        "name": "House Rent",
-        "amount": 20000,
-        "frequency": "Monthly",
-        "type": "Fixed Expenditure",
-        "category": "Housing"
-      },
-      {
-        "id": "out_9",
-        "name": "Gym Membership",
-        "amount": 3000,
-        "frequency": "Quarterly",
-        "type": "Fixed Expenditure",
-        "category": "Health"
-      },
-      {
-        "id": "out_10",
-        "name": "Netflix Subscription",
-        "amount": 799,
-        "frequency": "Monthly",
-        "type": "Fixed Expenditure",
-        "category": "Entertainment"
-      }
-    ],
-    "financialGoal": [
-      {
-        "id": "goal_1",
-        "name": "Down Payment for House",
-        "amountNeeded": 2000000,
-        "amountAccumulated": 800000,
-        "targetDate": "2026-12-31",
-        "type": "Short-term",
-        "priority": "High"
-      },
-      {
-        "id": "goal_2",
-        "name": "Emergency Fund",
-        "amountNeeded": 600000,
-        "amountAccumulated": 300000,
-        "targetDate": "2025-06-30",
-        "type": "Short-term",
-        "priority": "High"
-      },
-      {
-        "id": "goal_3",
-        "name": "Retirement Corpus",
-        "amountNeeded": 50000000,
-        "amountAccumulated": 7500000,
-        "targetDate": "2045-12-31",
-        "type": "Long-term",
-        "priority": "Medium"
-      },
-      {
-        "id": "goal_4",
-        "name": "Vacation to Europe",
-        "amountNeeded": 500000,
-        "amountAccumulated": 150000,
-        "targetDate": "2025-09-30",
-        "type": "Mid-term",
-        "priority": "Low"
-      },
-      {
-        "id": "goal_5",
-        "name": "New Car",
-        "amountNeeded": 800000,
-        "amountAccumulated": 200000,
-        "targetDate": "2026-03-31",
-        "type": "Mid-term",
-        "priority": "Medium"
-      }
-    ],
-    "insurance": [
-      {
-        "id": "ins_1",
-        "name": "Star Health Comprehensive",
-        "policyType": "Health",
-        "sumAssured": 1000000,
-        "amount": 25000,
-        "premiumFrequency": "Annual",
-        "startDate": "2023-06-01",
-        "expiryDate": "2024-06-01",
-        "nominee": "Spouse"
-      },
-      {
-        "id": "ins_2",
-        "name": "LIC Term Insurance",
-        "policyType": "Term Life",
-        "sumAssured": 10000000,
-        "amount": 15000,
-        "premiumFrequency": "Annual",
-        "startDate": "2023-01-01",
-        "expiryDate": "2043-01-01",
-        "nominee": "Spouse"
-      },
-      {
-        "id": "ins_3",
-        "name": "Critical Illness Cover",
-        "policyType": "Critical Illness",
-        "sumAssured": 5000000,
-        "amount": 8000,
-        "premiumFrequency": "Annual",
-        "startDate": "2023-03-01",
-        "expiryDate": "2043-03-01",
-        "nominee": "Spouse"
-      }
-    ],
-    "liability": [
-      {
-        "id": "liab_1",
-        "name": "Home Loan - HDFC",
-        "amount": 3500000,
-        "interestRate": 8.5,
-        "emi": 35000,
-        "tenure": 20,
-        "startDate": "2022-01-01",
-        "type": "Home Loan"
-      },
-      {
-        "id": "liab_2",
-        "name": "Car Loan - HDFC",
-        "amount": 400000,
-        "interestRate": 9.5,
-        "emi": 15000,
-        "tenure": 5,
-        "startDate": "2023-01-01",
-        "type": "Car Loan"
-      }
-    ],
-    "taxPlan": [
-      {
-        "id": "tax_1",
-        "name": "80C - PPF Contribution",
-        "amount": 150000,
-        "section": "80C",
-        "details": "PPF investment for tax saving"
-      },
-      {
-        "id": "tax_2",
-        "name": "80C - ELSS SIP",
-        "amount": 120000,
-        "section": "80C",
-        "details": "ELSS mutual fund SIP"
-      },
-      {
-        "id": "tax_3",
-        "name": "80D - Health Insurance Premium",
-        "amount": 25000,
-        "section": "80D",
-        "details": "Self and family health insurance"
-      },
-      {
-        "id": "tax_4",
-        "name": "80C - Life Insurance Premium",
-        "amount": 15000,
-        "section": "80C",
-        "details": "Term insurance premium"
-      },
-      {
-        "id": "tax_5",
-        "name": "24(b) - Home Loan Interest",
-        "amount": 200000,
-        "section": "24(b)",
-        "details": "Home loan principal repayment"
-      }
-    ],
-    "gifts": [
-      {
-        "id": "gift_1",
-        "name": "Birthday Gift - Wife",
-        "amount": 10000,
-        "date": "2024-08-15",
-        "recipient": "Spouse",
-        "occasion": "Birthday"
-      },
-      {
-        "id": "gift_2",
-        "name": "Diwali Gift - Parents",
-        "amount": 25000,
-        "date": "2024-11-01",
-        "recipient": "Parents",
-        "occasion": "Diwali"
-      },
-      {
-        "id": "gift_3",
-        "name": "Wedding Gift - Friend",
-        "amount": 15000,
-        "date": "2024-12-20",
-        "recipient": "Friend",
-        "occasion": "Wedding"
-      }
-    ],
-    "emergencyFund": [
-      {
-        "id": "ef_1",
-        "name": "Axis Emergency Fund",
-        "amount": 300000,
-        "targetAmount": 600000,
-        "accountType": "Savings"
-      }
-    ]
-  },
-  "monthlyBudgetData": {
-    "2024-01": {
-      "inflow": {
-        "salary": 150000,
-        "bonus": 0,
-        "other": 0
-      },
-      "outflow": {
-        "fixedExpenditure": 30000,
-        "variableExpenditure": 25000,
-        "midMonthCCOutstanding": 35000,
-        "prevMonthCCBill": 30000
-      },
-      "investing": {
-        "fixedSaving": 20000,
-        "fixedInvestment": 15000,
-        "fixedExpenditure": 50000,
-        "insurancePremiums": 3333
-      },
-      "_transferDone": true,
-      "_initialBalance": 75000,
-      "_monthClosed": true
-    },
-    "2024-02": {
-      "inflow": {
-        "salary": 150000,
-        "bonus": 0,
-        "other": 0
-      },
-      "outflow": {
-        "fixedExpenditure": 30000,
-        "variableExpenditure": 28000,
-        "midMonthCCOutstanding": 40000,
-        "prevMonthCCBill": 35000
-      },
-      "investing": {
-        "fixedSaving": 20000,
-        "fixedInvestment": 15000,
-        "fixedExpenditure": 50000,
-        "insurancePremiums": 3333
-      },
-      "_transferDone": true,
-      "_initialBalance": 80000,
-      "_monthClosed": true
-    },
-    "2024-03": {
-      "inflow": {
-        "salary": 150000,
-        "bonus": 0,
-        "other": 0
-      },
-      "outflow": {
-        "fixedExpenditure": 30000,
-        "variableExpenditure": 22000,
-        "midMonthCCOutstanding": 32000,
-        "prevMonthCCBill": 40000
-      },
-      "investing": {
-        "fixedSaving": 20000,
-        "fixedInvestment": 15000,
-        "fixedExpenditure": 50000,
-        "insurancePremiums": 3333
-      },
-      "_transferDone": true,
-      "_initialBalance": 78000,
-      "_monthClosed": true
-    },
-    "2024-04": {
-      "inflow": {
-        "salary": 150000,
-        "bonus": 0,
-        "other": 0
-      },
-      "outflow": {
-        "fixedExpenditure": 30000,
-        "variableExpenditure": 25000,
-        "midMonthCCOutstanding": 38000,
-        "prevMonthCCBill": 32000
-      },
-      "investing": {
-        "fixedSaving": 20000,
-        "fixedInvestment": 15000,
-        "fixedExpenditure": 50000,
-        "insurancePremiums": 3333
-      },
-      "_transferDone": true,
-      "_initialBalance": 75000,
-      "_monthClosed": false
-    },
-    "2024-05": {
-      "inflow": {
-        "salary": 150000,
-        "bonus": 0,
-        "other": 0
-      },
-      "outflow": {
-        "fixedExpenditure": 30000,
-        "variableExpenditure": 0,
-        "midMonthCCOutstanding": 0,
-        "prevMonthCCBill": 38000
-      },
-      "investing": {
-        "fixedSaving": 20000,
-        "fixedInvestment": 15000,
-        "fixedExpenditure": 50000,
-        "insurancePremiums": 3333
-      },
-      "_transferDone": false,
-      "_initialBalance": 0,
-      "_monthClosed": false
-    }
-  },
-  "expenseTrackingData": {
-    "2024-04": {
-      "expenses": [
+  "exportDate": "2026-08-19T16:44:46.379Z",
+  "version": "v5.4.7",
+  "data": {
+    "tabData": {
+      "cards": [
         {
-          "id": "exp_1",
-          "date": "2024-04-05",
-          "category": "Food",
-          "amount": 2500,
-          "description": "Grocery shopping",
-          "paymentMethod": "Credit Card"
+          "id": "acc_1",
+          "bankName": "HDFC Bank",
+          "purpose": "Salary",
+          "balance": 150000,
+          "isPrimary": "Yes",
+          "accountPresent": "Yes",
+          "debitCardPresent": "Yes",
+          "creditCardPresent": "Yes",
+          "creditLimit": 200000,
+          "kycUpdated": "Yes",
+          "nomineeAdded": "Yes"
         },
         {
-          "id": "exp_2",
-          "date": "2024-04-10",
-          "category": "Transport",
-          "amount": 1500,
-          "description": "Fuel",
-          "paymentMethod": "Debit Card"
+          "id": "acc_2",
+          "bankName": "ICICI Bank",
+          "purpose": "Expenditure",
+          "balance": 25000,
+          "isPrimary": "No",
+          "accountPresent": "Yes",
+          "debitCardPresent": "Yes",
+          "creditCardPresent": "Yes",
+          "creditLimit": 100000,
+          "kycUpdated": "Yes",
+          "nomineeAdded": "Yes"
         },
         {
-          "id": "exp_3",
-          "date": "2024-04-15",
-          "category": "Entertainment",
-          "amount": 1200,
-          "description": "Movie",
-          "paymentMethod": "UPI"
+          "id": "acc_3",
+          "bankName": "SBI",
+          "purpose": "Savings",
+          "balance": 500000,
+          "isPrimary": "No",
+          "accountPresent": "Yes",
+          "debitCardPresent": "Yes",
+          "creditCardPresent": "No",
+          "creditLimit": "",
+          "kycUpdated": "Yes",
+          "nomineeAdded": "Yes"
         },
         {
-          "id": "exp_4",
-          "date": "2024-04-20",
-          "category": "Health",
-          "amount": 3000,
-          "description": "Doctor consultation",
-          "paymentMethod": "Cash"
+          "id": "acc_4",
+          "bankName": "Kotak Bank",
+          "purpose": "Investment",
+          "balance": 750000,
+          "isPrimary": "No",
+          "accountPresent": "Yes",
+          "debitCardPresent": "Yes",
+          "creditCardPresent": "No",
+          "creditLimit": "",
+          "kycUpdated": "Yes",
+          "nomineeAdded": "Yes"
         },
         {
-          "id": "exp_5",
-          "date": "2024-04-25",
-          "category": "Shopping",
+          "id": "acc_5",
+          "bankName": "HDFC Bank",
+          "purpose": "Others",
+          "purposeOther": "Credit card expense",
+          "balance": -45000,
+          "isPrimary": "No",
+          "accountPresent": "No",
+          "debitCardPresent": "No",
+          "creditCardPresent": "Yes",
+          "creditLimit": 200000,
+          "kycUpdated": "Yes",
+          "nomineeAdded": "Yes"
+        },
+        {
+          "id": "acc_6",
+          "bankName": "Axis Bank",
+          "purpose": "Savings",
+          "purposeOther": "Emergency Fund",
+          "balance": 300000,
+          "isPrimary": "No",
+          "accountPresent": "Yes",
+          "debitCardPresent": "Yes",
+          "creditCardPresent": "No",
+          "creditLimit": "",
+          "kycUpdated": "Yes",
+          "nomineeAdded": "Yes"
+        }
+      ],
+      "inflow": [
+        {
+          "id": "inv_1",
+          "name": "SIP - HDFC Flexi Cap Fund",
+          "amount": 10000,
+          "frequency": "Monthly",
+          "startDate": "2024-01-01",
+          "endDate": "2040-12-31",
+          "type": "Mutual Fund",
+          "category": "Existing",
+          "interestRate": 12,
+          "currentValue": 150000,
+          "details": "Equity mutual fund SIP for long-term wealth creation"
+        },
+        {
+          "id": "inv_2",
+          "name": "SIP - PPF",
           "amount": 5000,
-          "description": "Clothes",
-          "paymentMethod": "Credit Card"
+          "frequency": "Monthly",
+          "startDate": "2024-01-01",
+          "endDate": "2050-12-31",
+          "type": "PPF",
+          "category": "Monthly",
+          "interestRate": 7.1,
+          "currentValue": 75000,
+          "details": "Public Provident Fund for tax saving and retirement"
+        },
+        {
+          "id": "inv_3",
+          "name": "Lumpsum - SBI Blue Chip Fund",
+          "amount": 100000,
+          "frequency": "One-Time",
+          "startDate": "2024-03-15",
+          "endDate": "",
+          "type": "Mutual Fund",
+          "category": "Existing",
+          "interestRate": 10,
+          "currentValue": 125000,
+          "details": "One-time investment in large cap fund"
+        },
+        {
+          "id": "inv_4",
+          "name": "Sovereign Gold Bonds",
+          "amount": 25000,
+          "frequency": "Annual",
+          "startDate": "2024-01-01",
+          "endDate": "2030-01-01",
+          "type": "Gold",
+          "category": "Existing",
+          "interestRate": 2.5,
+          "currentValue": 28000,
+          "details": "Government gold bonds for portfolio diversification"
+        },
+        {
+          "id": "inv_5",
+          "name": "Fixed Deposit - SBI",
+          "amount": 200000,
+          "frequency": "Quarterly",
+          "startDate": "2024-01-01",
+          "endDate": "2025-01-01",
+          "type": "FD",
+          "category": "Existing",
+          "interestRate": 7,
+          "currentValue": 214000,
+          "details": "Fixed deposit for safe returns"
+        },
+        {
+          "id": "inv_6",
+          "name": "EPF Contribution",
+          "amount": 25000,
+          "frequency": "Monthly",
+          "startDate": "2024-01-01",
+          "endDate": "2050-12-31",
+          "type": "EPF",
+          "category": "Monthly",
+          "interestRate": 8.5,
+          "currentValue": 300000,
+          "details": "Employee Provident Fund contribution from salary"
+        },
+        {
+          "id": "inv_7",
+          "name": "NPS - Corporate",
+          "amount": 10000,
+          "frequency": "Monthly",
+          "startDate": "2024-01-01",
+          "endDate": "2050-12-31",
+          "type": "NPS",
+          "category": "Monthly",
+          "interestRate": 10,
+          "currentValue": 120000,
+          "details": "National Pension System for retirement planning"
+        }
+      ],
+      "outflow": [
+        {
+          "id": "out_1",
+          "name": "Home Loan EMI",
+          "amount": 35000,
+          "frequency": "Monthly",
+          "type": "Liability",
+          "bankName": "HDFC Bank",
+          "startDate": "2022-01-01",
+          "endDate": "2042-01-01",
+          "details": "Home loan EMI for property in Mumbai"
+        },
+        {
+          "id": "out_2",
+          "name": "Car Loan EMI",
+          "amount": 15000,
+          "frequency": "Monthly",
+          "type": "Liability",
+          "bankName": "ICICI Bank",
+          "startDate": "2023-01-01",
+          "endDate": "2028-01-01",
+          "details": "Car loan EMI for Honda City"
+        },
+        {
+          "id": "out_3",
+          "name": "Health Insurance - Star Health",
+          "amount": 25000,
+          "frequency": "Annual",
+          "type": "Insurance",
+          "bankName": "Star Health",
+          "startDate": "2023-06-01",
+          "endDate": "2024-06-01",
+          "details": "Family health insurance premium"
+        },
+        {
+          "id": "out_4",
+          "name": "Term Insurance - LIC",
+          "amount": 15000,
+          "frequency": "Annual",
+          "type": "Insurance",
+          "bankName": "LIC",
+          "startDate": "2023-01-01",
+          "endDate": "2043-01-01",
+          "details": "Term insurance premium for 1 crore coverage"
+        },
+        {
+          "id": "out_5",
+          "name": "Internet - Airtel",
+          "amount": 1200,
+          "frequency": "Monthly",
+          "type": "Expenditure",
+          "bankName": "Airtel",
+          "startDate": "2023-01-01",
+          "endDate": "2025-01-01",
+          "details": "Broadband connection for home"
+        },
+        {
+          "id": "out_6",
+          "name": "Mobile Postpaid",
+          "amount": 800,
+          "frequency": "Monthly",
+          "type": "Expenditure",
+          "bankName": "Jio",
+          "startDate": "2023-01-01",
+          "endDate": "2025-01-01",
+          "details": "Postpaid mobile connection"
+        },
+        {
+          "id": "out_7",
+          "name": "Electricity",
+          "amount": 2500,
+          "frequency": "Monthly",
+          "type": "Expenditure",
+          "bankName": "MSEB",
+          "startDate": "2023-01-01",
+          "endDate": "2025-01-01",
+          "details": "Monthly electricity bill"
+        },
+        {
+          "id": "out_8",
+          "name": "House Rent",
+          "amount": 20000,
+          "frequency": "Monthly",
+          "type": "Liability",
+          "bankName": "Landlord",
+          "startDate": "2023-01-01",
+          "endDate": "2025-12-31",
+          "details": "Monthly rent for apartment in Mumbai"
+        },
+        {
+          "id": "out_9",
+          "name": "Gym Membership",
+          "amount": 3000,
+          "frequency": "Quarterly",
+          "type": "Expenditure",
+          "bankName": "Gold's Gym",
+          "startDate": "2023-01-01",
+          "endDate": "2024-12-31",
+          "details": "Quarterly gym membership"
+        },
+        {
+          "id": "out_10",
+          "name": "Netflix Subscription",
+          "amount": 799,
+          "frequency": "Monthly",
+          "type": "Expenditure",
+          "bankName": "Netflix",
+          "startDate": "2023-01-01",
+          "endDate": "2025-01-01",
+          "details": "Monthly streaming subscription"
+        },
+        {
+          "id": "out_11",
+          "name": "Emergency Fund Contribution",
+          "amount": 10000,
+          "frequency": "Monthly",
+          "type": "Savings",
+          "bankName": "Axis Bank",
+          "startDate": "2023-01-01",
+          "endDate": "2030-12-31",
+          "details": "Monthly contribution to emergency fund"
+        },
+        {
+          "id": "out_12",
+          "name": "Travel Fund",
+          "amount": 5000,
+          "frequency": "Monthly",
+          "type": "Savings",
+          "bankName": "Indian Bank",
+          "startDate": "2023-01-01",
+          "endDate": "2030-12-31",
+          "details": "Monthly savings for vacation"
+        }
+      ],
+      "financialGoal": [
+        {
+          "id": "goal_1",
+          "name": "Down Payment for House",
+          "amountNeeded": 2000000,
+          "amountAccumulated": 800000,
+          "targetDate": "2026-12-31",
+          "goalType": "ShortTerm",
+          "details": "Down payment for 2BHK apartment in Mumbai",
+          "status": "Ongoing"
+        },
+        {
+          "id": "goal_2",
+          "name": "Emergency Fund",
+          "amountNeeded": 600000,
+          "amountAccumulated": 300000,
+          "targetDate": "2025-06-30",
+          "goalType": "ShortTerm",
+          "details": "6 months of expenses as emergency fund",
+          "status": "Ongoing"
+        },
+        {
+          "id": "goal_3",
+          "name": "Retirement Corpus",
+          "amountNeeded": 50000000,
+          "amountAccumulated": 7500000,
+          "targetDate": "2045-12-31",
+          "goalType": "LongTerm",
+          "details": "Retirement corpus for comfortable retirement at age 55",
+          "status": "Ongoing"
+        },
+        {
+          "id": "goal_4",
+          "name": "Vacation to Europe",
+          "amountNeeded": 500000,
+          "amountAccumulated": 150000,
+          "targetDate": "2025-09-30",
+          "goalType": "MidTerm",
+          "details": "European vacation with family",
+          "status": "Ongoing"
+        },
+        {
+          "id": "goal_5",
+          "name": "New Car",
+          "amountNeeded": 800000,
+          "amountAccumulated": 200000,
+          "targetDate": "2026-03-31",
+          "goalType": "MidTerm",
+          "details": "Upgrade to SUV for family",
+          "status": "Ongoing"
+        },
+        {
+          "id": "goal_6",
+          "name": "Child Education Fund",
+          "amountNeeded": 2000000,
+          "amountAccumulated": 500000,
+          "targetDate": "2035-06-30",
+          "goalType": "LongTerm",
+          "details": "Education fund for child's higher studies",
+          "status": "Ongoing"
+        },
+        {
+          "id": "goal_7",
+          "name": "Emergency Fund Completion",
+          "amountNeeded": 600000,
+          "amountAccumulated": 600000,
+          "targetDate": "2024-12-31",
+          "goalType": "ShortTerm",
+          "details": "Achieved emergency fund target",
+          "status": "Completed"
+        },
+        {
+          "id": "goal_8",
+          "name": "Old Laptop Replacement",
+          "amountNeeded": 80000,
+          "amountAccumulated": 20000,
+          "targetDate": "2023-12-31",
+          "goalType": "ShortTerm",
+          "details": "Missed target due to other priorities",
+          "status": "Missed"
+        }
+      ],
+      "insurance": [
+        {
+          "id": "ins_1",
+          "name": "Star Health Comprehensive",
+          "policyType": "Health",
+          "sumAssured": 1000000,
+          "premiumAmount": 25000,
+          "premiumFrequency": "Annual",
+          "startDate": "2023-06-01",
+          "expiryDate": "2024-06-01",
+          "nominee": "Spouse",
+          "provider": "Star Health Insurance",
+          "policyNumber": "SH123456789",
+          "details": "Family floater health insurance policy"
+        },
+        {
+          "id": "ins_2",
+          "name": "LIC Term Insurance",
+          "policyType": "Term Life",
+          "sumAssured": 10000000,
+          "premiumAmount": 15000,
+          "premiumFrequency": "Annual",
+          "startDate": "2023-01-01",
+          "expiryDate": "2043-01-01",
+          "nominee": "Spouse",
+          "provider": "LIC of India",
+          "policyNumber": "LIC987654321",
+          "details": "Term insurance for family financial security"
+        },
+        {
+          "id": "ins_3",
+          "name": "Critical Illness Cover",
+          "policyType": "Critical Illness",
+          "sumAssured": 5000000,
+          "premiumAmount": 8000,
+          "premiumFrequency": "Annual",
+          "startDate": "2023-03-01",
+          "expiryDate": "2043-03-01",
+          "nominee": "Spouse",
+          "provider": "HDFC Ergo",
+          "policyNumber": "HDFC456789123",
+          "details": "Critical illness cover for major diseases"
+        },
+        {
+          "id": "ins_4",
+          "name": "Vehicle Insurance - Car",
+          "policyType": "Vehicle",
+          "sumAssured": 600000,
+          "premiumAmount": 12000,
+          "premiumFrequency": "Annual",
+          "startDate": "2023-01-01",
+          "expiryDate": "2024-01-01",
+          "nominee": "Self",
+          "provider": "ICICI Lombard",
+          "policyNumber": "ICICI789456123",
+          "details": "Comprehensive car insurance for Honda City"
+        }
+      ],
+      "taxPlan": [
+        {
+          "id": "tax_1",
+          "name": "80C - PPF Contribution",
+          "amount": 150000,
+          "section": "80C",
+          "details": "PPF investment for tax saving under Section 80C"
+        },
+        {
+          "id": "tax_2",
+          "name": "80C - ELSS SIP",
+          "amount": 120000,
+          "section": "80C",
+          "details": "ELSS mutual fund SIP for tax saving"
+        },
+        {
+          "id": "tax_3",
+          "name": "80D - Health Insurance Premium",
+          "amount": 25000,
+          "section": "80D",
+          "details": "Self and family health insurance premium"
+        },
+        {
+          "id": "tax_4",
+          "name": "80C - Life Insurance Premium",
+          "amount": 15000,
+          "section": "80C",
+          "details": "Term insurance premium under Section 80C"
+        },
+        {
+          "id": "tax_5",
+          "name": "24(b) - Home Loan Interest",
+          "amount": 200000,
+          "section": "24(b)",
+          "details": "Home loan interest deduction for self-occupied property"
+        },
+        {
+          "id": "tax_6",
+          "name": "80C - NPS Contribution",
+          "amount": 50000,
+          "section": "80C",
+          "details": "Additional NPS contribution under Section 80CCD(1B)"
+        }
+      ],
+      "gifts": [
+        {
+          "id": "gift_1",
+          "name": "Cash",
+          "amount": 10000,
+          "date": "2024-08-15",
+          "transactionType": "Given",
+          "relativeName": "Spouse",
+          "category": "On Demand",
+          "occasion": "Birthday",
+          "details": "Birthday gift for spouse"
+        },
+        {
+          "id": "gift_2",
+          "name": "Cash",
+          "amount": 25000,
+          "date": "2024-11-01",
+          "transactionType": "Given",
+          "relativeName": "Parents",
+          "category": "Fixed Every Year",
+          "occasion": "Diwali",
+          "details": "Diwali gift for parents"
+        },
+        {
+          "id": "gift_3",
+          "name": "Cash",
+          "amount": 15000,
+          "date": "2024-12-20",
+          "transactionType": "Given",
+          "relativeName": "Friend",
+          "category": "On Demand",
+          "occasion": "Wedding",
+          "details": "Wedding gift for close friend"
+        },
+        {
+          "id": "gift_4",
+          "name": "Gold Bangle",
+          "amount": 20000,
+          "date": "2024-01-15",
+          "transactionType": "Taken",
+          "relativeName": "Mother",
+          "category": "On Demand",
+          "occasion": "Makar Sankranti",
+          "details": "Traditional gold bangle gift from mother"
+        },
+        {
+          "id": "gift_5",
+          "name": "Cash",
+          "amount": 5000,
+          "date": "2024-03-15",
+          "transactionType": "Given",
+          "relativeName": "Siblings",
+          "category": "Fixed Every Year",
+          "occasion": "Raksha Bandhan",
+          "details": "Annual Raksha Bandhan gift for siblings"
+        }
+      ],
+      "emergencyFund": [
+        {
+          "id": "ef_1",
+          "name": "Axis Emergency Fund",
+          "currentFund": 300000,
+          "details": "Emergency fund maintained in Axis Bank savings account",
+          "targetAmount": 600000
         }
       ]
+    },
+    "customTabs": [],
+    "userName": "Test User",
+    "userLocation": "Mumbai, Maharashtra, India",
+    "monthlyBudgetData": {
+      "2024-01": {
+        "inflow": {
+          "primaryIncome": 150000,
+          "secondaryIncome": 0,
+          "othersInflow": 0,
+          "interest": 0,
+          "borrowing": 0
+        },
+        "outflow": {
+          "fixedExpenditure": 30000,
+          "variableExpenditure": 25000,
+          "midMonthCCOutstanding": 35000,
+          "prevMonthCCBill": 30000,
+          "creditCardOutstanding": 0,
+          "fixedSaving": 20000,
+          "fixedInvestment": 15000,
+          "fixedOthers": 0,
+          "insurancePremiums": 3333,
+          "loanEMI": 50000,
+          "debtRepayment": 0,
+          "familyExpenditure": 0,
+          "miscExpenses": 0,
+          "utilityBills": 0
+        },
+        "investing": {
+          "onetimeSaving": 0,
+          "onetimeInvestment": 0,
+          "onetimeSavingDesc": "",
+          "onetimeInvestmentDesc": "",
+          "ondemandExpenditure": 0,
+          "ondemandExpenditureDesc": "",
+          "ondemandLiability": 0,
+          "ondemandLiabilityDesc": "",
+          "fixedSaving": 20000,
+          "fixedInvestment": 15000,
+          "fixedExpenditure": 50000
+        },
+        "_transferDone": 75000,
+        "_initialBalance": 75000,
+        "_monthClosed": true,
+        "_closedBudgetStatus": "Budget Surplus: +₹7,062 remaining",
+        "_closedBudgetStatusType": "positive",
+        "_carryForwardDone": 0,
+        "_ccSettlementAmount": 0,
+        "_actualCCOutstanding": 0,
+        "autoLinkedFields": {
+          "outflow.loanEMI": true,
+          "outflow.fixedExpenditure": true,
+          "outflow.variableExpenditure": true,
+          "outflow.fixedSaving": true,
+          "outflow.fixedInvestment": true,
+          "outflow.insurancePremiums": true,
+          "outflow.midMonthCCOutstanding": true,
+          "outflow.creditCardOutstanding": true
+        },
+        "autoLinkedBreakdown": {
+          "outflow.loanEMI": [
+            {
+              "name": "Home Loan EMI",
+              "amount": 35000,
+              "source": "Fixed Outflow"
+            },
+            {
+              "name": "Car Loan EMI",
+              "amount": 15000,
+              "source": "Fixed Outflow"
+            }
+          ],
+          "outflow.fixedExpenditure": [
+            {
+              "name": "Internet - Airtel",
+              "amount": 1200,
+              "source": "Fixed Outflow"
+            },
+            {
+              "name": "Mobile Postpaid",
+              "amount": 800,
+              "source": "Fixed Outflow"
+            },
+            {
+              "name": "Electricity",
+              "amount": 2500,
+              "source": "Fixed Outflow"
+            },
+            {
+              "name": "House Rent",
+              "amount": 20000,
+              "source": "Fixed Outflow"
+            },
+            {
+              "name": "Netflix Subscription",
+              "amount": 799,
+              "source": "Fixed Outflow"
+            }
+          ],
+          "outflow.fixedSaving": [
+            {
+              "name": "Emergency Fund Contribution",
+              "amount": 10000,
+              "source": "Fixed Outflow"
+            },
+            {
+              "name": "Travel Fund",
+              "amount": 5000,
+              "source": "Fixed Outflow"
+            }
+          ],
+          "outflow.fixedInvestment": [
+            {
+              "name": "SIP - HDFC Flexi Cap Fund",
+              "amount": 10000,
+              "source": "Fixed Outflow"
+            },
+            {
+              "name": "SIP - PPF",
+              "amount": 5000,
+              "source": "Fixed Outflow"
+            }
+          ]
+        },
+        "monthEndBalance": 75000
+      },
+      "2024-02": {
+        "inflow": {
+          "primaryIncome": 150000,
+          "secondaryIncome": 0,
+          "othersInflow": 0,
+          "interest": 0,
+          "borrowing": 0
+        },
+        "outflow": {
+          "fixedExpenditure": 30000,
+          "variableExpenditure": 28000,
+          "midMonthCCOutstanding": 40000,
+          "prevMonthCCBill": 35000,
+          "creditCardOutstanding": 0,
+          "fixedSaving": 20000,
+          "fixedInvestment": 15000,
+          "fixedOthers": 0,
+          "insurancePremiums": 3333,
+          "loanEMI": 50000,
+          "debtRepayment": 0,
+          "familyExpenditure": 0,
+          "miscExpenses": 0,
+          "utilityBills": 0
+        },
+        "investing": {
+          "onetimeSaving": 0,
+          "onetimeInvestment": 0,
+          "onetimeSavingDesc": "",
+          "onetimeInvestmentDesc": "",
+          "ondemandExpenditure": 0,
+          "ondemandExpenditureDesc": "",
+          "ondemandLiability": 0,
+          "ondemandLiabilityDesc": "",
+          "fixedSaving": 20000,
+          "fixedInvestment": 15000,
+          "fixedExpenditure": 50000
+        },
+        "_transferDone": 80000,
+        "_initialBalance": 80000,
+        "_monthClosed": true,
+        "_closedBudgetStatus": "Budget Surplus: +₹5,000 remaining",
+        "_closedBudgetStatusType": "positive",
+        "_carryForwardDone": 0,
+        "_ccSettlementAmount": 0,
+        "_actualCCOutstanding": 0,
+        "autoLinkedFields": {
+          "outflow.loanEMI": true,
+          "outflow.fixedExpenditure": true,
+          "outflow.variableExpenditure": true,
+          "outflow.fixedSaving": true,
+          "outflow.fixedInvestment": true,
+          "outflow.insurancePremiums": true,
+          "outflow.midMonthCCOutstanding": true,
+          "outflow.creditCardOutstanding": true
+        },
+        "autoLinkedBreakdown": {
+          "outflow.loanEMI": [
+            {
+              "name": "Home Loan EMI",
+              "amount": 35000,
+              "source": "Fixed Outflow"
+            },
+            {
+              "name": "Car Loan EMI",
+              "amount": 15000,
+              "source": "Fixed Outflow"
+            }
+          ],
+          "outflow.fixedExpenditure": [
+            {
+              "name": "Internet - Airtel",
+              "amount": 1200,
+              "source": "Fixed Outflow"
+            },
+            {
+              "name": "Mobile Postpaid",
+              "amount": 800,
+              "source": "Fixed Outflow"
+            },
+            {
+              "name": "Electricity",
+              "amount": 2500,
+              "source": "Fixed Outflow"
+            },
+            {
+              "name": "House Rent",
+              "amount": 20000,
+              "source": "Fixed Outflow"
+            },
+            {
+              "name": "Netflix Subscription",
+              "amount": 799,
+              "source": "Fixed Outflow"
+            }
+          ],
+          "outflow.fixedSaving": [
+            {
+              "name": "Emergency Fund Contribution",
+              "amount": 10000,
+              "source": "Fixed Outflow"
+            },
+            {
+              "name": "Travel Fund",
+              "amount": 5000,
+              "source": "Fixed Outflow"
+            }
+          ],
+          "outflow.fixedInvestment": [
+            {
+              "name": "SIP - HDFC Flexi Cap Fund",
+              "amount": 10000,
+              "source": "Fixed Outflow"
+            },
+            {
+              "name": "SIP - PPF",
+              "amount": 5000,
+              "source": "Fixed Outflow"
+            }
+          ]
+        },
+        "monthEndBalance": 80000
+      },
+      "2024-03": {
+        "inflow": {
+          "primaryIncome": 150000,
+          "secondaryIncome": 0,
+          "othersInflow": 0,
+          "interest": 0,
+          "borrowing": 0
+        },
+        "outflow": {
+          "fixedExpenditure": 30000,
+          "variableExpenditure": 22000,
+          "midMonthCCOutstanding": 32000,
+          "prevMonthCCBill": 40000,
+          "creditCardOutstanding": 0,
+          "fixedSaving": 20000,
+          "fixedInvestment": 15000,
+          "fixedOthers": 0,
+          "insurancePremiums": 3333,
+          "loanEMI": 50000,
+          "debtRepayment": 0,
+          "familyExpenditure": 0,
+          "miscExpenses": 0,
+          "utilityBills": 0
+        },
+        "investing": {
+          "onetimeSaving": 0,
+          "onetimeInvestment": 0,
+          "onetimeSavingDesc": "",
+          "onetimeInvestmentDesc": "",
+          "ondemandExpenditure": 0,
+          "ondemandExpenditureDesc": "",
+          "ondemandLiability": 0,
+          "ondemandLiabilityDesc": "",
+          "fixedSaving": 20000,
+          "fixedInvestment": 15000,
+          "fixedExpenditure": 50000
+        },
+        "_transferDone": 78000,
+        "_initialBalance": 78000,
+        "_monthClosed": true,
+        "_closedBudgetStatus": "Budget Surplus: +₹8,000 remaining",
+        "_closedBudgetStatusType": "positive",
+        "_carryForwardDone": 0,
+        "_ccSettlementAmount": 0,
+        "_actualCCOutstanding": 0,
+        "autoLinkedFields": {
+          "outflow.loanEMI": true,
+          "outflow.fixedExpenditure": true,
+          "outflow.variableExpenditure": true,
+          "outflow.fixedSaving": true,
+          "outflow.fixedInvestment": true,
+          "outflow.insurancePremiums": true,
+          "outflow.midMonthCCOutstanding": true,
+          "outflow.creditCardOutstanding": true
+        },
+        "autoLinkedBreakdown": {
+          "outflow.loanEMI": [
+            {
+              "name": "Home Loan EMI",
+              "amount": 35000,
+              "source": "Fixed Outflow"
+            },
+            {
+              "name": "Car Loan EMI",
+              "amount": 15000,
+              "source": "Fixed Outflow"
+            }
+          ],
+          "outflow.fixedExpenditure": [
+            {
+              "name": "Internet - Airtel",
+              "amount": 1200,
+              "source": "Fixed Outflow"
+            },
+            {
+              "name": "Mobile Postpaid",
+              "amount": 800,
+              "source": "Fixed Outflow"
+            },
+            {
+              "name": "Electricity",
+              "amount": 2500,
+              "source": "Fixed Outflow"
+            },
+            {
+              "name": "House Rent",
+              "amount": 20000,
+              "source": "Fixed Outflow"
+            },
+            {
+              "name": "Netflix Subscription",
+              "amount": 799,
+              "source": "Fixed Outflow"
+            }
+          ],
+          "outflow.fixedSaving": [
+            {
+              "name": "Emergency Fund Contribution",
+              "amount": 10000,
+              "source": "Fixed Outflow"
+            },
+            {
+              "name": "Travel Fund",
+              "amount": 5000,
+              "source": "Fixed Outflow"
+            }
+          ],
+          "outflow.fixedInvestment": [
+            {
+              "name": "SIP - HDFC Flexi Cap Fund",
+              "amount": 10000,
+              "source": "Fixed Outflow"
+            },
+            {
+              "name": "SIP - PPF",
+              "amount": 5000,
+              "source": "Fixed Outflow"
+            }
+          ]
+        },
+        "monthEndBalance": 78000
+      },
+      "2024-04": {
+        "inflow": {
+          "primaryIncome": 150000,
+          "secondaryIncome": 0,
+          "othersInflow": 0,
+          "interest": 0,
+          "borrowing": 0
+        },
+        "outflow": {
+          "fixedExpenditure": 30000,
+          "variableExpenditure": 25000,
+          "midMonthCCOutstanding": 38000,
+          "prevMonthCCBill": 32000,
+          "creditCardOutstanding": 0,
+          "fixedSaving": 20000,
+          "fixedInvestment": 15000,
+          "fixedOthers": 0,
+          "insurancePremiums": 3333,
+          "loanEMI": 50000,
+          "debtRepayment": 0,
+          "familyExpenditure": 0,
+          "miscExpenses": 0,
+          "utilityBills": 0
+        },
+        "investing": {
+          "onetimeSaving": 0,
+          "onetimeInvestment": 0,
+          "onetimeSavingDesc": "",
+          "onetimeInvestmentDesc": "",
+          "ondemandExpenditure": 0,
+          "ondemandExpenditureDesc": "",
+          "ondemandLiability": 0,
+          "ondemandLiabilityDesc": "",
+          "fixedSaving": 20000,
+          "fixedInvestment": 15000,
+          "fixedExpenditure": 50000
+        },
+        "_transferDone": 75000,
+        "_initialBalance": 75000,
+        "_monthClosed": false,
+        "_closedBudgetStatus": "",
+        "_closedBudgetStatusType": "",
+        "_carryForwardDone": 0,
+        "_ccSettlementAmount": 0,
+        "_actualCCOutstanding": 0,
+        "autoLinkedFields": {
+          "outflow.loanEMI": true,
+          "outflow.fixedExpenditure": true,
+          "outflow.variableExpenditure": true,
+          "outflow.fixedSaving": true,
+          "outflow.fixedInvestment": true,
+          "outflow.insurancePremiums": true,
+          "outflow.midMonthCCOutstanding": true,
+          "outflow.creditCardOutstanding": true
+        },
+        "autoLinkedBreakdown": {
+          "outflow.loanEMI": [
+            {
+              "name": "Home Loan EMI",
+              "amount": 35000,
+              "source": "Fixed Outflow"
+            },
+            {
+              "name": "Car Loan EMI",
+              "amount": 15000,
+              "source": "Fixed Outflow"
+            }
+          ],
+          "outflow.fixedExpenditure": [
+            {
+              "name": "Internet - Airtel",
+              "amount": 1200,
+              "source": "Fixed Outflow"
+            },
+            {
+              "name": "Mobile Postpaid",
+              "amount": 800,
+              "source": "Fixed Outflow"
+            },
+            {
+              "name": "Electricity",
+              "amount": 2500,
+              "source": "Fixed Outflow"
+            },
+            {
+              "name": "House Rent",
+              "amount": 20000,
+              "source": "Fixed Outflow"
+            },
+            {
+              "name": "Netflix Subscription",
+              "amount": 799,
+              "source": "Fixed Outflow"
+            }
+          ],
+          "outflow.fixedSaving": [
+            {
+              "name": "Emergency Fund Contribution",
+              "amount": 10000,
+              "source": "Fixed Outflow"
+            },
+            {
+              "name": "Travel Fund",
+              "amount": 5000,
+              "source": "Fixed Outflow"
+            }
+          ],
+          "outflow.fixedInvestment": [
+            {
+              "name": "SIP - HDFC Flexi Cap Fund",
+              "amount": 10000,
+              "source": "Fixed Outflow"
+            },
+            {
+              "name": "SIP - PPF",
+              "amount": 5000,
+              "source": "Fixed Outflow"
+            }
+          ]
+        },
+        "monthEndBalance": 75000
+      },
+      "2024-05": {
+        "inflow": {
+          "primaryIncome": 150000,
+          "secondaryIncome": 0,
+          "othersInflow": 0,
+          "interest": 0,
+          "borrowing": 0
+        },
+        "outflow": {
+          "fixedExpenditure": 30000,
+          "variableExpenditure": 0,
+          "midMonthCCOutstanding": 0,
+          "prevMonthCCBill": 38000,
+          "creditCardOutstanding": 0,
+          "fixedSaving": 20000,
+          "fixedInvestment": 15000,
+          "fixedOthers": 0,
+          "insurancePremiums": 3333,
+          "loanEMI": 50000,
+          "debtRepayment": 0,
+          "familyExpenditure": 0,
+          "miscExpenses": 0,
+          "utilityBills": 0
+        },
+        "investing": {
+          "onetimeSaving": 0,
+          "onetimeInvestment": 0,
+          "onetimeSavingDesc": "",
+          "onetimeInvestmentDesc": "",
+          "ondemandExpenditure": 0,
+          "ondemandExpenditureDesc": "",
+          "ondemandLiability": 0,
+          "ondemandLiabilityDesc": "",
+          "fixedSaving": 20000,
+          "fixedInvestment": 15000,
+          "fixedExpenditure": 50000
+        },
+        "_transferDone": 0,
+        "_initialBalance": 0,
+        "_monthClosed": false,
+        "_closedBudgetStatus": "",
+        "_closedBudgetStatusType": "",
+        "_carryForwardDone": 0,
+        "_ccSettlementAmount": 0,
+        "_actualCCOutstanding": 0,
+        "autoLinkedFields": {
+          "outflow.loanEMI": true,
+          "outflow.fixedExpenditure": true,
+          "outflow.variableExpenditure": true,
+          "outflow.fixedSaving": true,
+          "outflow.fixedInvestment": true,
+          "outflow.insurancePremiums": true,
+          "outflow.midMonthCCOutstanding": true,
+          "outflow.creditCardOutstanding": true
+        },
+        "autoLinkedBreakdown": {
+          "outflow.loanEMI": [
+            {
+              "name": "Home Loan EMI",
+              "amount": 35000,
+              "source": "Fixed Outflow"
+            },
+            {
+              "name": "Car Loan EMI",
+              "amount": 15000,
+              "source": "Fixed Outflow"
+            }
+          ],
+          "outflow.fixedExpenditure": [
+            {
+              "name": "Internet - Airtel",
+              "amount": 1200,
+              "source": "Fixed Outflow"
+            },
+            {
+              "name": "Mobile Postpaid",
+              "amount": 800,
+              "source": "Fixed Outflow"
+            },
+            {
+              "name": "Electricity",
+              "amount": 2500,
+              "source": "Fixed Outflow"
+            },
+            {
+              "name": "House Rent",
+              "amount": 20000,
+              "source": "Fixed Outflow"
+            },
+            {
+              "name": "Netflix Subscription",
+              "amount": 799,
+              "source": "Fixed Outflow"
+            }
+          ],
+          "outflow.fixedSaving": [
+            {
+              "name": "Emergency Fund Contribution",
+              "amount": 10000,
+              "source": "Fixed Outflow"
+            },
+            {
+              "name": "Travel Fund",
+              "amount": 5000,
+              "source": "Fixed Outflow"
+            }
+          ],
+          "outflow.fixedInvestment": [
+            {
+              "name": "SIP - HDFC Flexi Cap Fund",
+              "amount": 10000,
+              "source": "Fixed Outflow"
+            },
+            {
+              "name": "SIP - PPF",
+              "amount": 5000,
+              "source": "Fixed Outflow"
+            }
+          ]
+        },
+        "monthEndBalance": 0
+      }
+    },
+    "expenseTrackingData": {
+      "2024-04": {
+        "expenses": [
+          {
+            "id": "exp_1",
+            "date": "2024-04-05",
+            "category": "Food & Dining",
+            "amount": 2500,
+            "description": "Grocery shopping at local supermarket",
+            "paymentMethod": "Credit Card",
+            "createdAt": "2024-04-05T18:30:00.000Z"
+          },
+          {
+            "id": "exp_2",
+            "date": "2024-04-10",
+            "category": "Transportation",
+            "amount": 1500,
+            "description": "Fuel for car",
+            "paymentMethod": "Debit Card",
+            "createdAt": "2024-04-10T10:15:00.000Z"
+          },
+          {
+            "id": "exp_3",
+            "date": "2024-04-15",
+            "category": "Entertainment",
+            "amount": 1200,
+            "description": "Movie tickets for family",
+            "paymentMethod": "UPI",
+            "createdAt": "2024-04-15T14:00:00.000Z"
+          },
+          {
+            "id": "exp_4",
+            "date": "2024-04-20",
+            "category": "Health & Wellness",
+            "amount": 3000,
+            "description": "Doctor consultation and medicines",
+            "paymentMethod": "Cash",
+            "createdAt": "2024-04-20T11:30:00.000Z"
+          },
+          {
+            "id": "exp_5",
+            "date": "2024-04-25",
+            "category": "Shopping",
+            "amount": 5000,
+            "description": "Clothes and accessories",
+            "paymentMethod": "Credit Card",
+            "createdAt": "2024-04-25T16:45:00.000Z"
+          },
+          {
+            "id": "exp_6",
+            "date": "2024-04-28",
+            "category": "Food & Dining",
+            "amount": 1800,
+            "description": "Dinner at restaurant",
+            "paymentMethod": "UPI",
+            "createdAt": "2024-04-28T20:00:00.000Z"
+          }
+        ]
+      },
+      "2024-05": {
+        "expenses": []
+      }
+    },
+    "fixedMonthlyIncome": 150000,
+    "dateOfBirth": "1990-05-15",
+    "currentAge": 34,
+    "onboardingComplete": true,
+    "onboardingDate": "2024-01-01",
+    "dataMigrated": true,
+    "taxData": {
+      "houseProperty": {
+        "isSelfOccupied": "yes",
+        "rentalIncome": 0,
+        "homeLoanInterest": 200000,
+        "municipalTaxes": 5000
+      },
+      "salary": {
+        "basicSalary": 900000,
+        "hraReceived": 540000,
+        "rentPaid": 180000,
+        "isMetroCity": "yes",
+        "specialAllowance": 360000,
+        "lta": 96000,
+        "otherAllowances": 144000
+      }
     }
-  },
-  "userLocation": "Mumbai, Maharashtra",
-  "dateOfBirth": "1990-05-15",
-  "fixedMonthlyIncome": 150000
+  }
 }

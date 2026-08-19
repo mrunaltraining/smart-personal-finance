@@ -75,6 +75,13 @@ for file in "${FILES[@]}"; do
     if [ -f "$file" ]; then
         # Update version pattern vX.Y.Z
         sed -i "s/v[0-9]\+\.[0-9]\+\.[0-9]\+/$NEW_VERSION/g" "$file"
+        
+        # Special handling for README.md version badge
+        if [ "$file" = "README.md" ]; then
+            # Update version badge: version-X.Y.Z-blue.svg
+            sed -i "s/version-[0-9]\+\.[0-9]\+\.[0-9]\+-blue\.svg/version-${MAJOR}.${MINOR}.${BUILD}-blue.svg/g" "$file"
+        fi
+        
         echo "✓ Updated $file"
     else
         echo "⚠ Skipped $file (not found)"

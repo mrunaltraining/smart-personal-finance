@@ -658,6 +658,45 @@ function generateInsights(data) {
         });
     }
     
+    // Retirement planning insights (based on EPF, NPS, and PPF calculations)
+    if (data.currentAge && data.currentAge >= 25 && data.currentAge <= 50) {
+        const currentAge = data.currentAge;
+        const retirementAge = 55; // Early retirement target
+        const officialRetirementAge = 60;
+        const yearsToRetirement = retirementAge - currentAge;
+        const yearsToOfficial = officialRetirementAge - currentAge;
+        
+        // EPF calculation (assuming basic salary and 12% contribution)
+        const basicSalary = data.fixedMonthlyIncome ? data.fixedMonthlyIncome * 0.4 : 0; // Assuming 40% of income is basic
+        const epfContribution = basicSalary * 0.24; // 12% employee + 12% employer
+        const epfRate = 0.085; // 8.5% annual return
+        
+        if (basicSalary > 0) {
+            // Future value of EPF at retirement
+            const monthsToRetirement = yearsToRetirement * 12;
+            const epfAt55 = epfContribution * ((Math.pow(1 + epfRate/12, monthsToRetirement) - 1) / (epfRate/12));
+            const epfAt60 = epfContribution * ((Math.pow(1 + epfRate/12, yearsToOfficial * 12) - 1) / (epfRate/12));
+            
+            // Calculate monthly pension equivalent (for 25 years, till age 80)
+            const pensionMonths = 25 * 12;
+            const monthlyPensionAt55 = epfAt55 / pensionMonths;
+            const monthlyPensionAt60 = epfAt60 / pensionMonths;
+            
+            // Adjust for inflation (6% annual)
+            const inflationRate = 0.06;
+            const todayValueAt55 = monthlyPensionAt55 / Math.pow(1 + inflationRate, yearsToRetirement);
+            const todayValueAt60 = monthlyPensionAt60 / Math.pow(1 + inflationRate, yearsToOfficial);
+            
+            if (yearsToRetirement > 0) {
+                insights.push({
+                    type: 'positive',
+                    icon: 'calendarSmall',
+                    message: `Retirement Planning: EPF corpus at age ${retirementAge} will be ~${fmtMoney(epfAt55)} (${fmtMoney(monthlyPensionAt55)}/month for 25 years, ~${fmtMoney(todayValueAt55)}/month in today's value). At age ${officialRetirementAge}: ~${fmtMoney(epfAt60)} corpus (${fmtMoney(monthlyPensionAt60)}/month, ~${fmtMoney(todayValueAt60)}/month today's value).`
+                });
+            }
+        }
+    }
+    
     return insights.slice(0, 6); // Limit to 6 most relevant insights
 }
 
@@ -844,7 +883,7 @@ export function renderDashboard(appData, netWorthSummary = {}) {
     const plannedGoals = goals.filter(goal => goal.status === 'Planned');
     const missedGoals = goals.filter(goal => goal.status === 'Missed');
     const achievedGoals = goals.filter(goal => goal.status === 'Achieved');
-    const coveredGoals = goals.filter(goal => goal.status === 'Covered');
+    const completedGoals = goals.filter(goal => goal.status === 'Completed');
 
     // For compatibility with existing code
     const activeGoals = ongoingGoals;
@@ -1166,7 +1205,7 @@ export function renderDashboard(appData, netWorthSummary = {}) {
                     <div style="display:grid;grid-template-columns:1fr auto 1fr;gap:16px;align-items:start;">
                         <div>
                             <div class="dash-goal-name">All Goals Combined</div>
-                            <div class="dash-goal-meta">${ongoingGoals.length} ongoing · ${plannedGoals.length} planned · ${achievedGoals.length} achieved · ${missedGoals.length} missed${coveredGoals.length > 0 ? ` · ${coveredGoals.length} covered` : ''}</div>
+                            <div class="dash-goal-meta">${ongoingGoals.length} ongoing · ${plannedGoals.length} planned · ${achievedGoals.length} achieved · ${missedGoals.length} missed${completedGoals.length > 0 ? ` · ${completedGoals.length} completed` : ''}</div>
                             <div class="dash-goal-meta" style="margin-top:4px;">${shortTermGoals.length} short-term · ${midTermGoals.length} mid-term · ${longTermGoals.length} long-term</div>
                             ${(() => {
                                 const totalNeeded = ongoingGoals.reduce((sum, g) => sum + Number(g.amountNeeded || 0), 0);
@@ -1203,7 +1242,18 @@ export function renderDashboard(appData, netWorthSummary = {}) {
                 </div>` : '<p class="dash-empty-state">No ongoing goals.</p>'}
             <div class="dash-stat-row"><span class="dash-stat-label">Portfolio value</span><span class="dash-stat-value" style="color:${COLOR_POSITIVE}">${fmtMoney(portfolioValue)}</span></div>
             <div class="dash-stat-row"><span class="dash-stat-label">Monthly investment</span><span class="dash-stat-value">${fmtMoney(monthlyInvestment)}</span></div>
-            <div class="dash-card-note">${ongoingGoals.length} ongoing · ${plannedGoals.length} planned · ${achievedGoals.length} achieved · ${missedGoals.length} missed${coveredGoals.length > 0 ? ` · ${coveredGoals.length} covered` : ''} · ${shortTermGoals.length} short-term · ${midTermGoals.length} mid-term · ${longTermGoals.length} long-term</div>
+            ${(() => {
+                // Calculate projected investment values for 5 and 10 years
+                const avgReturn = 0.12; // 12% average annual return
+                const monthlyAmt = monthlyInvestment;
+                const currentValue = portfolioValue;
+                
+                // Future value calculation: FV = PV(1+r)^n + PMT × [((1+r)^n - 1) / r]
+                const fv5yr = currentValue * Math.pow(1 + avgReturn, 5) + (monthlyAmt * 12) * ((Math.pow(1 + avgReturn, 5) - 1) / avgReturn);
+                const fv10yr = currentValue * Math.pow(1 + avgReturn, 10) + (monthlyAmt * 12) * ((Math.pow(1 + avgReturn, 10) - 1) / avgReturn);
+                
+                return `<div class="dash-card-note">Projected value: ${fmtMoney(fv5yr)} in 5 years · ${fmtMoney(fv10yr)} in 10 years (assuming 12% annual return)</div>`;
+            })()}
         </article>
 
         <article class="dash-card">

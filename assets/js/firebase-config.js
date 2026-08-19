@@ -21,6 +21,8 @@ const firebaseConfig = {
     messagingSenderId: "590766304497",
     appId:             "1:590766304497:web:cb4b33c5596940f78a0d50",
     // measurementId:     "G-YE1XL7QWPX"
+    // NOTE: These are actual Firebase project identifiers. Do not change unless you have created
+    // a new Firebase project with the corresponding project name and updated these values accordingly.
 };
 
 firebase.initializeApp(firebaseConfig);

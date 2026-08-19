@@ -83,7 +83,7 @@ const ICONS = {
     present: '<rect x="3" y="8" width="18" height="13" rx="1"/><path d="M12 8v13M3 12h18"/><path d="M12 8H8.5A2.5 2.5 0 1 1 11 5.5L12 8Zm0 0h3.5A2.5 2.5 0 1 0 13 5.5L12 8Z"/>',
     
     // Simplified Icons for Insights (more compact)
-    starSmall: '<polygon points="12 2 15 9 22 9 17 13 18 21 12 17 6 21 7 13 2 9 9 2 12 2z"/>',
+    starSmall: '<polygon points="12 2 15 9 22 9 17 13 18 21 12 17 6 21 7 13 2 9 9 2 12 2"/>',
     checkSmall: '<polyline points="5 12 9 16 19 5"/>',
     lightbulbSmall: '<path d="M9 18h6"/><path d="M12 2v6"/><circle cx="12" cy="14" r="4"/>',
     hospitalSmall: '<rect x="4" y="4" width="16" height="16" rx="2"/><path d="M12 8v8"/><path d="M8 12h8"/>',

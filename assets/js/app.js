@@ -315,6 +315,9 @@ class AppLogger {
 // Initialize global logger
 const logger = new AppLogger();
 
+// ── Network Status ───────────────────────────────────────────────────────────────
+let networkStatusTimeout = null;
+
 // ── App Logs Panel ─────────────────────────────────────────────────────────────
 let logsAutoRefreshInterval = null;
 
@@ -598,7 +601,7 @@ function semanticBadgeStyle(value, paid = false) {
 }
 
 // ── Version Info ──────────────────────────────────────────────────────────────
-const APP_VERSION = { major: 5, minor: 4, build: 8 };
+const APP_VERSION = { major: 5, minor: 4, build: 7 };
 function getAppVersion() {
     return `v${APP_VERSION.major}.${APP_VERSION.minor}.${APP_VERSION.build}`;
 }
@@ -627,7 +630,7 @@ const DEFAULT_TABS = [
     { id: "expenseTracking",     label: "Expenses",              semantic: "Expenditure", core: true },
     { id: "financialGoal",       label: "Goals",                 semantic: "Savings", core: true },
     { id: "netWorth",            label: "Net Worth",             semantic: "Others" },
-    { id: "taxPlan",             label: "Tax Plan",              semantic: "Savings" },
+    { id: "taxPlan",             label: "Tax",              semantic: "Savings" },
     { id: "emergencyFund",       label: "Emergency",             semantic: "Savings" },
     { id: "gifts",               label: "Gifts",                 semantic: "Others" }
 ];
@@ -707,6 +710,23 @@ const TAB_FIELDS = {
         { id: "amount",   label: "Amount Invested (₹)", type: "number", placeholder: "0", required: true },
         { id: "section",  label: "Section",             type: "select", options: ["80C", "80D", "80CCD(1B)", "80CCD(2)", "80E", "80EEA", "80G", "24(b)", "80TTA", "HRA", "Others"] },
         { id: "details",   label: "Details",            type: "text",   placeholder: "Optional" }
+    ],
+    // Salary Details for Tax Planning (Optional - for HRA exemption and comprehensive tax calculation)
+    salaryDetails: [
+        { id: "basicSalary", label: "Basic Salary (Annual ₹)", type: "number", placeholder: "Annual basic salary" },
+        { id: "hraReceived", label: "HRA Received (Annual ₹)", type: "number", placeholder: "Annual HRA received" },
+        { id: "rentPaid", label: "Rent Paid (Annual ₹)", type: "number", placeholder: "Annual rent paid" },
+        { id: "isMetroCity", label: "Metro City", type: "select", options: ["yes", "no"] },
+        { id: "specialAllowance", label: "Special Allowance (Annual ₹)", type: "number", placeholder: "Annual special allowance" },
+        { id: "lta", label: "LTA (Annual ₹)", type: "number", placeholder: "Annual leave travel allowance" },
+        { id: "otherAllowances", label: "Other Allowances (Annual ₹)", type: "number", placeholder: "Annual other allowances" }
+    ],
+    // House Property Details for Tax Planning
+    houseProperty: [
+        { id: "isSelfOccupied", label: "Self Occupied", type: "select", options: ["yes", "no"] },
+        { id: "rentalIncome", label: "Rental Income (Annual ₹)", type: "number", placeholder: "Annual rental income" },
+        { id: "homeLoanInterest", label: "Home Loan Interest (Annual ₹)", type: "number", placeholder: "Annual home loan interest" },
+        { id: "municipalTaxes", label: "Municipal Taxes (Annual ₹)", type: "number", placeholder: "Annual municipal taxes" }
     ],
     gifts: [
         { id: "name",      label: "Gift Type",           type: "select",   options: ["Cash", "Gold", "Silver", "Gift"], required: true },
@@ -1113,14 +1133,21 @@ let localWritePending = false;
 let budgetEditSnapshot = null;
 
 // ── Sort/filter state for list views ─────────────────────────────────────────
+// Load list sort/filter state from localStorage
+const savedListSortFilter = JSON.parse(localStorage.getItem('listSortFilter') || '{}');
 const listSortFilter = {
-    financialGoal: { sortBy: "", sortDir: "asc", filters: {}, searchText: "" },
-    inflow:        { sortBy: "", sortDir: "asc", filters: {}, searchText: "" },
-    outflow:       { sortBy: "", sortDir: "asc", filters: {}, searchText: "" },
-    gifts:         { sortBy: "", sortDir: "asc", filters: {}, searchText: "" },
-    insurance:     { sortBy: "", sortDir: "asc", filters: {}, searchText: "" },
-    expenseTracking: { sortBy: "amount", sortDir: "desc", filters: {}, searchText: "" }
+    financialGoal: { sortBy: "", sortDir: "asc", filters: {}, searchText: "", hideCompleted: false, ...savedListSortFilter.financialGoal },
+    inflow:        { sortBy: "", sortDir: "asc", filters: {}, searchText: "", ...savedListSortFilter.inflow },
+    outflow:       { sortBy: "", sortDir: "asc", filters: {}, searchText: "", ...savedListSortFilter.outflow },
+    gifts:         { sortBy: "", sortDir: "asc", filters: {}, searchText: "", ...savedListSortFilter.gifts },
+    insurance:     { sortBy: "", sortDir: "asc", filters: {}, searchText: "", ...savedListSortFilter.insurance },
+    expenseTracking: { sortBy: "amount", sortDir: "desc", filters: {}, searchText: "", ...savedListSortFilter.expenseTracking }
 };
+
+// Save list sort/filter state to localStorage
+function saveListSortFilter() {
+    localStorage.setItem('listSortFilter', JSON.stringify(listSortFilter));
+}
 
 const editingEntryIds = {
     financialGoal: null,
@@ -1347,15 +1374,22 @@ let notificationDismissTime = 10000; // 10 seconds auto-dismiss
 let notificationTriggers = []; // Store trigger functions
 
 function updateNotificationBadge(count) {
-    if (!notificationBadge) return;
+    if (!notificationBadge) {
+        console.log('Notification badge element not found');
+        return;
+    }
     
     // Show badge if there are unread notifications
     const unreadCount = count - (notificationState.viewedCount || 0);
+    console.log('Updating badge - total:', count, 'viewed:', notificationState.viewedCount, 'unread:', unreadCount);
+    
     if (unreadCount > 0) {
         notificationBadge.textContent = unreadCount;
         notificationBadge.hidden = false;
+        console.log('Badge shown with count:', unreadCount);
     } else {
         notificationBadge.hidden = true;
+        console.log('Badge hidden');
     }
 }
 
@@ -1367,39 +1401,12 @@ function getNotificationState() {
             date: today,
             viewedCount: 0,
             cleared: false,
-            lastAlertsHash: null
+            lastAlertsHash: null,
+            autoShownOnLoad: false
         };
         localStorage.setItem('notificationState', JSON.stringify(notificationState));
     }
     return notificationState;
-}
-
-function shouldRegenerateAlerts(newAlerts) {
-    const state = getNotificationState();
-    
-    // If cleared, don't regenerate unless it's a new day
-    if (state.cleared) {
-        return false;
-    }
-    
-    // If no alerts, nothing to do
-    if (!newAlerts || newAlerts.length === 0) {
-        return true;
-    }
-    
-    // Calculate hash of alerts to detect changes
-    const alertsHash = JSON.stringify(newAlerts);
-    
-    // If alerts haven't changed, don't regenerate
-    if (state.lastAlertsHash === alertsHash) {
-        return false;
-    }
-    
-    // New alerts detected
-    state.lastAlertsHash = alertsHash;
-    state.viewedCount = 0; // Reset viewed count for new alerts
-    localStorage.setItem('notificationState', JSON.stringify(state));
-    return true;
 }
 
 // ── Notification Triggers ─────────────────────────────────────────────────────
@@ -1407,7 +1414,8 @@ function registerNotificationTrigger(triggerFn) {
     notificationTriggers.push(triggerFn);
 }
 
-function checkNotificationTriggers() {
+function checkNotificationTriggers(options = {}) {
+    const { forceShow = false, isUserAction = false } = options;
     const alerts = [];
     
     // Run all registered triggers
@@ -1422,6 +1430,8 @@ function checkNotificationTriggers() {
         }
     });
     
+    console.log('[Notification] Generated alerts:', alerts.length);
+    
     // Remove duplicates
     const uniqueAlerts = [];
     const seen = new Set();
@@ -1433,20 +1443,49 @@ function checkNotificationTriggers() {
         }
     });
     
-    // Update if alerts changed
-    if (shouldRegenerateAlerts(uniqueAlerts)) {
+    // Calculate hash of current alerts
+    const alertsHash = JSON.stringify(uniqueAlerts);
+    const state = getNotificationState();
+    
+    console.log('[Notification] State check - cleared:', state.cleared, 'lastHash:', state.lastAlertsHash === alertsHash, 'userAction:', isUserAction);
+    
+    // Determine if we should update
+    // Always update if: user action, was cleared, alerts changed, or no alerts
+    // Also update on page load if alerts exist and weren't cleared (to persist notifications)
+    const shouldUpdate = isUserAction || 
+                        state.cleared || 
+                        state.lastAlertsHash !== alertsHash ||
+                        uniqueAlerts.length === 0 ||
+                        (!isUserAction && uniqueAlerts.length > 0 && !state.cleared);
+    
+    console.log('[Notification] shouldUpdate:', shouldUpdate);
+    
+    if (shouldUpdate) {
+        // Update state
+        state.lastAlertsHash = alertsHash;
+        state.cleared = false; // Reset cleared flag when updating
+        // Don't reset viewedCount - let badge persist until manually cleared
+        localStorage.setItem('notificationState', JSON.stringify(state));
+        
+        // Update alerts and badge
         window.currentAlerts = uniqueAlerts;
         updateNotificationBadge(uniqueAlerts.length);
+        console.log('[Notification] Badge updated with count:', uniqueAlerts.length);
         
-        // Auto-show if this is first load and not cleared
-        const state = getNotificationState();
-        if (!state.cleared && uniqueAlerts.length > 0) {
+        // Auto-show popup on first load only (not on user actions)
+        if (!state.autoShownOnLoad && !isUserAction && uniqueAlerts.length > 0) {
+            state.autoShownOnLoad = true;
+            // Don't mark as viewed on auto-show - let badge persist
+            localStorage.setItem('notificationState', JSON.stringify(state));
             setTimeout(() => {
                 showNotificationPopup(uniqueAlerts);
-                state.viewedCount = uniqueAlerts.length;
-                localStorage.setItem('notificationState', JSON.stringify(state));
             }, 2000);
+        } else if (forceShow && uniqueAlerts.length > 0) {
+            // Force show if explicitly requested
+            showNotificationPopup(uniqueAlerts);
         }
+    } else {
+        console.log('[Notification] No changes detected, skipping update');
     }
 }
 
@@ -1456,6 +1495,7 @@ registerNotificationTrigger(() => {
     const now = new Date();
     const monthKey = getMonthKey(currentMonth);
     const monthData = (appData.monthlyBudgetData || {})[monthKey] || {};
+    console.log('[Notification Budget Trigger] Month key:', monthKey, 'Month data:', monthData);
     
     // Over budget trigger
     const inflowTotal = Object.values(monthData.inflow || {}).reduce((s, v) => s + Number(v || 0), 0);
@@ -1472,6 +1512,7 @@ registerNotificationTrigger(() => {
     const midMonthCC = Number(monthData.outflow?.midMonthCCOutstanding || 0);
     const totalExpenses = variableExp + midMonthCC;
     const budgetBalance = inflowTotal - fixedMonthlyOutflow - totalExpenses;
+    console.log('[Notification Budget Trigger] Inflow:', inflowTotal, 'Fixed outflow:', fixedMonthlyOutflow, 'Total expenses:', totalExpenses, 'Balance:', budgetBalance);
     
     if (budgetBalance < 0) {
         alerts.push({
@@ -1532,6 +1573,7 @@ registerNotificationTrigger(() => {
         });
     }
     
+    console.log('[Notification Budget Trigger] Generated alerts:', alerts.length);
     return alerts;
 });
 
@@ -1540,10 +1582,13 @@ registerNotificationTrigger(() => {
     const alerts = [];
     const now = new Date();
     const goals = (appData.tabData || {}).financialGoal || [];
+    console.log('[Notification Goal Trigger] Total goals:', goals.length);
+    
     const ongoingGoals = goals.filter(g => {
         const targetDate = g.targetDate ? new Date(g.targetDate) : null;
         return targetDate && targetDate > now;
     });
+    console.log('[Notification Goal Trigger] Ongoing goals:', ongoingGoals.length);
     
     const behindGoals = ongoingGoals.filter(g => {
         if (!g.targetDate) return false;
@@ -1578,6 +1623,54 @@ registerNotificationTrigger(() => {
             type: 'info',
             icon: 'calendarSmall',
             message: `${upcomingGoals.length} goal${upcomingGoals.length > 1 ? 's' : ''} due within 30 days`,
+            action: 'financialGoal'
+        });
+    }
+    
+    // Goals due very soon (within 7 days) - higher priority
+    const urgentGoals = ongoingGoals.filter(g => {
+        if (!g.targetDate) return false;
+        const targetDate = new Date(g.targetDate);
+        const daysToTarget = Math.ceil((targetDate - now) / (1000 * 60 * 60 * 24));
+        console.log('[Notification Goal Trigger] Goal:', g.name, 'Days to target:', daysToTarget);
+        return daysToTarget > 0 && daysToTarget <= 7;
+    });
+    console.log('[Notification Goal Trigger] Urgent goals (within 7 days):', urgentGoals.length);
+    
+    if (urgentGoals.length > 0) {
+        alerts.push({
+            type: 'warning',
+            icon: 'alertSmall',
+            message: `${urgentGoals.length} goal${urgentGoals.length > 1 ? 's' : ''} due within 7 days!`,
+            action: 'financialGoal'
+        });
+    }
+    
+    // Goals with insufficient accumulated amount
+    const underfundedGoals = ongoingGoals.filter(g => {
+        const needed = Number(g.amountNeeded || 0);
+        const accumulated = Number(g.amountAccumulated || 0);
+        const targetDate = g.targetDate ? new Date(g.targetDate) : null;
+        const daysToTarget = targetDate ? Math.ceil((targetDate - now) / (1000 * 60 * 60 * 24)) : 365;
+        
+        if (needed <= 0) return false;
+        
+        // Calculate expected monthly contribution needed
+        const monthsRemaining = Math.max(1, daysToTarget / 30);
+        const expectedContribution = (needed - accumulated) / monthsRemaining;
+        
+        // Alert if accumulated is less than 30% of needed and deadline is within 2 years
+        const progressPercentage = (accumulated / needed) * 100;
+        const isUnderfunded = progressPercentage < 30 && daysToTarget <= 730; // 2 years
+        
+        return isUnderfunded;
+    });
+    
+    if (underfundedGoals.length > 0) {
+        alerts.push({
+            type: 'warning',
+            icon: 'alertSmall',
+            message: `${underfundedGoals.length} goal${underfundedGoals.length > 1 ? 's' : ''} need more funding (accumulated < 30%)`,
             action: 'financialGoal'
         });
     }
@@ -1820,12 +1913,14 @@ registerNotificationTrigger(() => {
 });
 
 // Trigger notification check on data changes
-function triggerNotificationCheck() {
-    checkNotificationTriggers();
+function triggerNotificationCheck(options = {}) {
+    console.log('[Notification] triggerNotificationCheck called', options);
+    checkNotificationTriggers(options);
 }
 
 // Make function globally accessible for dashboard.js
 window.updateNotificationBadge = updateNotificationBadge;
+window.triggerNotificationCheck = triggerNotificationCheck;
 
 // Simple icon SVG paths for notification popup (inline to avoid module import issues)
 const NOTIFICATION_ICONS = {
@@ -1893,9 +1988,9 @@ function showNotificationPopup(alerts) {
 function clearNotifications(button) {
     const state = getNotificationState();
     
-    // Mark as cleared for today
+    // Mark as cleared - this will allow regeneration on next check
     state.cleared = true;
-    state.viewedCount = window.currentAlerts.length; // Mark all as viewed
+    state.lastAlertsHash = ''; // Reset hash to force regeneration
     localStorage.setItem('notificationState', JSON.stringify(state));
     
     // Clear the alerts
@@ -1905,20 +2000,24 @@ function clearNotifications(button) {
     // Close popup
     button.closest('.notification-popup').remove();
     
-    showToast('Notifications cleared', { variant: 'success' });
+    showToast('Notifications cleared. They will reappear on next update.', { variant: 'success' });
+    console.log('[Notification] Cleared - will regenerate on next data change');
 }
 
 // Make clearNotifications globally accessible
 window.clearNotifications = clearNotifications;
 
-// Make shouldRegenerateAlerts globally accessible for dashboard.js
-window.shouldRegenerateAlerts = shouldRegenerateAlerts;
-
 if (notificationBtn) {
     notificationBtn.addEventListener("click", () => {
         const alerts = window.currentAlerts || [];
+        console.log('[Notification] Bell clicked - currentAlerts:', alerts.length, alerts);
         if (alerts.length > 0) {
             showNotificationPopup(alerts);
+            // Mark as viewed when user manually opens notifications
+            const state = getNotificationState();
+            state.viewedCount = alerts.length;
+            localStorage.setItem('notificationState', JSON.stringify(state));
+            updateNotificationBadge(alerts.length);
         } else {
             showToast('No new notifications', { variant: 'info' });
         }
@@ -1930,11 +2029,12 @@ function showNotificationsOnLogin() {
     const alerts = window.currentAlerts || [];
     const state = getNotificationState();
     
-    if (alerts.length > 0 && !state.cleared) {
+    if (alerts.length > 0 && !state.cleared && !state.autoShownOnLoad) {
+        state.autoShownOnLoad = true;
+        // Don't mark as viewed on auto-show - let badge persist
+        localStorage.setItem('notificationState', JSON.stringify(state));
         setTimeout(() => {
             showNotificationPopup(alerts);
-            state.viewedCount = alerts.length; // Mark as viewed
-            localStorage.setItem('notificationState', JSON.stringify(state));
         }, 2000); // Show 2 seconds after login
     }
 }
@@ -3144,8 +3244,6 @@ function doSave() {
 }
 
 // ── Network Status Indicator Functions ──────────────────────────────────
-let networkStatusTimeout = null;
-
 function showNetworkStatus(status) {
     const networkStatusEl = document.getElementById('networkStatus');
     if (!networkStatusEl) return;
@@ -3439,10 +3537,15 @@ window.switchToTab = switchToTab;
 function buildSortFilterToolbar(tabId, hideFields = []) {
     const fields = TAB_FIELDS[tabId] || [];
     const state = listSortFilter[tabId];
-    const selectFields = fields.filter(f => f.type === "select" && !hideFields.includes(f.id));
+    const selectFields = fields.filter(f => f.type === "select" && !hideFields.includes(f.id) && f.id !== "details");
 
-    const sortOpts = `<option value="">None</option>` +
-        fields.map(f => `<option value="${f.id}"${state.sortBy === f.id ? " selected" : ""}>${f.label}</option>`).join("");
+    // For financialGoal, add Status as a sort option
+    let sortOpts = `<option value=""${state.sortBy === "" ? " selected" : ""}>None</option>`;
+    if (tabId === "financialGoal") {
+        sortOpts += `<option value="status"${state.sortBy === "status" ? " selected" : ""}>Status</option>`;
+        sortOpts += `<option value="goalType"${state.sortBy === "goalType" ? " selected" : ""}>Goal Type</option>`;
+    }
+    sortOpts += fields.filter(f => f.id !== "details").map(f => `<option value="${f.id}"${state.sortBy === f.id ? " selected" : ""}>${f.label}</option>`).join("");
 
     const filtersHtml = selectFields.map(f => {
         const val = state.filters[f.id] || "";
@@ -3456,9 +3559,19 @@ function buildSortFilterToolbar(tabId, hideFields = []) {
         </div>`;
     }).join("");
 
-    const divider = selectFields.length > 0 ? `<div class="list-toolbar-divider"></div>` : "";
-    const filterBlock = selectFields.length > 0
-        ? `<div class="list-toolbar-filters">${filtersHtml}</div>`
+    // Add "Hide Completed" checkbox for financialGoal tab
+    const hideCompletedHtml = tabId === "financialGoal" 
+        ? `<div class="toolbar-filter-item toolbar-checkbox-item">
+            <label class="toolbar-checkbox-label">
+                <input type="checkbox" class="toolbar-hide-completed" data-tab="${tabId}" ${state.hideCompleted ? "checked" : ""}>
+                <span class="toolbar-checkbox-text">Hide Completed</span>
+            </label>
+        </div>`
+        : "";
+
+    const divider = (selectFields.length > 0 || hideCompletedHtml) ? `<div class="list-toolbar-divider"></div>` : "";
+    const filterBlock = (selectFields.length > 0 || hideCompletedHtml)
+        ? `<div class="list-toolbar-filters">${filtersHtml}${hideCompletedHtml}</div>`
         : "";
 
     const searchHtml = `<div class="toolbar-search-item">
@@ -3494,6 +3607,14 @@ function applyListSortFilter(tabId, entries, skipFilters = false) {
         });
     }
 
+    // Apply hide completed filter for goals
+    if (tabId === "financialGoal" && state.hideCompleted) {
+        result = result.filter(e => {
+            const status = normalizeGoalStatus(e);
+            return status !== "Completed";
+        });
+    }
+
     // Apply dropdown filters (skip if requested for custom filtering)
     if (!skipFilters) {
         Object.entries(state.filters).forEach(([fieldId, val]) => {
@@ -3503,20 +3624,32 @@ function applyListSortFilter(tabId, entries, skipFilters = false) {
 
     // Apply sorting
     if (state.sortBy) {
-        const field = fields.find(f => f.id === state.sortBy);
-        result.sort((a, b) => {
-            let av = a[state.sortBy] != null ? a[state.sortBy] : "";
-            let bv = b[state.sortBy] != null ? b[state.sortBy] : "";
-            if (field && field.type === "number") {
-                av = Number(av); bv = Number(bv);
-                return state.sortDir === "asc" ? av - bv : bv - av;
-            }
-            av = String(av).toLowerCase();
-            bv = String(bv).toLowerCase();
-            if (av < bv) return state.sortDir === "asc" ? -1 : 1;
-            if (av > bv) return state.sortDir === "asc" ? 1 : -1;
-            return 0;
-        });
+        // Special handling for status sorting
+        if (state.sortBy === "status" && tabId === "financialGoal") {
+            const statusOrder = { "Ongoing": 1, "Planned": 2, "Achieved": 3, "Missed": 4, "Completed": 5 };
+            result.sort((a, b) => {
+                const statusA = normalizeGoalStatus(a);
+                const statusB = normalizeGoalStatus(b);
+                const orderA = statusOrder[statusA] || 999;
+                const orderB = statusOrder[statusB] || 999;
+                return state.sortDir === "asc" ? orderA - orderB : orderB - orderA;
+            });
+        } else {
+            const field = fields.find(f => f.id === state.sortBy);
+            result.sort((a, b) => {
+                let av = a[state.sortBy] != null ? a[state.sortBy] : "";
+                let bv = b[state.sortBy] != null ? b[state.sortBy] : "";
+                if (field && field.type === "number") {
+                    av = Number(av); bv = Number(bv);
+                    return state.sortDir === "asc" ? av - bv : bv - av;
+                }
+                av = String(av).toLowerCase();
+                bv = String(bv).toLowerCase();
+                if (av < bv) return state.sortDir === "asc" ? -1 : 1;
+                if (av > bv) return state.sortDir === "asc" ? 1 : -1;
+                return 0;
+            });
+        }
     }
     return result;
 }
@@ -3703,6 +3836,12 @@ function upsertSectionEntry(tabId, entry) {
         setSectionEntries(tabId, [entry, ...entries]);
     }
     clearEditing(tabId);
+    
+    // Trigger notification check after updating entry (user action)
+    if (window.triggerNotificationCheck) {
+        console.log('[Notification] Entry updated, triggering notification check');
+        window.triggerNotificationCheck({ isUserAction: true });
+    }
 }
 
 function resetSectionForm(tabId) {
@@ -3731,27 +3870,62 @@ function handleTableAction(tabId, e) {
         return;
     }
     const deleteBtn = e.target.closest(".btn-delete");
-    if (deleteBtn) deleteEntry(deleteBtn.dataset.id);
+    if (deleteBtn) {
+        deleteEntry(deleteBtn.dataset.id);
+        // Trigger notification check after deleting entry (user action)
+        if (window.triggerNotificationCheck) {
+            console.log('[Notification] Entry deleted, triggering notification check');
+            window.triggerNotificationCheck({ isUserAction: true });
+        }
+    }
 }
 
 function normalizeGoalStatus(goal) {
-    const needed = Number(goal.amountNeeded || 0);
+    const needed = Number(goal.amountNeeded);
     const accumulated = Number(goal.amountAccumulated || 0);
-    const targetDate = goal.targetDate ? new Date(`${goal.targetDate}T00:00:00`) : null;
+
+    const targetDate = goal.targetDate
+        ? new Date(`${goal.targetDate}T23:59:59`)
+        : null;
+
     const now = new Date();
     const datePassed = targetDate && targetDate < now;
 
     if (!datePassed) {
-        // Target date not passed
         if (accumulated === 0) return "Planned";
         if (accumulated < needed) return "Ongoing";
         return "Achieved";
-    } else {
-        // Target date passed
-        if (accumulated === 0) return "Missed";
-        if (accumulated < needed) return "Missed";
-        return "Covered";
     }
+
+    if (accumulated < needed) return "Missed";
+
+    return "Completed";
+}
+
+function formatHumanFriendlyDate(dateString) {
+    if (!dateString) return "—";
+    
+    const date = new Date(dateString);
+    if (isNaN(date.getTime())) return dateString;
+    
+    const day = date.getDate();
+    const monthNames = ["January", "February", "March", "April", "May", "June",
+                        "July", "August", "September", "October", "November", "December"];
+    const month = monthNames[date.getMonth()];
+    const year = date.getFullYear();
+    
+    // Add ordinal suffix to day (1st, 2nd, 3rd, 4th, etc.)
+    const suffix = (day) => {
+        if (day > 3 && day < 21) return 'th';
+        switch (day % 10) {
+            case 1: return 'st';
+            case 2: return 'nd';
+            case 3: return 'rd';
+            default: return 'th';
+        }
+    };
+    
+    return `${day}${suffix(day)} ${month} ${year}`;
 }
 
 function monthsBetween(startDate, endDate = new Date()) {
@@ -4506,8 +4680,8 @@ function renderExpenseTracking() {
     // Calculate totals
     const totalExpenses = expenses.reduce((sum, exp) => sum + Number(exp.amount || 0), 0);
     
-    // Get budget variable expenditure for comparison
-    const budgetMonthKey = getMonthKey(currentExpenseMonth);
+    // Get budget variable expenditure for comparison (use currentMonth from budget tab, not currentExpenseMonth)
+    const budgetMonthKey = getMonthKey(currentMonth);
     const budgetData = (appData.monthlyBudgetData || {})[budgetMonthKey];
     const budgetVarExp = budgetData?.outflow?.variableExpenditure || 0;
     const difference = totalExpenses - budgetVarExp;
@@ -5278,6 +5452,8 @@ function renderGoalTable(entries) {
             if (f.type === "number") {
                 td.textContent = formatMoney(Number(item[f.id] || 0));
                 td.className = "amount";
+            } else if (f.id === "targetDate" && item[f.id]) {
+                td.textContent = formatHumanFriendlyDate(item[f.id]);
             } else {
                 td.textContent = esc(item[f.id] || "—");
             }
@@ -5286,10 +5462,10 @@ function renderGoalTable(entries) {
         const statusTd = document.createElement("td");
         const status = normalizeGoalStatus(item);
         const statusColors = {
-            "Planned": "#6b7280",
+            "Planned": "#eab308",
             "Ongoing": "#3b82f6",
             "Achieved": "#10b981",
-            "Covered": "#10b981",
+            "Completed": "#9ca3af",
             "Missed": "#ef4444"
         };
         statusTd.innerHTML = `<span style="color:${statusColors[status] || "#6b7280"};font-weight:500;">${status}</span>`;
@@ -5308,7 +5484,7 @@ function renderGoalPreviewCards(entries) {
         toolbarEl.innerHTML = buildSortFilterToolbar("financialGoal");
     }
 
-    const displayEntries = applyListSortFilter("financialGoal", entries);
+    let displayEntries = applyListSortFilter("financialGoal", entries);
     goalsList.innerHTML = "";
 
     if (displayEntries.length === 0) {
@@ -5318,7 +5494,56 @@ function renderGoalPreviewCards(entries) {
         return;
     }
 
-    displayEntries.forEach(goal => {
+    // Group by goal type if sorting by goalType or no sort selected (default view)
+    const state = listSortFilter.financialGoal;
+    if (state.sortBy === "goalType" || state.sortBy === "" || !state.sortBy) {
+        // Further sort by status within each group
+        const statusOrder = { "Ongoing": 1, "Planned": 2, "Achieved": 3, "Missed": 4, "Completed": 5 };
+        displayEntries.sort((a, b) => {
+            const statusA = normalizeGoalStatus(a);
+            const statusB = normalizeGoalStatus(b);
+            return (statusOrder[statusA] || 999) - (statusOrder[statusB] || 999);
+        });
+        
+        const grouped = {};
+        displayEntries.forEach(goal => {
+            const type = goal.goalType || "Long Term";
+            if (!grouped[type]) grouped[type] = [];
+            grouped[type].push(goal);
+        });
+        
+        const typeOrder = ["Short Term", "Mid Term", "Long Term", "ShortTerm", "MidTerm", "LongTerm"];
+        const sortedTypes = Object.keys(grouped).sort((a, b) => {
+            const indexA = typeOrder.indexOf(a);
+            const indexB = typeOrder.indexOf(b);
+            if (indexA === -1 && indexB === -1) return a.localeCompare(b);
+            if (indexA === -1) return 1;
+            if (indexB === -1) return -1;
+            return indexA - indexB;
+        });
+        
+        sortedTypes.forEach(type => {
+            const typeDisplayMap = {
+                "ShortTerm": "Short Term",
+                "MidTerm": "Mid Term",
+                "LongTerm": "Long Term"
+            };
+            const displayType = typeDisplayMap[type] || type;
+            
+            const groupHeader = document.createElement("div");
+            groupHeader.style.cssText = "font-size:14px;font-weight:600;color:var(--text);margin:16px 0 8px 0;padding:8px 12px;background:var(--surf1);border-radius:8px;border-left:3px solid var(--primary);";
+            groupHeader.textContent = `${displayType} Goals (${grouped[type].length})`;
+            goalsList.appendChild(groupHeader);
+            
+            grouped[type].forEach(goal => renderGoalCard(goal));
+        });
+        return;
+    }
+
+    displayEntries.forEach(goal => renderGoalCard(goal));
+}
+
+function renderGoalCard(goal) {
         const card = document.createElement("div");
         card.className = "goal-card";
         
@@ -5347,7 +5572,7 @@ function renderGoalPreviewCards(entries) {
             </div>
             <div class="goal-card-details">
                 ${esc(goal.details || "No details")}<br>
-                Target: ${esc(goal.targetDate || "—")}
+                Target: ${formatHumanFriendlyDate(goal.targetDate)}
             </div>
             <div class="goal-card-progress">
                 <div class="goal-progress-bar">
@@ -5361,7 +5586,6 @@ function renderGoalPreviewCards(entries) {
         `;
         
         goalsList.appendChild(card);
-    });
 }
 
 function calculateGoalSummary(entries) {
@@ -5617,7 +5841,7 @@ function renderInflowPreviewCards(entries) {
                 <div class="investment-card-details">
                     <span class="investment-card-frequency" style="${semanticBadgeStyle("Investment", false)}">${esc(item.type || "Others")}</span>
                     <span class="semantic-badge semantic-investment ${frequency === "One-Time" ? "is-paid" : ""}">${esc(frequency)}</span><br>
-                    Amount: ${formatMoney(Number(item.amount || 0))} | <span class="investment-detail-value">${formatMoney(curVal)}</span><br>
+                    Invested: ${formatMoney(Number(item.amount || 0))}<br>
                     Interest: ${Number(item.interestRate || 0).toFixed(2)}% p.a.<br>
                     Start: ${esc(item.startDate || "—")} | End: ${esc(item.endDate || "—")}<br>
                     ${item.details ? esc(item.details) : ""}
@@ -7877,43 +8101,93 @@ function renderGiftsPreviewCards(entries) {
         return;
     }
 
-    displayEntries.forEach(gift => {
-        const item = document.createElement("div");
-        item.className = "gift-item";
-        
-        const categoryClass = gift.category === "Fixed Every Year" ? "fixed" : "demand";
-        
-        // Format date/month display
-        let dateDisplay = "";
-        if (gift.date) {
-            const giftDate = new Date(gift.date);
-            if (!isNaN(giftDate.getTime())) {
-                if (gift.category === "Fixed Every Year") {
-                    // Show month for recurring gifts
-                    dateDisplay = giftDate.toLocaleDateString('en-IN', { month: 'long' });
-                } else {
-                    // Show full date for on-demand gifts
-                    dateDisplay = giftDate.toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' });
-                }
+    // Default view: Group by category and sort by transaction type
+    if (!listSortFilter.gifts.sortBy) {
+        // Group by category
+        const grouped = {};
+        displayEntries.forEach(gift => {
+            const category = gift.category || "On Demand";
+            if (!grouped[category]) grouped[category] = [];
+            grouped[category].push(gift);
+        });
+
+        // Sort categories (Fixed Every Year first, then On Demand)
+        const categoryOrder = ["Fixed Every Year", "On Demand"];
+        const sortedCategories = Object.keys(grouped).sort((a, b) => {
+            const indexA = categoryOrder.indexOf(a);
+            const indexB = categoryOrder.indexOf(b);
+            if (indexA === -1 && indexB === -1) return a.localeCompare(b);
+            if (indexA === -1) return 1;
+            if (indexB === -1) return -1;
+            return indexA - indexB;
+        });
+
+        // Render grouped gifts
+        sortedCategories.forEach(category => {
+            // Sort by transaction type within each category
+            grouped[category].sort((a, b) => {
+                const typeA = (a.transactionType || "").toLowerCase();
+                const typeB = (b.transactionType || "").toLowerCase();
+                return typeA.localeCompare(typeB);
+            });
+
+            // Add group header
+            const groupHeader = document.createElement("div");
+            groupHeader.style.cssText = "font-size:14px;font-weight:600;color:var(--text);margin:16px 0 8px 0;padding:8px 12px;background:var(--surf1);border-radius:8px;border-left:3px solid var(--primary);";
+            groupHeader.textContent = `${category} (${grouped[category].length})`;
+            giftsList.appendChild(groupHeader);
+
+            // Render gifts in this category
+            grouped[category].forEach(gift => {
+                const item = renderGiftCard(gift);
+                giftsList.appendChild(item);
+            });
+        });
+    } else {
+        // Render with selected sort
+        displayEntries.forEach(gift => {
+            const item = renderGiftCard(gift);
+            giftsList.appendChild(item);
+        });
+    }
+}
+
+function renderGiftCard(gift) {
+    const item = document.createElement("div");
+    item.className = "gift-item";
+    
+    const categoryClass = gift.category === "Fixed Every Year" ? "fixed" : "demand";
+    
+    // Format date/month display
+    let dateDisplay = "";
+    if (gift.date) {
+        const giftDate = new Date(gift.date);
+        if (!isNaN(giftDate.getTime())) {
+            if (gift.category === "Fixed Every Year") {
+                // Show month for recurring gifts
+                dateDisplay = giftDate.toLocaleDateString('en-IN', { month: 'long' });
+            } else {
+                // Show full date for on-demand gifts
+                dateDisplay = giftDate.toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' });
             }
         }
-        
-        item.innerHTML = `
-            <div class="gift-item-info">
-                <div class="gift-item-title">${esc(gift.name)}</div>
-                <div class="gift-item-details">
-                    <span class="gift-item-category ${categoryClass}">${esc(gift.category || "On Demand")}</span>
-                    <span class="gift-item-transaction-type">${esc(gift.transactionType || "—")}</span><br>
-                    ${esc(gift.relativeName || "—")}<br>
-                    Occasion: ${esc(gift.occasion || "—")}${dateDisplay ? ` · ${dateDisplay}` : ""}<br>
+    }
+    
+    item.innerHTML = `
+        <div class="gift-item-info">
+            <div class="gift-item-title">${esc(gift.name)}</div>
+            <div class="gift-item-details">
+                <span class="gift-item-category ${categoryClass}">${esc(gift.category || "On Demand")}</span>
+                <span class="gift-item-transaction-type">${esc(gift.transactionType || "—")}</span><br>
+                ${esc(gift.relativeName || "—")}<br>
+                Occasion: ${esc(gift.occasion || "—")}${dateDisplay ? ` · ${dateDisplay}` : ""}<br>
                     ${gift.details ? `Details: ${esc(gift.details)}` : ""}
                 </div>
             </div>
             <div class="gift-item-amount">${formatMoney(Number(gift.amount || 0))}</div>
         `;
-        
-        giftsList.appendChild(item);
-    });
+    
+    return item;
 }
 
 function renderEmergencyFund() {
@@ -9368,45 +9642,188 @@ function getTabIcon(tabId) {
     return icons[tabId] || 'sparkles';
 }
 
+// ── Tab Bar Dynamic Resize Handler ─────────────────────────────────────────────
+let resizeTimeout;
+let tabResizeObserver;
+
+function initTabBarResize() {
+    // Use ResizeObserver for more accurate detection
+    if (tabResizeObserver) {
+        tabResizeObserver.disconnect();
+    }
+    
+    tabResizeObserver = new ResizeObserver(() => {
+        clearTimeout(resizeTimeout);
+        resizeTimeout = setTimeout(() => {
+            if (window.innerWidth > 768) {
+                renderTabs();
+            }
+        }, 100);
+    });
+    
+    if (tabList) {
+        tabResizeObserver.observe(tabList);
+    }
+}
+
+// ── Tab Rendering ───────────────────────────────────────────────────────────────
 function renderTabs() {
     tabList.innerHTML = "";
     const accountsReady = areAccountsSetUp();
+    const tabs = getTabs();
+    
+    // Mobile: simple horizontal scroll
+    if (window.innerWidth <= 768) {
+        tabs.forEach(tab => {
+            const btn = createTabButton(tab, accountsReady);
+            tabList.appendChild(btn);
+        });
+    } else {
+        // Desktop: measure and implement overflow with "More" button
+        requestAnimationFrame(() => {
+            const containerWidth = tabList.clientWidth;
+            const visibleTabs = [];
+            const hiddenTabs = [];
+            
+            // Render all tabs temporarily to measure them
+            const tempButtons = [];
+            tabs.forEach(tab => {
+                const btn = createTabButton(tab, accountsReady);
+                btn.style.visibility = 'hidden';
+                tabList.appendChild(btn);
+                tempButtons.push({ tab, btn, width: btn.offsetWidth });
+            });
+            
+            // Clear and recalculate
+            tabList.innerHTML = "";
+            
+            const moreButtonWidth = 100; // Reserve space for "More" button
+            const gap = 3;
+            let currentWidth = 24; // padding
+            
+            // Determine which tabs fit
+            tempButtons.forEach(({ tab, width }) => {
+                if (currentWidth + width + gap <= containerWidth - moreButtonWidth) {
+                    visibleTabs.push(tab);
+                    currentWidth += width + gap;
+                } else {
+                    hiddenTabs.push(tab);
+                }
+            });
+            
+            // If we have hidden tabs but enough space for all, show all
+            if (hiddenTabs.length > 0) {
+                const totalWidth = tempButtons.reduce((sum, { width }) => sum + width + gap, 24);
+                if (totalWidth <= containerWidth) {
+                    // All tabs fit, show them all
+                    visibleTabs.push(...hiddenTabs);
+                    hiddenTabs.length = 0;
+                }
+            }
+            
+            // Render visible tabs
+            visibleTabs.forEach(tab => {
+                const btn = createTabButton(tab, accountsReady);
+                tabList.appendChild(btn);
+            });
+            
+            // Render "More" button if needed
+            if (hiddenTabs.length > 0) {
+                renderMoreButton(hiddenTabs, accountsReady);
+            }
+        });
+    }
 
-    getTabs().forEach(tab => {
-        const btn = document.createElement("button");
-        btn.type = "button";
-        const disabled = !accountsReady && tab.id !== "cards";
-        btn.className = "tab" + (tab.id === activeTabId ? " active" : "") + (disabled ? " tab-disabled" : "");
-        btn.innerHTML = `${iconSvg(getTabIcon(tab.id), 'tab-icon')}<span>${esc(tab.label)}</span>`;
-        btn.style.borderColor = tab.id === activeTabId ? "var(--text)" : "transparent";
-        btn.style.background = tab.id === activeTabId ? "var(--surf2)" : "transparent";
-        btn.style.color = "var(--text)";
+    // Update mobile label
+    const activeTab = tabs.find(t => t.id === activeTabId);
+    if (mobileActiveTab && activeTab) {
+        mobileActiveTab.textContent = activeTab.label;
+    }
+}
+
+function createTabButton(tab, accountsReady) {
+    const btn = document.createElement("button");
+    btn.type = "button";
+    const disabled = !accountsReady && tab.id !== "cards";
+    btn.className = "tab" + (tab.id === activeTabId ? " active" : "") + (disabled ? " tab-disabled" : "");
+    btn.innerHTML = `${iconSvg(getTabIcon(tab.id), 'tab-icon')}<span>${esc(tab.label)}</span>`;
+    
+    if (disabled) {
+        btn.title = "Set up a Primary (Expenditure) + Salary account first";
+        btn.style.opacity = "0.4";
+        btn.style.cursor = "not-allowed";
+    }
+    
+    btn.addEventListener("click", () => {
         if (disabled) {
-            btn.title = "Set up a Primary (Expenditure) + Salary account first";
-            btn.style.opacity = "0.4";
-            btn.style.cursor = "not-allowed";
+            showAlert('Please set up both a Primary (Expenditure) account and a Salary account in the Accounts tab before accessing other tabs.', { variant: 'warning' });
+            return;
         }
-        btn.addEventListener("click", () => {
-            if (disabled) {
+        activeTabId = tab.id;
+        searchInput.value = "";
+        render();
+        if (window.innerWidth <= MOBILE_BREAKPOINT_PX) {
+            tabList.classList.remove("open");
+        }
+    });
+    
+    return btn;
+}
+
+function renderMoreButton(hiddenTabs, accountsReady) {
+    const moreContainer = document.createElement("div");
+    moreContainer.className = "tab-more-container";
+    
+    const moreBtn = document.createElement("button");
+    moreBtn.type = "button";
+    moreBtn.className = "tab-more-btn";
+    moreBtn.innerHTML = `More (${hiddenTabs.length})`;
+    moreContainer.appendChild(moreBtn);
+    
+    // Create dropdown
+    const dropdown = document.createElement("div");
+    dropdown.className = "tab-more-dropdown";
+    
+    hiddenTabs.forEach(tab => {
+        const item = document.createElement("div");
+        item.className = "tab-more-dropdown-item" + (tab.id === activeTabId ? " active" : "");
+        item.innerHTML = `${iconSvg(getTabIcon(tab.id), 'tab-icon')}<span>${esc(tab.label)}</span>`;
+        item.addEventListener("click", () => {
+            if (!accountsReady && tab.id !== "cards") {
                 showAlert('Please set up both a Primary (Expenditure) account and a Salary account in the Accounts tab before accessing other tabs.', { variant: 'warning' });
                 return;
             }
             activeTabId = tab.id;
             searchInput.value = "";
             render();
-            if (window.innerWidth <= MOBILE_BREAKPOINT_PX) {
-                tabList.classList.remove("open");
-            }
+            dropdown.classList.remove("show");
         });
-        tabList.appendChild(btn);
+        dropdown.appendChild(item);
     });
-
-    // Update mobile label with active tab name
-    const activeTab = getTabs().find(t => t.id === activeTabId);
-    if (mobileActiveTab && activeTab) {
-        mobileActiveTab.textContent = activeTab.label;
-    }
+    
+    moreContainer.appendChild(dropdown);
+    tabList.appendChild(moreContainer);
+    
+    // Toggle dropdown
+    moreBtn.addEventListener("click", (e) => {
+        e.stopPropagation();
+        dropdown.classList.toggle("show");
+    });
+    
+    // Close on outside click
+    setTimeout(() => {
+        const closeDropdown = (e) => {
+            if (!moreContainer.contains(e.target)) {
+                dropdown.classList.remove("show");
+                document.removeEventListener("click", closeDropdown);
+            }
+        };
+        document.addEventListener("click", closeDropdown);
+    }, 0);
 }
+
+// Initialize resize observer
+setTimeout(() => initTabBarResize(), 1000);
 
 function renderSummary(entries) {
     const planned = entries.reduce((s, i) => s + Number(i.planned || 0), 0);
@@ -9483,6 +9900,10 @@ async function deleteEntry(id) {
         if (editingEntryIds[tabId] === id) editingEntryIds[tabId] = null;
     });
     render();
+    // Trigger notification check after deleting entry
+    if (window.triggerNotificationCheck) {
+        window.triggerNotificationCheck();
+    }
 
     // Show undo toast (P1)
     if (deletedEntry) {
@@ -9501,6 +9922,10 @@ async function deleteEntry(id) {
                 _undoDeleteTabId = null;
                 render();
                 showToast('Entry restored.', { variant: 'success', duration: 2000 });
+                // Trigger notification check after restoring entry
+                if (window.triggerNotificationCheck) {
+                    window.triggerNotificationCheck();
+                }
             } else {
                 _undoDeleteEntry = null;
                 _undoDeleteTabId = null;
@@ -10314,10 +10739,16 @@ if (btnUpdateCCOutstanding) btnUpdateCCOutstanding.addEventListener("click", () 
         el.addEventListener("change", e => {
             if (e.target.classList.contains("toolbar-sort-select")) {
                 listSortFilter[tabId].sortBy = e.target.value;
+                saveListSortFilter();
                 render();
             } else if (e.target.classList.contains("toolbar-filter-select")) {
                 const fieldId = e.target.dataset.field;
                 listSortFilter[tabId].filters[fieldId] = e.target.value;
+                saveListSortFilter();
+                render();
+            } else if (e.target.classList.contains("toolbar-hide-completed")) {
+                listSortFilter[tabId].hideCompleted = e.target.checked;
+                saveListSortFilter();
                 render();
             }
         });
@@ -10325,6 +10756,7 @@ if (btnUpdateCCOutstanding) btnUpdateCCOutstanding.addEventListener("click", () 
         el.addEventListener("input", e => {
             if (e.target.classList.contains("toolbar-search-input")) {
                 listSortFilter[tabId].searchText = e.target.value;
+                saveListSortFilter();
                 render();
             }
         });
@@ -10332,6 +10764,7 @@ if (btnUpdateCCOutstanding) btnUpdateCCOutstanding.addEventListener("click", () 
         el.addEventListener("click", e => {
             if (e.target.classList.contains("toolbar-sort-dir")) {
                 listSortFilter[tabId].sortDir = listSortFilter[tabId].sortDir === "asc" ? "desc" : "asc";
+                saveListSortFilter();
                 render();
             }
         });
@@ -10585,6 +11018,10 @@ function addGoalEntry(event) {
     upsertSectionEntry("financialGoal", entry);
     resetSectionForm("financialGoal");
     renderFinancialGoal();
+    // Trigger notification check after adding/updating goal
+    if (window.triggerNotificationCheck) {
+        window.triggerNotificationCheck();
+    }
 }
 
 function addInflowEntry(event) {
@@ -10594,6 +11031,10 @@ function addInflowEntry(event) {
     upsertSectionEntry("inflow", entry);
     resetSectionForm("inflow");
     renderInflow();
+    // Trigger notification check after adding/updating inflow
+    if (window.triggerNotificationCheck) {
+        window.triggerNotificationCheck();
+    }
 }
 
 function addOutflowEntry(event) {
@@ -10603,6 +11044,10 @@ function addOutflowEntry(event) {
     upsertSectionEntry("outflow", entry);
     resetSectionForm("outflow");
     renderOutflow();
+    // Trigger notification check after adding/updating outflow
+    if (window.triggerNotificationCheck) {
+        window.triggerNotificationCheck();
+    }
 }
 
 function addInsuranceEntry(event) {
@@ -10612,6 +11057,10 @@ function addInsuranceEntry(event) {
     upsertSectionEntry("insurance", entry);
     resetSectionForm("insurance");
     renderInsurance();
+    // Trigger notification check after adding/updating insurance
+    if (window.triggerNotificationCheck) {
+        window.triggerNotificationCheck();
+    }
 }
 
 function addCardEntry(event) {
@@ -10657,6 +11106,10 @@ function addCardEntry(event) {
     scheduleSave();
     renderTabs();
     renderCards();
+    // Trigger notification check after adding/updating card
+    if (window.triggerNotificationCheck) {
+        window.triggerNotificationCheck();
+    }
 }
 
 function addNetWorthEntry(event) {
@@ -10666,6 +11119,10 @@ function addNetWorthEntry(event) {
     upsertSectionEntry("netWorth", entry);
     resetSectionForm("netWorth");
     renderNetWorth();
+    // Trigger notification check after adding/updating net worth
+    if (window.triggerNotificationCheck) {
+        window.triggerNotificationCheck();
+    }
 }
 
 function addTaxPlanEntry(event) {
@@ -10675,6 +11132,10 @@ function addTaxPlanEntry(event) {
     upsertSectionEntry("taxPlan", entry);
     resetSectionForm("taxPlan");
     renderTaxPlan();
+    // Trigger notification check after adding/updating tax plan
+    if (window.triggerNotificationCheck) {
+        window.triggerNotificationCheck();
+    }
 }
 
 function addGiftsEntry(event) {
@@ -10684,6 +11145,10 @@ function addGiftsEntry(event) {
     upsertSectionEntry("gifts", entry);
     resetSectionForm("gifts");
     renderGifts();
+    // Trigger notification check after adding/updating gifts
+    if (window.triggerNotificationCheck) {
+        window.triggerNotificationCheck();
+    }
 }
 
 function saveEmergencyFundFromForm() {
@@ -10704,6 +11169,10 @@ function saveEmergencyFundFromForm() {
     // Emergency fund is a single entry, replace existing
     setActiveEntries([entry]);
     emergencyFundForm.reset();
+    // Trigger notification check after saving emergency fund
+    if (window.triggerNotificationCheck) {
+        window.triggerNotificationCheck();
+    }
 }
 
 function addEmergencyFundEntry(event) {

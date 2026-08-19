@@ -803,7 +803,7 @@ Excludes Saving & Investment outflows (stoppable in emergency).
 ### 7.5 File Structure
 
 ```
-smart-financial-planning/
+smart-personal-finance/
 ├── index.html              # Single-page app shell (760 lines)
 ├── assets/
 │   ├── css/

@@ -359,6 +359,11 @@
                         <div class="category-total">Total: <strong id="inflowTotal">₹0</strong></div>
                     </div>
 
+                    <div class="chart-container">
+                        <h3>Monthly Distribution</h3>
+                        <canvas id="pieChart"></canvas>
+                    </div>
+
                     <div class="category-preview-section">
                         <h3>Cash Outflow</h3>
                         <div id="outflowPreview" class="category-preview-list"></div>
@@ -443,11 +448,6 @@
                         <button type="button" id="btnCarryForward" class="btn-do-transfer" style="background:#ef4444">Close Month</button>
                         <small class="transfer-note">Marks this month as read-only. Leftover balance carries forward, CC outstanding becomes next month's unpaid bill.</small>
                     </div>
-                </div>
-
-                <div class="chart-container">
-                    <h3>Monthly Distribution</h3>
-                    <canvas id="pieChart"></canvas>
                 </div>
             </div>
 
@@ -592,17 +592,17 @@
                 </div>
             </div>
 
+            <!-- Expense Chart -->
+            <div id="expenseChartContainer" class="chart-container">
+                <h3>Category Breakdown</h3>
+                <canvas id="expensePieChart"></canvas>
+            </div>
+
             <!-- Expense List (Preview Mode) -->
             <div id="expensePreview" class="expense-preview">
                 <div id="expenseSortFilter"></div>
                 <h3>Expenses This Month</h3>
                 <div id="expenseList" class="expense-list"></div>
-            </div>
-
-            <!-- Expense Chart -->
-            <div id="expenseChartContainer" class="chart-container">
-                <h3>Category Breakdown</h3>
-                <canvas id="expensePieChart"></canvas>
             </div>
 
             <!-- Expense Edit Mode -->
@@ -1091,6 +1091,12 @@
 
             <!-- Preview Mode -->
             <div id="netWorthPreview" class="net-worth-preview">
+                <div class="chart-section">
+                    <h3>Net Worth Projection (Till Age 70)</h3>
+                    <div class="chart-wrapper" style="height: 280px;">
+                        <canvas id="netWorthProjectionChart"></canvas>
+                    </div>
+                </div>
                 <div class="assets-liabilities-section">
                     <h3>Assets</h3>
                     <div id="assetsList" class="assets-liabilities-list"></div>
@@ -1098,12 +1104,6 @@
                 <div class="assets-liabilities-section">
                     <h3>Liabilities</h3>
                     <div id="liabilitiesList" class="assets-liabilities-list"></div>
-                </div>
-                <div class="chart-section">
-                    <h3>Net Worth Projection (Till Age 70)</h3>
-                    <div class="chart-wrapper" style="height: 280px;">
-                        <canvas id="netWorthProjectionChart"></canvas>
-                    </div>
                 </div>
                 <div class="projection-details">
                     <div class="projection-detail-item">
@@ -1199,6 +1199,14 @@
             <div id="taxPlanPreview" class="tax-plan-preview">
                 <div id="taxSavingBanner" class="tax-saving-banner" style="display:none;"></div>
                 
+                <!-- Tax Deductions Chart -->
+                <div class="chart-section">
+                    <h3>Tax Deductions by Section</h3>
+                    <div class="chart-wrapper">
+                        <canvas id="taxDeductionsChart"></canvas>
+                    </div>
+                </div>
+                
                 <!-- Salary Details Section -->
                 <div class="tax-deductions-section">
                     <h3>Salary Details</h3>
@@ -1214,14 +1222,6 @@
                 <div class="tax-deductions-section">
                     <h3>Tax Deductions</h3>
                     <div id="taxDeductionsList" class="tax-deductions-list"></div>
-                </div>
-                
-                <!-- Tax Deductions Chart -->
-                <div class="chart-section">
-                    <h3>Tax Deductions by Section</h3>
-                    <div class="chart-wrapper">
-                        <canvas id="taxDeductionsChart"></canvas>
-                    </div>
                 </div>
                 
                 <div class="tax-breakdown-section">
@@ -1406,12 +1406,6 @@
                     </div>
                 </div>
 
-                <!-- Monthly Need Breakdown -->
-                <div class="expense-transfer-section">
-                    <h3>Monthly Need Breakdown</h3>
-                    <div id="emergencyFundBreakdown" class="ef-breakdown"></div>
-                </div>
-
                 <!-- Status Display -->
                 <div class="emergency-fund-status" id="emergencyFundStatus">
                     <div class="status-badge" id="statusBadge">-</div>
@@ -1425,6 +1419,12 @@
                             <strong id="monthsCovered">0</strong>
                         </div>
                     </div>
+                </div>
+
+                <!-- Monthly Need Breakdown -->
+                <div class="expense-transfer-section">
+                    <h3>Monthly Need Breakdown</h3>
+                    <div id="emergencyFundBreakdown" class="ef-breakdown"></div>
                 </div>
             </div>
 
@@ -1984,6 +1984,6 @@
 <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore-compat.js"></script>
 <!-- SheetJS + Chart.js are lazy-loaded on demand (see app.js loadScript) -->
 <script src="assets/js/firebase-config.js?v=1785884544"></script>
-<script type="module" src="assets/js/app.js?v=1785884544"></script>
+<script type="module" src="assets/js/app.js?v=1785897000"></script>
 </body>
 </html>
