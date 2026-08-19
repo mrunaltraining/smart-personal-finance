@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>SmartFin - Test Suite (v5.4.9)</title>
+<title>SmartFin - Test Suite (v5.4.10)</title>
 <style>
 body { font-family: system-ui, sans-serif; max-width: 900px; margin: 40px auto; padding: 20px; background: #1a1a1a; color: #e0e0e0; }
 h1 { color: #fff; }
@@ -27,7 +27,7 @@ button:hover { background: #e0e0e0; }
 </style>
 </head>
 <body>
-<h1>₹ SmartFin – Test Suite (v5.4.9)</h1>
+<h1>₹ SmartFin – Test Suite (v5.4.10)</h1>
 <p style="color: #888; margin-top: -10px; margin-bottom: 20px;">
   Comprehensive test coverage for financial calculations, UI logic, notifications, insights, health score, and dashboard enhancements
 </p>
@@ -47,23 +47,23 @@ button:hover { background: #e0e0e0; }
     <li><strong>Auth:</strong> Sign in with wrong password → verify friendly error</li>
     <li><strong>Auth:</strong> Forgot password → enter email → verify reset email sent toast</li>
     <li><strong>Tabs:</strong> Click each of the 11 tabs → verify correct UI renders</li>
-    <li><strong>Dashboard (v5.4.9):</strong> Verify Saving and Investment account status displays</li>
-    <li><strong>Dashboard (v5.4.9):</strong> Verify Variable Expenses and On-Demand Items shown separately</li>
-    <li><strong>Dashboard (v5.4.9):</strong> Verify Total Allocated = Variable Expenses + On-Demand Items</li>
-    <li><strong>Dashboard (v5.4.9):</strong> Verify insight icons are compact (28px containers)</li>
-    <li><strong>Dashboard (v5.4.9):</strong> Verify alert icons are compact (28px containers)</li>
-    <li><strong>Budget (v5.4.9):</strong> Verify on-demand items reduce expenditure account balance</li>
-    <li><strong>Budget (v5.4.9):</strong> Verify budget surplus includes on-demand items</li>
-    <li><strong>Budget (v5.4.9):</strong> Verify Variable Expenses display excludes on-demand items</li>
-    <li><strong>Budget (v5.4.9):</strong> Verify summary grid shows 4 items per row on desktop</li>
-    <li><strong>Budget (v5.4.9):</strong> Verify summary grid shows 2 items per row on mobile</li>
-    <li><strong>Dashboard (v5.4.9):</strong> Verify Goals section shows combined progress bar (not individual)</li>
-    <li><strong>Dashboard (v5.4.9):</strong> Verify Preparedness section shows Emergency Fund, Health Insurance, Term Insurance</li>
-    <li><strong>Dashboard (v5.4.9):</strong> Hover over "Ideal" amounts → verify tooltips show calculation formulas</li>
-    <li><strong>Dashboard (v5.4.9):</strong> Verify 6-Month Trend chart displays with Investment, Liability, Saving, Expenditure, Others</li>
-    <li><strong>Dashboard (v5.4.9):</strong> Verify amounts appear on top of trend chart bars (₹XXK format)</li>
-    <li><strong>Dashboard (v5.4.9):</strong> Click "Download PDF" → verify HTML file downloads</li>
-    <li><strong>Dashboard (v5.4.9):</strong> Verify Emergency Fund ideal matches Emergency Fund tab (same amount)</li>
+    <li><strong>Dashboard (v5.4.10):</strong> Verify Saving and Investment account status displays</li>
+    <li><strong>Dashboard (v5.4.10):</strong> Verify Variable Expenses and On-Demand Items shown separately</li>
+    <li><strong>Dashboard (v5.4.10):</strong> Verify Total Allocated = Variable Expenses + On-Demand Items</li>
+    <li><strong>Dashboard (v5.4.10):</strong> Verify insight icons are compact (28px containers)</li>
+    <li><strong>Dashboard (v5.4.10):</strong> Verify alert icons are compact (28px containers)</li>
+    <li><strong>Budget (v5.4.10):</strong> Verify on-demand items reduce expenditure account balance</li>
+    <li><strong>Budget (v5.4.10):</strong> Verify budget surplus includes on-demand items</li>
+    <li><strong>Budget (v5.4.10):</strong> Verify Variable Expenses display excludes on-demand items</li>
+    <li><strong>Budget (v5.4.10):</strong> Verify summary grid shows 4 items per row on desktop</li>
+    <li><strong>Budget (v5.4.10):</strong> Verify summary grid shows 2 items per row on mobile</li>
+    <li><strong>Dashboard (v5.4.10):</strong> Verify Goals section shows combined progress bar (not individual)</li>
+    <li><strong>Dashboard (v5.4.10):</strong> Verify Preparedness section shows Emergency Fund, Health Insurance, Term Insurance</li>
+    <li><strong>Dashboard (v5.4.10):</strong> Hover over "Ideal" amounts → verify tooltips show calculation formulas</li>
+    <li><strong>Dashboard (v5.4.10):</strong> Verify 6-Month Trend chart displays with Investment, Liability, Saving, Expenditure, Others</li>
+    <li><strong>Dashboard (v5.4.10):</strong> Verify amounts appear on top of trend chart bars (₹XXK format)</li>
+    <li><strong>Dashboard (v5.4.10):</strong> Click "Download PDF" → verify HTML file downloads</li>
+    <li><strong>Dashboard (v5.4.10):</strong> Verify Emergency Fund ideal matches Emergency Fund tab (same amount)</li>
     <li><strong>Dashboard:</strong> Verify responsive layout (3-col desktop, 2-col tablet, 1-col mobile)</li>
     <li><strong>Budget:</strong> Enter income/expense → verify totals update live</li>
     <li><strong>Budget:</strong> Click "📊 Annual" → verify annual summary with month breakdown</li>
@@ -72,20 +72,20 @@ button:hover { background: #e0e0e0; }
     <li><strong>Fixed Outflow:</strong> Add expense → verify bar graphs update</li>
     <li><strong>Investments:</strong> Add Monthly investment → verify appears in Tax Plan auto-deductions</li>
     <li><strong>Investments:</strong> Add One-Time investment → verify NOT in Tax Plan auto-deductions</li>
-    <li><strong>Accounts (v5.4.9):</strong> Verify purpose badge appears next to bank name (not below)</li>
-    <li><strong>Accounts (v5.4.9):</strong> Verify PRIMARY badge shows "PRIMARY (Expenditure)"</li>
-    <li><strong>Accounts (v5.4.9):</strong> Verify all badges have consistent backgrounds</li>
+    <li><strong>Accounts (v5.4.10):</strong> Verify purpose badge appears next to bank name (not below)</li>
+    <li><strong>Accounts (v5.4.10):</strong> Verify PRIMARY badge shows "PRIMARY (Expenditure)"</li>
+    <li><strong>Accounts (v5.4.10):</strong> Verify all badges have consistent backgrounds</li>
     <li><strong>Net Worth:</strong> Add asset + liability → verify projection chart shows</li>
-    <li><strong>Tax Plan (v5.4.9):</strong> Verify auto-deductions only show recurring investments (not One-Time)</li>
-    <li><strong>Tax Plan (v5.4.9):</strong> Verify total is realistic (₹2-8L range, not crores)</li>
+    <li><strong>Tax Plan (v5.4.10):</strong> Verify auto-deductions only show recurring investments (not One-Time)</li>
+    <li><strong>Tax Plan (v5.4.10):</strong> Verify total is realistic (₹2-8L range, not crores)</li>
     <li><strong>Tax Plan:</strong> Switch regime → verify tax calculation changes</li>
-    <li><strong>Gifts (v5.4.9):</strong> Add gift with date → verify appears in monthly chart</li>
-    <li><strong>Gifts (v5.4.9):</strong> Verify summary shows: Total Gifts, Fixed Every Year (count & amount), Spent This Year, Overall Total</li>
-    <li><strong>Gifts (v5.4.9):</strong> Verify monthly chart shows current financial year (Apr-Mar)</li>
+    <li><strong>Gifts (v5.4.10):</strong> Add gift with date → verify appears in monthly chart</li>
+    <li><strong>Gifts (v5.4.10):</strong> Verify summary shows: Total Gifts, Fixed Every Year (count & amount), Spent This Year, Overall Total</li>
+    <li><strong>Gifts (v5.4.10):</strong> Verify monthly chart shows current financial year (Apr-Mar)</li>
     <li><strong>Emergency Fund:</strong> Enter current fund → verify status badge color (red/yellow/green)</li>
     <li><strong>Emergency Fund:</strong> Verify ideal amount calculation shown (12 months)</li>
-    <li><strong>Insurance (v5.4.9):</strong> Add health insurance → verify appears in Dashboard preparedness</li>
-    <li><strong>Insurance (v5.4.9):</strong> Verify ideal health insurance based on income and location</li>
+    <li><strong>Insurance (v5.4.10):</strong> Add health insurance → verify appears in Dashboard preparedness</li>
+    <li><strong>Insurance (v5.4.10):</strong> Verify ideal health insurance based on income and location</li>
     <li><strong>Export:</strong> Click "Export Excel" on any tab with data → verify .xlsx downloads</li>
     <li><strong>Reset:</strong> Click "Reset All Data" → cancel → verify data intact</li>
     <li><strong>Reset:</strong> Click "Reset All Data" → confirm → type DELETE → verify all data cleared</li>
@@ -95,18 +95,18 @@ button:hover { background: #e0e0e0; }
     <li><strong>Loading:</strong> Refresh page → verify loading spinner with logo inside rotating ring</li>
     <li><strong>Modals:</strong> Trigger alert/confirm actions → verify styled modals appear (not browser alerts)</li>
     <li><strong>Theme:</strong> Switch OS dark/light mode → verify app auto-detects and updates theme</li>
-    <li><strong>Notifications (v5.4.9):</strong> Click bell icon → verify notification popup appears with alerts</li>
-    <li><strong>Notifications (v5.4.9):</strong> Click "Clear All" → verify notifications cleared and badge hidden</li>
-    <li><strong>Notifications (v5.4.9):</strong> Click notification item → verify navigates to correct tab</li>
-    <li><strong>Notifications (v5.4.9):</strong> Click outside popup → verify popup closes</li>
-    <li><strong>Notifications (v5.4.9):</strong> Verify notifications reset daily (new day = new alerts)</li>
-    <li><strong>Dashboard (v5.4.9):</strong> Verify Financial Health Score updates dynamically with data changes</li>
-    <li><strong>Dashboard (v5.4.9):</strong> Hover over health score breakdown items → verify detailed tooltips</li>
-    <li><strong>Dashboard (v5.4.9):</strong> Verify insights section shows up to 6 recommendations</li>
-    <li><strong>Dashboard (v5.4.9):</strong> Verify insights include positive, suggestion, and warning types</li>
-    <li><strong>Tags (v5.4.9):</strong> Toggle dark/light mode → verify all semantic badges are readable</li>
-    <li><strong>Tags (v5.4.9):</strong> Verify tag colors: Investment=indigo, Liability=rose, Savings=emerald, Expenditure=amber</li>
-    <li><strong>Tax Plan (v5.4.9):</strong> Verify horizontal bar chart for deductions with proper colors</li>
+    <li><strong>Notifications (v5.4.10):</strong> Click bell icon → verify notification popup appears with alerts</li>
+    <li><strong>Notifications (v5.4.10):</strong> Click "Clear All" → verify notifications cleared and badge hidden</li>
+    <li><strong>Notifications (v5.4.10):</strong> Click notification item → verify navigates to correct tab</li>
+    <li><strong>Notifications (v5.4.10):</strong> Click outside popup → verify popup closes</li>
+    <li><strong>Notifications (v5.4.10):</strong> Verify notifications reset daily (new day = new alerts)</li>
+    <li><strong>Dashboard (v5.4.10):</strong> Verify Financial Health Score updates dynamically with data changes</li>
+    <li><strong>Dashboard (v5.4.10):</strong> Hover over health score breakdown items → verify detailed tooltips</li>
+    <li><strong>Dashboard (v5.4.10):</strong> Verify insights section shows up to 6 recommendations</li>
+    <li><strong>Dashboard (v5.4.10):</strong> Verify insights include positive, suggestion, and warning types</li>
+    <li><strong>Tags (v5.4.10):</strong> Toggle dark/light mode → verify all semantic badges are readable</li>
+    <li><strong>Tags (v5.4.10):</strong> Verify tag colors: Investment=indigo, Liability=rose, Savings=emerald, Expenditure=amber</li>
+    <li><strong>Tax Plan (v5.4.10):</strong> Verify horizontal bar chart for deductions with proper colors</li>
   </ul>
 </div>
 
@@ -531,7 +531,7 @@ function runTests() {
         return count === 0 || `Expected 0 immediate calls, got ${count}`;
     });
 
-    // ─ v5.4.9: toMonthlyAmount (frequency conversion) ────────────────────────────
+    // ─ v5.4.10: toMonthlyAmount (frequency conversion) ────────────────────────────
     function toMonthlyAmount(amount, frequency) {
         const divisors = { Monthly: 1, Quarterly: 3, 'Semi-Annual': 6, Annual: 12 };
         return amount / (divisors[frequency] || 1);
@@ -543,7 +543,7 @@ function runTests() {
     assertEqual(toMonthlyAmount(12000, 'Annual'), 1000, "toMonthlyAmount: Annual → amount/12");
     assertEqual(toMonthlyAmount(12000, 'One-Time'), 12000, "toMonthlyAmount: One-Time → same amount");
 
-    // ─ v5.4.9: Health Insurance Calculation ──────────────────────────────────────
+    // ─ v5.4.10: Health Insurance Calculation ──────────────────────────────────────
     function calculateIdealHealthInsurance(age, location, monthlyIncome) {
         const annualIncome = monthlyIncome * 12;
         const baseAmount = annualIncome * 0.5; // 50% of annual income
@@ -574,7 +574,7 @@ function runTests() {
     assertEqual(calculateIdealHealthInsurance(50, 'Bengaluru, Karnataka', 500000), 2000000, 
         "Health Insurance: High income capped at 20L");
 
-    // ─ v5.4.9: Term Insurance Calculation ────────────────────────────────────────
+    // ─ v5.4.10: Term Insurance Calculation ────────────────────────────────────────
     function calculateIdealTermInsurance(age, monthlyIncome, currentSavings) {
         const annualIncome = monthlyIncome * 12;
         
@@ -596,7 +596,7 @@ function runTests() {
     assertEqual(calculateIdealTermInsurance(50, 100000, 5000000), 7000000, 
         "Term Insurance: 50yr, 12L income, 50L savings → 12L * 10 - 50L = 70L");
 
-    // ─ v5.4.9: Emergency Fund Calculation ────────────────────────────────────────
+    // ─ v5.4.10: Emergency Fund Calculation ────────────────────────────────────────
     function calculateIdealEmergencyFund(fixedLiabilities, fixedExpenditure, avgVariableExpenses) {
         const minMonthlyNeed = fixedLiabilities + fixedExpenditure + avgVariableExpenses;
         return minMonthlyNeed * 6; // 6 months recommended
@@ -609,7 +609,7 @@ function runTests() {
     assertEqual(calculateIdealEmergencyFund(50000, 0, 0), 300000, 
         "Emergency Fund: Only liabilities → 50k * 6 = 3L");
 
-    // ─ v5.4.9: Tax Auto-Deduction Logic ──────────────────────────────────────────
+    // ─ v5.4.10: Tax Auto-Deduction Logic ──────────────────────────────────────────
     function getAutoTaxDeductions(investments, insurances) {
         const auto = [];
         
@@ -684,7 +684,7 @@ function runTests() {
             || "Incorrect section assignment";
     });
 
-    // ─ v5.4.9: Gifts Summary Calculation ─────────────────────────────────────────
+    // ─ v5.4.10: Gifts Summary Calculation ─────────────────────────────────────────
     function calculateGiftsSummary(gifts) {
         const fixedGifts = gifts.filter(g => g.category === 'Fixed Every Year');
         const currentFY = new Date().getMonth() >= 3 ? new Date().getFullYear() : new Date().getFullYear() - 1;
@@ -724,7 +724,7 @@ function runTests() {
         return giftsSummary.spentThisYear > 0 || "Should include current FY gifts";
     });
 
-    // ─ v5.4.9: Budget Surplus Calculation with On-Demand Items ─────────────────
+    // ─ v5.4.10: Budget Surplus Calculation with On-Demand Items ─────────────────
     function calcBudgetSurplus(monthData, expBalance) {
         const inflowTotal = Object.values(monthData.inflow || {}).reduce((s, v) => s + Number(v || 0), 0);
         const borrowing = Number(monthData.inflow?.borrowing || 0);
@@ -769,7 +769,7 @@ function runTests() {
         return result.budgetBalance === 35000 || `Expected 35000, got ${result.budgetBalance}`;
     });
 
-    // ─ v5.4.9: Corrected Budget Calculation ───────────────────────────────────────
+    // ─ v5.4.10: Corrected Budget Calculation ───────────────────────────────────────
     function calcCorrectedBudget(monthData) {
         const inflowTotal = Object.values(monthData.inflow || {}).reduce((s, v) => s + Number(v || 0), 0);
         const borrowing = Number(monthData.inflow?.borrowing || 0);
@@ -815,7 +815,7 @@ function runTests() {
         };
     }
 
-    test("v5.4.9: Variable expenses excludes on-demand items", () => {
+    test("v5.4.10: Variable expenses excludes on-demand items", () => {
         const monthData = {
             inflow: { primaryIncome: 100000 },
             outflow: { fixedExpenditure: 30000, variableExpenditure: 50000 },
@@ -828,7 +828,7 @@ function runTests() {
         return result.actualVariableExp === 25000 || `Expected 25000, got ${result.actualVariableExp}`;
     });
 
-    test("v5.4.9: Total allocated = variable + CC + on-demand", () => {
+    test("v5.4.10: Total allocated = variable + CC + on-demand", () => {
         const monthData = {
             inflow: { primaryIncome: 100000 },
             outflow: { fixedExpenditure: 30000, variableExpenditure: 50000, creditCardOutstanding: 20000 },
@@ -842,7 +842,7 @@ function runTests() {
         return result.totalAllocated === 70000 || `Expected 70000, got ${result.totalAllocated}`;
     });
 
-    test("v5.4.9: Budget balance uses corrected total allocated", () => {
+    test("v5.4.10: Budget balance uses corrected total allocated", () => {
         const monthData = {
             inflow: { primaryIncome: 100000 },
             outflow: { fixedExpenditure: 30000, variableExpenditure: 50000, creditCardOutstanding: 20000 },
@@ -855,7 +855,7 @@ function runTests() {
         return result.budgetBalance === 0 || `Expected 0, got ${result.budgetBalance}`;
     });
 
-    test("v5.4.9: Variable expenses display includes CC", () => {
+    test("v5.4.10: Variable expenses display includes CC", () => {
         const monthData = {
             inflow: { primaryIncome: 100000 },
             outflow: { fixedExpenditure: 30000, variableExpenditure: 50000, creditCardOutstanding: 20000 },
@@ -868,7 +868,7 @@ function runTests() {
         return result.variableExpDisplay === 55000 || `Expected 55000, got ${result.variableExpDisplay}`;
     });
 
-    test("v5.4.9: No double-counting of on-demand items", () => {
+    test("v5.4.10: No double-counting of on-demand items", () => {
         const monthData = {
             inflow: { primaryIncome: 100000 },
             outflow: { fixedExpenditure: 30000, variableExpenditure: 40000 },
@@ -882,7 +882,7 @@ function runTests() {
         return result.totalAllocated === 40000 || `Expected 40000, got ${result.totalAllocated}`;
     });
 
-    // ─ v5.4.9: Dashboard Fallback Calculation ────────────────────────────────────
+    // ─ v5.4.10: Dashboard Fallback Calculation ────────────────────────────────────
     function calcDashboardFallback(monthData, accounts) {
         // Use stored values if available, otherwise calculate
         const storedSpendable = Number(monthData._calculatedSpendable || 0);
@@ -918,7 +918,7 @@ function runTests() {
         return { spendable, untracked, usedStored: false };
     }
 
-    test("v5.4.9: Dashboard uses stored values when available", () => {
+    test("v5.4.10: Dashboard uses stored values when available", () => {
         const monthData = {
             inflow: { primaryIncome: 100000 },
             _calculatedSpendable: 70000,
@@ -929,7 +929,7 @@ function runTests() {
             || "Should use stored values";
     });
 
-    test("v5.4.9: Dashboard falls back to calculation when stored values missing", () => {
+    test("v5.4.10: Dashboard falls back to calculation when stored values missing", () => {
         const monthData = {
             inflow: { primaryIncome: 100000 },
             outflow: { variableExpenditure: 40000 },
@@ -940,7 +940,7 @@ function runTests() {
             || "Should calculate on-the-fly";
     });
 
-    test("v5.4.9: Dashboard fallback uses corrected calculation", () => {
+    test("v5.4.10: Dashboard fallback uses corrected calculation", () => {
         const monthData = {
             inflow: { primaryIncome: 100000 },
             outflow: { variableExpenditure: 50000 },
@@ -952,7 +952,7 @@ function runTests() {
         return result.untracked === 50000 || `Expected 50000, got ${result.untracked}`;
     });
 
-    // ─ v5.4.9: Account Status Detection ───────────────────────────────────────────
+    // ─ v5.4.10: Account Status Detection ───────────────────────────────────────────
     function detectAccountStatus(accounts) {
         const expenditureAccount = accounts.find(c => c.isPrimary === "Yes");
         const salaryAccount = accounts.find(c => c.purpose === "Salary" && c.isPrimary !== "Yes");
@@ -967,7 +967,7 @@ function runTests() {
         };
     }
 
-    test("v5.4.9: Detects all account types correctly", () => {
+    test("v5.4.10: Detects all account types correctly", () => {
         const accounts = [
             { id: "e1", isPrimary: "Yes", purpose: "Expenditure" },
             { id: "s1", purpose: "Salary" },
@@ -979,7 +979,7 @@ function runTests() {
             || "Should detect all account types";
     });
 
-    test("v5.4.9: Handles missing accounts gracefully", () => {
+    test("v5.4.10: Handles missing accounts gracefully", () => {
         const accounts = [
             { id: "e1", isPrimary: "Yes", purpose: "Expenditure" }
         ];
@@ -988,8 +988,8 @@ function runTests() {
             || "Should handle missing accounts";
     });
 
-    // ─ v5.4.9: Icon System ──────────────────────────────────────────────────────────
-    test("v5.4.9: Compact icon names exist", () => {
+    // ─ v5.4.10: Icon System ──────────────────────────────────────────────────────────
+    test("v5.4.10: Compact icon names exist", () => {
         const compactIcons = ['starSmall', 'checkSmall', 'lightbulbSmall', 'hospitalSmall', 
                            'trendingUpSmall', 'targetSmall', 'alertSmall', 'shieldCheckSmall',
                            'creditCardSmall', 'calendarSmall', 'bellSmall'];
@@ -997,7 +997,7 @@ function runTests() {
         return compactIcons.length === 11 || `Expected 11 compact icons, got ${compactIcons.length}`;
     });
 
-    test("v5.4.9: Icon naming follows pattern", () => {
+    test("v5.4.10: Icon naming follows pattern", () => {
         const compactIcons = ['starSmall', 'checkSmall', 'lightbulbSmall'];
         const allFollowPattern = compactIcons.every(name => name.endsWith('Small'));
         return allFollowPattern || "Compact icons should end with 'Small'";
@@ -1023,7 +1023,7 @@ function runTests() {
             || `Expected budgetBalance 55000 and totalOndemand 25000, got ${result.budgetBalance}/${result.totalOndemand}`;
     });
 
-    // ─ v5.4.9: Monthly Distribution with On-Demand Components ────────────────────
+    // ─ v5.4.10: Monthly Distribution with On-Demand Components ────────────────────
     function getMonthlyDistribution(monthData) {
         const outflow = monthData.outflow || {};
         const investing = monthData.investing || {};
@@ -1122,7 +1122,7 @@ function runTests() {
             || `Distribution mismatch: ${JSON.stringify(dist)}`;
     });
 
-    // ─ v5.4.9: Investment Account Reset on Month Close ───────────────────────────
+    // ─ v5.4.10: Investment Account Reset on Month Close ───────────────────────────
     test("Month Close: Investment account resets to 0", () => {
         const investmentAccount = { id: "i1", purpose: "Investment", balance: 250000 };
         // Simulate month close
@@ -1139,7 +1139,7 @@ function runTests() {
         return true; // No error thrown
     });
 
-    // ─ v5.4.9: Financial Health Score Calculation ──────────────────────────────────
+    // ─ v5.4.10: Financial Health Score Calculation ──────────────────────────────────
     function calculateFinancialHealthScore(data) {
         const { emergencyFund, idealEmergencyFund, totalAssets, totalLiabilities,
                 usableIncome, monthlyCommitments, healthInsurance, idealHealthInsurance,
@@ -1205,7 +1205,7 @@ function runTests() {
         return { score, healthLevel };
     }
 
-    test("v5.4.9 Health Score: Excellent score for strong finances", () => {
+    test("v5.4.10 Health Score: Excellent score for strong finances", () => {
         const result = calculateFinancialHealthScore({
             emergencyFund: 600000, idealEmergencyFund: 600000,
             totalAssets: 5000000, totalLiabilities: 500000,
@@ -1219,7 +1219,7 @@ function runTests() {
         return result.healthLevel === 'Excellent' || `Expected Excellent, got ${result.healthLevel} (score: ${result.score})`;
     });
 
-    test("v5.4.9 Health Score: Low score for poor finances", () => {
+    test("v5.4.10 Health Score: Low score for poor finances", () => {
         const result = calculateFinancialHealthScore({
             emergencyFund: 10000, idealEmergencyFund: 600000,
             totalAssets: 100000, totalLiabilities: 500000,
@@ -1233,7 +1233,7 @@ function runTests() {
         return result.score < 30 || `Expected score < 30, got ${result.score}`;
     });
 
-    test("v5.4.9 Health Score: Debt ratio < 30% gets full 20 pts", () => {
+    test("v5.4.10 Health Score: Debt ratio < 30% gets full 20 pts", () => {
         const result = calculateFinancialHealthScore({
             emergencyFund: 0, idealEmergencyFund: 0,
             totalAssets: 0, totalLiabilities: 0,
@@ -1247,7 +1247,7 @@ function runTests() {
         return result.score >= 20 || `Expected >= 20 (debt score), got ${result.score}`;
     });
 
-    test("v5.4.9 Health Score: Savings rate 30%+ gets full 25 pts", () => {
+    test("v5.4.10 Health Score: Savings rate 30%+ gets full 25 pts", () => {
         const result = calculateFinancialHealthScore({
             emergencyFund: 0, idealEmergencyFund: 0,
             totalAssets: 0, totalLiabilities: 0,
@@ -1261,7 +1261,7 @@ function runTests() {
         return result.score >= 25 || `Expected >= 25 (savings score), got ${result.score}`;
     });
 
-    test("v5.4.9 Health Score: Goals bonus for having goals defined", () => {
+    test("v5.4.10 Health Score: Goals bonus for having goals defined", () => {
         const withGoals = calculateFinancialHealthScore({
             emergencyFund: 0, idealEmergencyFund: 0,
             totalAssets: 100000, totalLiabilities: 0,
@@ -1285,7 +1285,7 @@ function runTests() {
         return withGoals.score > withoutGoals.score || `Having goals should increase score: withGoals=${withGoals.score}, withoutGoals=${withoutGoals.score}`;
     });
 
-    test("v5.4.9 Health Score: Asset diversification bonus", () => {
+    test("v5.4.10 Health Score: Asset diversification bonus", () => {
         const diversified = calculateFinancialHealthScore({
             emergencyFund: 0, idealEmergencyFund: 0,
             totalAssets: 1000000, totalLiabilities: 100000,
@@ -1309,7 +1309,7 @@ function runTests() {
         return diversified.score > notDiversified.score || "Diversification should increase score";
     });
 
-    // ─ v5.4.9: Notification Trigger Logic ────────────────────────────────────────
+    // ─ v5.4.10: Notification Trigger Logic ────────────────────────────────────────
     function testNotificationTrigger(budgetBalance, emergencyFund, idealEmergencyFund, ccUsage) {
         const alerts = [];
         if (budgetBalance < 0) {
@@ -1328,22 +1328,22 @@ function runTests() {
         return alerts;
     }
 
-    test("v5.4.9 Notifications: Over budget triggers warning", () => {
+    test("v5.4.10 Notifications: Over budget triggers warning", () => {
         const alerts = testNotificationTrigger(-10000, 600000, 600000, 0);
         return alerts.some(a => a.message.includes('Over budget')) || "Should trigger over budget alert";
     });
 
-    test("v5.4.9 Notifications: Low emergency fund triggers warning", () => {
+    test("v5.4.10 Notifications: Low emergency fund triggers warning", () => {
         const alerts = testNotificationTrigger(10000, 100000, 600000, 0);
         return alerts.some(a => a.message.includes('Emergency fund')) || "Should trigger emergency fund alert";
     });
 
-    test("v5.4.9 Notifications: High CC usage triggers info", () => {
+    test("v5.4.10 Notifications: High CC usage triggers info", () => {
         const alerts = testNotificationTrigger(10000, 600000, 600000, 75000);
         return alerts.some(a => a.message.includes('credit card')) || "Should trigger CC alert";
     });
 
-    test("v5.4.9 Notifications: No alerts when finances are healthy", () => {
+    test("v5.4.10 Notifications: No alerts when finances are healthy", () => {
         const alerts = testNotificationTrigger(50000, 600000, 600000, 10000);
         const hasOverBudget = alerts.some(a => a.message.includes('Over budget'));
         const hasEmergency = alerts.some(a => a.message.includes('Emergency'));
@@ -1351,7 +1351,7 @@ function runTests() {
         return !hasOverBudget && !hasEmergency && !hasCC || "Should not trigger critical alerts";
     });
 
-    // ─ v5.4.9: Goal Trigger Logic ────────────────────────────────────────────────
+    // ─ v5.4.10: Goal Trigger Logic ────────────────────────────────────────────────
     function testGoalTriggers(goals) {
         const alerts = [];
         const now = new Date();
@@ -1391,12 +1391,12 @@ function runTests() {
         return alerts;
     }
 
-    test("v5.4.9 Goals: No goals triggers suggestion", () => {
+    test("v5.4.10 Goals: No goals triggers suggestion", () => {
         const alerts = testGoalTriggers([]);
         return alerts.some(a => a.message.includes('No financial goals')) || "Should suggest setting goals";
     });
 
-    test("v5.4.9 Goals: Upcoming goals triggers alert", () => {
+    test("v5.4.10 Goals: Upcoming goals triggers alert", () => {
         const soon = new Date();
         soon.setDate(soon.getDate() + 15);
         const alerts = testGoalTriggers([
@@ -1405,7 +1405,7 @@ function runTests() {
         return alerts.some(a => a.message.includes('due within 30 days')) || "Should trigger upcoming goal alert";
     });
 
-    // ─ v5.4.9: Insurance Trigger Logic ───────────────────────────────────────────
+    // ─ v5.4.10: Insurance Trigger Logic ───────────────────────────────────────────
     function testInsuranceTriggers(policies, annualSalary) {
         const alerts = [];
         if (policies.length === 0 && annualSalary > 0) {
@@ -1424,12 +1424,12 @@ function runTests() {
         return alerts;
     }
 
-    test("v5.4.9 Insurance: No policies triggers warning", () => {
+    test("v5.4.10 Insurance: No policies triggers warning", () => {
         const alerts = testInsuranceTriggers([], 1200000);
         return alerts.some(a => a.message.includes('No insurance')) || "Should warn about no insurance";
     });
 
-    test("v5.4.9 Insurance: Expiring policy triggers warning", () => {
+    test("v5.4.10 Insurance: Expiring policy triggers warning", () => {
         const soon = new Date();
         soon.setDate(soon.getDate() + 30);
         const alerts = testInsuranceTriggers([
@@ -1438,7 +1438,7 @@ function runTests() {
         return alerts.some(a => a.message.includes('expiring within 60 days')) || "Should warn about expiring policy";
     });
 
-    test("v5.4.9 Insurance: Non-expiring policy does not trigger", () => {
+    test("v5.4.10 Insurance: Non-expiring policy does not trigger", () => {
         const future = new Date();
         future.setFullYear(future.getFullYear() + 2);
         const alerts = testInsuranceTriggers([
@@ -1447,7 +1447,7 @@ function runTests() {
         return !alerts.some(a => a.message.includes('expiring')) || "Should not warn about future policy";
     });
 
-    // ─ v5.4.9: Net Worth & Debt Trigger Logic ────────────────────────────────────
+    // ─ v5.4.10: Net Worth & Debt Trigger Logic ────────────────────────────────────
     function testNetWorthTriggers(totalAssets, totalLiabilities, assetTypes) {
         const alerts = [];
         const netWorth = totalAssets - totalLiabilities;
@@ -1464,29 +1464,29 @@ function runTests() {
         return alerts;
     }
 
-    test("v5.4.9 Net Worth: Negative net worth triggers warning", () => {
+    test("v5.4.10 Net Worth: Negative net worth triggers warning", () => {
         const alerts = testNetWorthTriggers(100000, 500000, 3);
         return alerts.some(a => a.message.includes('Negative net worth')) || "Should warn about negative net worth";
     });
 
-    test("v5.4.9 Net Worth: Low diversification triggers info", () => {
+    test("v5.4.10 Net Worth: Low diversification triggers info", () => {
         const alerts = testNetWorthTriggers(500000, 100000, 2);
         return alerts.some(a => a.message.includes('diversification')) || "Should suggest diversification";
     });
 
-    test("v5.4.9 Net Worth: High debt ratio triggers warning", () => {
+    test("v5.4.10 Net Worth: High debt ratio triggers warning", () => {
         const alerts = testNetWorthTriggers(100000, 60000, 3);
         return alerts.some(a => a.message.includes('debt-to-asset')) || "Should warn about high debt ratio";
     });
 
-    test("v5.4.9 Net Worth: Healthy finances no warnings", () => {
+    test("v5.4.10 Net Worth: Healthy finances no warnings", () => {
         const alerts = testNetWorthTriggers(1000000, 200000, 4);
         const hasNegative = alerts.some(a => a.message.includes('Negative'));
         const hasDebt = alerts.some(a => a.message.includes('debt-to-asset'));
         return !hasNegative && !hasDebt || "Should not warn for healthy finances";
     });
 
-    // ─ v5.4.9: Insights Generation Logic ─────────────────────────────────────────
+    // ─ v5.4.10: Insights Generation Logic ─────────────────────────────────────────
     function testInsightsGeneration(data) {
         const insights = [];
         if (data.budgetBalance > 0) {
@@ -1513,7 +1513,7 @@ function runTests() {
         return insights.slice(0, 6);
     }
 
-    test("v5.4.9 Insights: Generates positive insight for surplus", () => {
+    test("v5.4.10 Insights: Generates positive insight for surplus", () => {
         const insights = testInsightsGeneration({
             budgetBalance: 20000, savingsRate: 0.15,
             emergencyFund: 300000, idealEmergencyFund: 600000,
@@ -1524,7 +1524,7 @@ function runTests() {
             || "Should generate positive surplus insight";
     });
 
-    test("v5.4.9 Insights: Generates warning for low savings", () => {
+    test("v5.4.10 Insights: Generates warning for low savings", () => {
         const insights = testInsightsGeneration({
             budgetBalance: 5000, savingsRate: 0.05,
             emergencyFund: 50000, idealEmergencyFund: 600000,
@@ -1534,7 +1534,7 @@ function runTests() {
         return insights.some(i => i.type === 'warning') || "Should generate warning insight";
     });
 
-    test("v5.4.9 Insights: Limits to 6 insights max", () => {
+    test("v5.4.10 Insights: Limits to 6 insights max", () => {
         const insights = testInsightsGeneration({
             budgetBalance: 50000, savingsRate: 0.35,
             emergencyFund: 600000, idealEmergencyFund: 600000,
@@ -1544,8 +1544,8 @@ function runTests() {
         return insights.length <= 6 || `Expected <= 6 insights, got ${insights.length}`;
     });
 
-    // ─ v5.4.9: Sample Data Validation ────────────────────────────────────────────
-    test("v5.4.9 Sample Data: sampledata.json structure validation", () => {
+    // ─ v5.4.10: Sample Data Validation ────────────────────────────────────────────
+    test("v5.4.10 Sample Data: sampledata.json structure validation", () => {
         // Validate the expected structure exists
         const requiredTabs = ['cards', 'inflow', 'outflow', 'financialGoal', 'insurance', 'liability', 'taxPlan', 'gifts', 'emergencyFund'];
         const requiredTopLevel = ['tabData', 'monthlyBudgetData', 'expenseTrackingData', 'userLocation', 'dateOfBirth', 'fixedMonthlyIncome'];
@@ -1553,7 +1553,7 @@ function runTests() {
         return requiredTabs.length === 9 && requiredTopLevel.length === 6;
     });
 
-    test("v5.4.9: Health score weight distribution totals 100", () => {
+    test("v5.4.10: Health score weight distribution totals 100", () => {
         const weights = { emergencyFund: 15, debtManagement: 20, savingsInvestment: 25, insurance: 15, netWorth: 15, goals: 10 };
         const total = Object.values(weights).reduce((s, v) => s + v, 0);
         return total === 100 || `Expected 100, got ${total}`;
