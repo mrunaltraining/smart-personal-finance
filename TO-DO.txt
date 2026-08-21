@@ -5,10 +5,10 @@
 ================================================================================
 
 
-[P1] HIGH PRIORITY - v5.4.11 Dynamic Notifications & Enhanced Insights
+[P1] HIGH PRIORITY - v5.5.1 Dynamic Notifications & Enhanced Insights
 ================================================================================
 
-[x] Dynamic Notification System (COMPLETED v5.4.11)
+[x] Dynamic Notification System (COMPLETED v5.5.1)
     - 7 notification triggers (Budget, Goals, Insurance, Expenses, Net Worth, Tax, Gifts)
     - Badge counter showing unread alert count
     - Popup panel with Clear All action
@@ -16,14 +16,14 @@
     - Daily reset with localStorage state management
     - Change detection to avoid regenerating same alerts
 
-[x] Enhanced Insights Engine (COMPLETED v5.4.11)
+[x] Enhanced Insights Engine (COMPLETED v5.5.1)
     - 11 recommendation types (5 positive, 7 suggestion, 3 warning)
     - Display limit increased from 4 to 6 insights
     - Categories: positive (surplus, savings rate, emergency fund, net worth, investing)
     - Categories: suggestion (EF gap, insurance, investments, goals, diversification, tax planning)
     - Categories: warning (debt ratio, savings rate, negative net worth)
 
-[x] Financial Health Score Rebalancing (COMPLETED v5.4.11)
+[x] Financial Health Score Rebalancing (COMPLETED v5.5.1)
     - Emergency Fund: 15 pts (gradual scoring)
     - Debt Management: 20 pts (debt-to-income bands)
     - Savings & Investment: 25 pts (combined, highest weight)
@@ -32,44 +32,44 @@
     - Goal Progress: 10 pts (8 pts progress + 2 pt bonus for having goals)
     - Total: 100 points
 
-[x] Modern Dark Theme (COMPLETED v5.4.11)
+[x] Modern Dark Theme (COMPLETED v5.5.1)
     - Indigo/slate color palette
     - Primary color: #6366f1 (indigo)
     - Updated all CSS variables for consistency
     - Light theme support with proper contrast
 
-[x] Loading Spinner Redesign (COMPLETED v5.4.11)
+[x] Loading Spinner Redesign (COMPLETED v5.5.1)
     - Logo inside rotating ring
     - Counter-rotation to keep logo upright
     - Reduced motion support
 
-[x] Tags/Badges Dark/Light Mode Consistency (COMPLETED v5.4.11)
+[x] Tags/Badges Dark/Light Mode Consistency (COMPLETED v5.5.1)
     - Updated semantic badges with modern colors (indigo, rose, emerald, amber, violet, cyan)
     - Separate light theme overrides for readability
     - Consistent across all tabs
 
-[x] Tax Deductions Chart Improvement (COMPLETED v5.4.11)
+[x] Tax Deductions Chart Improvement (COMPLETED v5.5.1)
     - Changed to horizontal bar chart for better label readability
     - Grouped by tax section
 
-[x] Sample Test Data (COMPLETED v5.4.11)
+[x] Sample Test Data (COMPLETED v5.5.1)
     - Created tests/sampledata.json with comprehensive test data
     - 6 accounts, 5 investments, 10 outflows, 5 goals, 3 insurance policies
     - 5 months of budget data with realistic numbers
     - Expense tracking data included
 
-[x] Unit Tests Updated (COMPLETED v5.4.11)
-    - Added 30+ new tests for v5.4.11 features
+[x] Unit Tests Updated (COMPLETED v5.5.1)
+    - Added 30+ new tests for v5.5.1 features
     - Health score calculation tests
     - Notification trigger tests
     - Insight generation tests
     - Total: 95+ tests (all passing)
 
-[x] Documentation Updated (COMPLETED v5.4.11)
+[x] Documentation Updated (COMPLETED v5.5.1)
     - APP_SPEC.md: Added notification system, insights, health score sections
     - ARCHITECTURE.md: Added notification and health score pipeline diagrams
     - API_DOCUMENTATION.md: Added health score and insights API docs
-    - USER_MANUAL.md: Added v5.4.11 changelog
+    - USER_MANUAL.md: Added v5.5.1 changelog
 
 
 [P2] MEDIUM PRIORITY - Enhanced Analytics
@@ -308,8 +308,8 @@
   
   Test Suite:       95+ tests (100% passing)
   
-  Recently Completed (v5.4.11):
-    v5.4.11 (MAJOR RELEASE):
+  Recently Completed (v5.5.1):
+    v5.5.1 (MAJOR RELEASE):
     - ✅ P1.1: Dynamic Notification System with 7 triggers, badge counter, Clear All, click-outside-close, daily reset
     - ✅ P1.2: Enhanced Insights Engine with 11 recommendation types, limit 4→6
     - ✅ P1.3: Financial Health Score rebalanced (Emergency Fund 15, Debt 20, Savings & Investment 25, Insurance 15, Net Worth 15, Goals 10)
@@ -321,8 +321,8 @@
     - ✅ P1.9: Unit tests updated with 30+ new tests
     - ✅ P1.10: All documentation updated (APP_SPEC, ARCHITECTURE, API_DOCUMENTATION, USER_MANUAL)
   
-  Previously Completed (v5.4.11 - v5.2):
-    v5.4.11: Platform-independent modules, standardized logging, documentation consolidation
+  Previously Completed (v5.5.1 - v5.2):
+    v5.5.1: Platform-independent modules, standardized logging, documentation consolidation
     v5.0-v5.2: Auto-debit routing, budget engine rewrite, transfer mismatch detection
   
   Next Priorities:

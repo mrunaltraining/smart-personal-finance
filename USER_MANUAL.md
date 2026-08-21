@@ -1,8 +1,8 @@
-# SmartFin – User Manual (v5.5.0)
+# SmartFin – User Manual (v5.5.1)
 
 A comprehensive guide to using SmartFin for personal financial planning.
 
-## What's New in v5.5.0
+## What's New in v5.5.1
 
 ### 📧 Email Infrastructure
 - **EmailJS Integration**: Complete email service for transactional emails
@@ -30,7 +30,7 @@ A comprehensive guide to using SmartFin for personal financial planning.
 - **Light Mode Enhancement**: Better contrast and visual hierarchy in light theme
 - **Bug Report UI**: Modern design matching existing app aesthetics
 
-## What's New in v5.4.11
+## What's New in v5.5.1
 
 ### 🔔 Dynamic Notification System
 - **Bell Icon with Badge Counter**: Shows unread alert count in header
@@ -71,7 +71,7 @@ A comprehensive guide to using SmartFin for personal financial planning.
 - **Horizontal Layout**: Changed to horizontal bar chart for better label readability
 - **Grouped by Section**: Deductions organized by tax section (80C, 80D, etc.)
 
-## What's New in v5.4.11
+## What's New in v5.5.1
 
 ### 🔧 Error Handling & Network Status
 - **Network Status Indicator**: Visual indicator in user bar (next to your email) showing Firebase save status
@@ -91,7 +91,7 @@ A comprehensive guide to using SmartFin for personal financial planning.
 - **Automatic Retry**: Network errors automatically retry after 2 seconds with visual feedback
 - **Offline Detection**: Automatically detects when browser goes offline and shows status
 
-## What's New in v5.4.11
+## What's New in v5.5.1
 
 ### 🎉 Major Architecture Redesign (Behind the Scenes)
 - **Modular Business Logic**: All financial calculations now use platform-independent modules for better reliability and accuracy
@@ -105,7 +105,7 @@ A comprehensive guide to using SmartFin for personal financial planning.
 - **Better Reliability**: Enhanced calculation accuracy with comprehensive testing
 - **Responsive Design**: Maintained full support for mobile, tablet, and desktop
 
-## What's New in v5.4.11
+## What's New in v5.5.1
 
 - **Improved Budget Calculation**: On-demand items (saving, investment, expenditure, liability) now properly reduce expenditure account balance and are included in budget surplus calculation
 - **Clearer Budget Display**: Variable Expenses and On-Demand Items are now shown separately for better tracking of actual spending vs allocations
@@ -113,14 +113,14 @@ A comprehensive guide to using SmartFin for personal financial planning.
 - **Compact Icons**: Redesigned insight and alert icons to be more compact and fit better in UI cards
 - **Consistent Layout**: Summary grid now displays exactly 4 items per row on desktop and 2 per row on mobile for a cleaner, more predictable layout
 
-## What's New in v5.4.11
+## What's New in v5.5.1
 
 - **Unified navigation and headers**: page names are no longer repeated; the active section in the app header and tabs provides context while controls stay compact.
 - **Better summaries**: Accounts and Gifts use responsive divider-based summary strips that stay readable on mobile.
 - **Expense category icons**: all available expense categories display a matching icon in the list and edit table.
 - **Refined charts and lists**: chart cards, grouped expenses, and edit tables now share the same visual system.
 
-## Previous Update: v5.4.11
+## Previous Update: v5.5.1
 
 - **Expense Tracking Tab**: Complete expense tracking system with category-wise breakdown and month-by-month analysis
 - **Budget Comparison**: Automatic comparison of actual expenses vs Budget's Variable Expenditure
@@ -132,7 +132,7 @@ A comprehensive guide to using SmartFin for personal financial planning.
 
 ## Previous Updates
 
-## What's New in v5.4.11
+## What's New in v5.5.1
 
 - **Location-Based Features**: City selection during registration for accurate insurance calculations
 - **Enhanced Dashboard**: Budget surplus, combined goals progress, preparedness metrics with ideal amounts

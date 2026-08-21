@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [5.5.0] - 2026-08-22 - Email Infrastructure & Professional Pages
 
+## [v5.5.1] - 2026-08-21 - Build Update
+
+### Changed
+- Bumped build number to 1
+
+
 ### Added
 - **EmailJS Integration**: Complete email service abstraction using EmailJS for transactional emails
   - EmailService module with rate limiting, retry logic, and error handling
