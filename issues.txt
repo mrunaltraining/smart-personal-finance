@@ -1,92 +1,183 @@
 listof issues:
 --------------
-make sure the /Users/mrunal/Documents/MyWork/mrunaldevcontainer/mrunalworkspace/mrunaldevrepo/smart-personal-finance/scripts/bump-version.sh takes care of bumping teh version on readme.md for folloing content
-![Version](https://img.shields.io/badge/version-4.0.5-blue.svg)
-
-so taht the tag will be automaticall updated in github view as it renders from readme.md
-
-see if import/export works fine or not if all data structures of teh app are taken care or not we should have some uts to test import export using the sampledata.json file we have under test directory
 
 
-on Spending breakdown section , make this a disclaimer at bottom of section : Recorded transactions only
+12. Email Infrastructure / EmailJS Integration
+Use EmailJS for application email functionality.
+Do not use Resend, SendGrid, Mailgun, or another email provider unless explicitly required later.
+12.1 EmailJS Integration
+Integrate EmailJS for sending application emails.
+The implementation should support:
+* Dashboard Report emails
+* Bug/Issue Report emails
+* Welcome emails
+* Email verification emails, if required by the existing authentication flow
+* Payment confirmation emails
+* Subscription activation emails
+* Subscription cancellation emails
+* Payment failure emails
+* Refund notifications
+* Referral notifications
+* Other existing application email notifications
+First inspect the current application and determine whether EmailJS is already partially integrated. Reuse and improve the existing implementation instead of creating a duplicate email system.
+12.2 Email Service Abstraction
+Create a reusable email service abstraction so the rest of the application does not directly depend on EmailJS-specific implementation details.
+For example:
+EmailService
+├── sendDashboardReport()
+├── sendBugReport()
+├── sendWelcomeEmail()
+├── sendVerificationEmail()
+├── sendPaymentConfirmation()
+├── sendSubscriptionActivated()
+├── sendSubscriptionCancelled()
+├── sendPaymentFailure()
+├── sendRefundNotification()
+└── sendReferralNotification()
+Adapt this structure to the existing application's framework and architecture.
+The objective is:
+Application Feature
+        ↓
+Email Service
+        ↓
+EmailJS
+rather than:
+Dashboard → EmailJS
+Bug Report → EmailJS
+Payments → EmailJS
+Subscriptions → EmailJS
+with provider-specific code duplicated throughout the application.
+12.3 EmailJS Configuration
+Use configuration/environment variables for EmailJS configuration where supported by the application's architecture.
+Do not hardcode sensitive credentials or configuration throughout the source code.
+Typical configuration may include:
+EMAILJS_SERVICE_ID
+EMAILJS_TEMPLATE_ID
+EMAILJS_PUBLIC_KEY
+Use the actual EmailJS configuration model appropriate for the selected integration method.
+Do not expose private secrets or administrative credentials to the browser.
+If the EmailJS integration requires a public key to be present in frontend code, only expose the values that EmailJS explicitly defines as safe for client-side use.
+Never expose:
+* Private API secrets
+* Database credentials
+* Authentication secrets
+* Application signing keys
+* User tokens
+* Internal credentials
+12.4 Email Templates
+Create reusable EmailJS templates for the supported email types.
+At minimum:
+Dashboard Report
+Include:
+* User name where available
+* User email
+* Report period
+* Appropriate report information
+* Generated report attachment where supported
+Bug Report
+Include:
+* Bug ID
+* Issue title
+* Description
+* Steps to reproduce
+* Expected behavior
+* Actual behavior
+* User email
+* Application version
+* Timestamp
+* Sanitized diagnostic information
+* Relevant logs
+* Screenshot/file attachments where supported
+Send bug reports to:
+mrunaltemp01@gmail.com
+The bug ID must appear in both the subject and body.
+Example:
+[DEF-100] Dashboard report calculation issue
+12.5 Dashboard Report Email
+When a user chooses:
+Download Dashboard Report → Send to My Email
+send the report to the email address associated with the authenticated account.
+Do not allow the user to manually change the destination email for this specific feature.
+The backend/application authentication state must determine the user's email.
+Show:
+Sending report...
+then:
+Report sent successfully to your registered email.
+If sending fails:
+We couldn't send the report. Please try again.
+Do not expose EmailJS implementation errors directly to the user.
+12.6 Bug Report Email
+When the user submits a bug:
+1. Validate the form.
+2. Validate attachments.
+3. Collect application diagnostics.
+4. Sanitize logs.
+5. Generate the next unique bug ID.
+6. Persist the issue where appropriate.
+7. Send the bug report using EmailJS.
+8. Attach supported files/screenshots where the EmailJS setup supports them.
+9. Show the generated bug ID to the user.
+Example:
+Your issue has been submitted successfully.
 
-on dashboard tab, Goals & Investment section folloing sectionis duplicated
-
-1 ongoing · 4 planned · 0 achieved · 0 missed · 5 covered · 6 short-term · 4 mid-term · 5 long-term
-
-remove the 2nd instance from the bottom of teh Goals & Investment section and add some quick insights about investments instead like value projected for next 5 yr 10 yr 
-
-In dashboard page, add this kind of summerized/optimized ß insights generated for retirment planning as well under Insights & Recommendations section
-based on existing investment values / recurring values underinvestment tab
-Want to Retire at Age 50 (official Retiremnt Age is 60)
-Get pension for 20 Years Atleast
-
-At age of 55 EPF total asset value would be 1,19,89,293 considering I retire at 55
-At age of 60 EPFcorpus value would be 1,95,60,142 without income for 55-60 and will b elligible to withdraw epf
-(Calculated at current Basic (32,576 rs  at age of 32) with annual 5% hike till Age 55)
-Which is approx 40-45K Per month for next 25 Years i.e Age 85 (Inflation not considered)
-So need to plan for Age 50-60 and Invest in PPF so that (50000rs per month pension x 12 months x 10years) i.e. to make 60,00,000 at Age 50 from PPF 
-The investment for above I will start in 2030-2040
-
-EPF + NPS contributions will give  ₹4 Cr at 55, Guaranteed pension ~₹30K/month from NPS 
-You want to take ₹1 crore at age 55 and use rest 3cr for an annuity or systematic drawdown for 25 years (till age 80)
-will get about ₹1.5–1.6 lakh/month at retirement (age 55). But in today’s money, that will only feel like ~₹53K/month. (6% inflation considered)
-
-
-If retire at 50 and withdraw immediately → ~₹1.1L/month (₹49K/month today).
-If retire at 50 but wait till 55 to withdraw → ~₹1.75L/month (₹58K/month today).
-If retire at 50 but wait till 60 to withdraw → ~₹2.7L/month (₹77K/month today).
-
-
-
-
-
-
-see if we can modify the fucntion like this
-function normalizeGoalStatus(goal) {
-    const needed = Number(goal.amountNeeded);
-    const accumulated = Number(goal.amountAccumulated || 0);
-
-    const targetDate = goal.targetDate
-        ? new Date(`${goal.targetDate}T23:59:59`)
-        : null;
-
-    const now = new Date();
-    const datePassed = targetDate && targetDate < now;
-
-    if (!datePassed) {
-        if (accumulated === 0) return "Planned";
-        if (accumulated < needed) return "Ongoing";
-        return "Achieved";
-    }
-
-    if (accumulated < needed) return "Missed";
-
-    return "Covered";
-}
-
-mak ethe dates more readable and human friendly for goal list like 15th August 2026 instead of 2040-01-01
-
-see if we can give an option to hide completed ones which will hide the covered ones or garyed out 
-in list view have teh default dvew as group the list by goal type and sorted by status logically 
-
-also see why the gaol type filter is not working properly
-
-remove sort by details ad that doe s not needed 
+Reference ID: DEF-100
+If email delivery fails, do not silently lose the bug report.
+If the architecture allows it:
+* Persist the bug report first.
+* Track email delivery status.
+* Allow retry/reprocessing.
+* Do not generate a second bug ID simply because email delivery failed.
+12.7 Email Failure Handling
+Email delivery must not break critical application functionality.
+For example:
+Payment succeeds
+       ↓
+Email notification attempted
+       ↓
+Email succeeds/fails independently
+Do not roll back a successful payment simply because an EmailJS notification failed.
+Likewise, a bug report should not be lost because of a temporary email failure.
+Use the existing application's retry/background-processing infrastructure if available.
+Do not introduce unnecessary infrastructure if the application does not require it.
+12.8 EmailJS Security
+Review the EmailJS integration carefully.
+Important:
+* Never expose private EmailJS credentials.
+* Never expose database credentials.
+* Never put sensitive application secrets in EmailJS templates.
+* Sanitize user-provided content before inserting it into emails.
+* Validate attachment types and sizes.
+* Do not include passwords, authentication tokens, session tokens, API keys, or other secrets in bug reports.
+* Sanitize application logs before sending them.
+* Prevent users from manipulating the administrator recipient through frontend requests.
+The administrator recipient must remain controlled by application configuration and must not be accepted as an arbitrary user-provided value.
+12.9 Rate Limiting / Abuse Prevention
+Review whether EmailJS calls could be abused.
+For features such as:
+* Send Dashboard Report
+* Report Bug
+* Resend verification email
+implement reasonable rate limiting/debouncing where appropriate.
+Do not allow a malicious user to repeatedly trigger large numbers of emails.
+12.10 Testing
+Test:
+* Successful Dashboard Report email
+* Dashboard Report email failure
+* Bug report email
+* Bug report with screenshots
+* Bug report with invalid attachment
+* Bug report with oversized attachment
+* EmailJS service failure
+* Invalid/missing configuration
+* Duplicate submissions
+* Multiple simultaneous bug reports
+* Bug ID uniqueness
+* Sanitized logs
+* Administrator recipient protection
+* Authentication/user email validation
+Also verify that no sensitive EmailJS credentials or other secrets are included in the generated frontend bundle.
 
 
-
-under tax paln tab, make this more comprehensive for tax calulation and retirement corpus calulation in future or pension calulation
-let the user give option al inputs here have most common salary bearkdown components 
-Salary Details (Optional - for HRA exemption)
-
-change the goal ststus to "Completed" instaed of "Covered"
-
-we can use colorcoding here too 
-planned yellow
-Ongoing blue
-Achieved green
-Missed Red
-completed gray/white which ever suuport both darka nd light mode
-
-mak eteh colour selection like this symantic but more modern palate
+So use mailjs instead use these Service id  smart_personal_finance
+Public key : ImSsUAPyw3LyjSQ8y
+templateid: smartfin_contact_us
