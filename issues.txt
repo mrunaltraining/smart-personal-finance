@@ -2,182 +2,106 @@ listof issues:
 --------------
 
 
-12. Email Infrastructure / EmailJS Integration
-Use EmailJS for application email functionality.
-Do not use Resend, SendGrid, Mailgun, or another email provider unless explicitly required later.
-12.1 EmailJS Integration
-Integrate EmailJS for sending application emails.
-The implementation should support:
-* Dashboard Report emails
-* Bug/Issue Report emails
-* Welcome emails
-* Email verification emails, if required by the existing authentication flow
-* Payment confirmation emails
-* Subscription activation emails
-* Subscription cancellation emails
-* Payment failure emails
-* Refund notifications
-* Referral notifications
-* Other existing application email notifications
-First inspect the current application and determine whether EmailJS is already partially integrated. Reuse and improve the existing implementation instead of creating a duplicate email system.
-12.2 Email Service Abstraction
-Create a reusable email service abstraction so the rest of the application does not directly depend on EmailJS-specific implementation details.
-For example:
-EmailService
-├── sendDashboardReport()
-├── sendBugReport()
-├── sendWelcomeEmail()
-├── sendVerificationEmail()
-├── sendPaymentConfirmation()
-├── sendSubscriptionActivated()
-├── sendSubscriptionCancelled()
-├── sendPaymentFailure()
-├── sendRefundNotification()
-└── sendReferralNotification()
-Adapt this structure to the existing application's framework and architecture.
-The objective is:
-Application Feature
-        ↓
-Email Service
-        ↓
-EmailJS
-rather than:
-Dashboard → EmailJS
-Bug Report → EmailJS
-Payments → EmailJS
-Subscriptions → EmailJS
-with provider-specific code duplicated throughout the application.
-12.3 EmailJS Configuration
-Use configuration/environment variables for EmailJS configuration where supported by the application's architecture.
-Do not hardcode sensitive credentials or configuration throughout the source code.
-Typical configuration may include:
-EMAILJS_SERVICE_ID
-EMAILJS_TEMPLATE_ID
-EMAILJS_PUBLIC_KEY
-Use the actual EmailJS configuration model appropriate for the selected integration method.
-Do not expose private secrets or administrative credentials to the browser.
-If the EmailJS integration requires a public key to be present in frontend code, only expose the values that EmailJS explicitly defines as safe for client-side use.
-Never expose:
-* Private API secrets
-* Database credentials
-* Authentication secrets
-* Application signing keys
-* User tokens
-* Internal credentials
-12.4 Email Templates
-Create reusable EmailJS templates for the supported email types.
-At minimum:
-Dashboard Report
-Include:
-* User name where available
-* User email
-* Report period
-* Appropriate report information
-* Generated report attachment where supported
-Bug Report
-Include:
-* Bug ID
-* Issue title
-* Description
-* Steps to reproduce
-* Expected behavior
-* Actual behavior
-* User email
-* Application version
-* Timestamp
-* Sanitized diagnostic information
-* Relevant logs
-* Screenshot/file attachments where supported
-Send bug reports to:
-mrunaltemp01@gmail.com
-The bug ID must appear in both the subject and body.
-Example:
-[DEF-100] Dashboard report calculation issue
-12.5 Dashboard Report Email
-When a user chooses:
-Download Dashboard Report → Send to My Email
-send the report to the email address associated with the authenticated account.
-Do not allow the user to manually change the destination email for this specific feature.
-The backend/application authentication state must determine the user's email.
-Show:
-Sending report...
-then:
-Report sent successfully to your registered email.
-If sending fails:
-We couldn't send the report. Please try again.
-Do not expose EmailJS implementation errors directly to the user.
-12.6 Bug Report Email
-When the user submits a bug:
-1. Validate the form.
-2. Validate attachments.
-3. Collect application diagnostics.
-4. Sanitize logs.
-5. Generate the next unique bug ID.
-6. Persist the issue where appropriate.
-7. Send the bug report using EmailJS.
-8. Attach supported files/screenshots where the EmailJS setup supports them.
-9. Show the generated bug ID to the user.
-Example:
-Your issue has been submitted successfully.
+Add a sending mail feature which cam be used send Download Dashboard Report to the mail id which the user used to sign in
+Same can be used to report a bug in system which will auto collect app version auto attach the logs and allow to attach 1-2 screenshot images or files with max size as per gmail requiremnt while raing a bug
 
-Reference ID: DEF-100
-If email delivery fails, do not silently lose the bug report.
-If the architecture allows it:
-* Persist the bug report first.
-* Track email delivery status.
-* Allow retry/reprocessing.
-* Do not generate a second bug ID simply because email delivery failed.
-12.7 Email Failure Handling
-Email delivery must not break critical application functionality.
-For example:
-Payment succeeds
-       ↓
-Email notification attempted
-       ↓
-Email succeeds/fails independently
-Do not roll back a successful payment simply because an EmailJS notification failed.
-Likewise, a bug report should not be lost because of a temporary email failure.
-Use the existing application's retry/background-processing infrastructure if available.
-Do not introduce unnecessary infrastructure if the application does not require it.
-12.8 EmailJS Security
-Review the EmailJS integration carefully.
-Important:
-* Never expose private EmailJS credentials.
-* Never expose database credentials.
-* Never put sensitive application secrets in EmailJS templates.
-* Sanitize user-provided content before inserting it into emails.
-* Validate attachment types and sizes.
-* Do not include passwords, authentication tokens, session tokens, API keys, or other secrets in bug reports.
-* Sanitize application logs before sending them.
-* Prevent users from manipulating the administrator recipient through frontend requests.
-The administrator recipient must remain controlled by application configuration and must not be accepted as an arbitrary user-provided value.
-12.9 Rate Limiting / Abuse Prevention
-Review whether EmailJS calls could be abused.
-For features such as:
-* Send Dashboard Report
-* Report Bug
-* Resend verification email
-implement reasonable rate limiting/debouncing where appropriate.
-Do not allow a malicious user to repeatedly trigger large numbers of emails.
-12.10 Testing
-Test:
-* Successful Dashboard Report email
-* Dashboard Report email failure
-* Bug report email
-* Bug report with screenshots
-* Bug report with invalid attachment
-* Bug report with oversized attachment
-* EmailJS service failure
-* Invalid/missing configuration
-* Duplicate submissions
-* Multiple simultaneous bug reports
-* Bug ID uniqueness
-* Sanitized logs
-* Administrator recipient protection
-* Authentication/user email validation
-Also verify that no sensitive EmailJS credentials or other secrets are included in the generated frontend bundle.
+That should come to me as auto incremented bug id like DEF-100,DEF-101 etc in mail title and bodys shouldninclude bug details send it to admin id which is fixed as mrunaltemp01@gmail.com
+Use this mail id as support mail id also in help and user guide section
+In the same section we can have teh report issue option or find a btter place to add it
+
+Follow existing design and modern style and
+create professional pages for:
+* Privacy Policy
+* Terms & Conditions
+* Disclaimer
+* About Us
+* Contact Us
+Make these accessible from:
+* footer
+* signup/login where appropriate
 
 
-So use mailjs instead use these Service id  smart_personal_finance
-Public key : ImSsUAPyw3LyjSQ8y
-templateid: smartfin_contact_us
+We have Contact & Support
+Under help and user guide section
+See if that is fine or need to be relocated to footer
+
+
+Optimise financial year overview more for mobile view. It z fine for tab or opad view but mobile it still shows in a single column for all. Make it more compact for phones
+
+
+See f alerts are getting reevaluated at every login so that they font hold stale information 
+
+Dark mode looks good see light mode can be done any better list down the redundant information on the dashboard and see how. We can optimise them
+
+
+[ ] CSV/Bank Statement Import
+    - Support CSV import from expense page
+    - Auto-detect and parse: date, merchant, amount, type (debit/credit)
+    - Support formats: credit card statement, debit card statement, wallet statement, UPI app export
+    - Preserve debit/credit semantics (debit = expense, credit = income)
+    - Allow editing category/fields after import
+    - Prevent interference with manual entries (both can coexist)
+    - Show import summary with count of added/skipped transactions
+[ ] Duplicate Detection System
+    - Transaction fingerprinting: date + merchant + amount + account hash
+    - Pre-import duplicate check (prevent insertion of duplicates)
+    - Cross-source detection: manual vs CSV vs document vs Drive
+    - Clear duplicate reporting with count/list
+    - Handle edge cases: same amount different dates, slight amount variations
+    - Configurable tolerance for amount matching
+
+
+
+
+## Phase 21: Resend Email Integration
+
+### 21.1 Email Service Integration
+- Integrate email through the backend
+- Never expose the Resend API key to frontend JavaScript
+- Create email abstractions for different email types
+
+### 21.2 Email Interface
+Create email service abstraction:
+```go
+type EmailService interface {
+    SendWelcomeEmail(...)
+    SendPaymentConfirmation(...)
+    SendSubscriptionActivated(...)
+    SendSubscriptionCancelled(...)
+    SendReferralNotification(...)
+}
+```
+
+### 21.3 Email Templates
+Support templates for:
+- Welcome emails
+- Email verification (if needed)
+- Payment confirmation
+- Subscription activation
+- Subscription cancellation
+- Payment failure
+- Refund notifications
+- Referral events
+
+### 21.4 Asynchronous Processing
+Use asynchronous processing where appropriate so email failures don't break critical payment transactions.
+
+
+## Phase 30: Configuration Management
+
+### 30.1 Environment Variables
+Use environment variables/secrets for configuration:
+```
+FIREBASE_PROJECT_ID
+FIREBASE_SERVICE_ACCOUNT
+RAZORPAY_KEY_ID
+RAZORPAY_KEY_SECRET
+RAZORPAY_WEBHOOK_SECRET
+RESEND_API_KEY
+RESEND_FROM_EMAIL
+APP_BASE_URL
+
+### 30.2 Security Practices
+- Never commit real credentials
+- Create `.env.example` with placeholders only
+- Use different configurations for development/staging/production
