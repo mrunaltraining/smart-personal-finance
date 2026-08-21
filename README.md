@@ -1,6 +1,6 @@
 # SmartFin – Smart Financial Planning
 
-![Version](https://img.shields.io/badge/version-5.4.11-blue.svg)
+![Version](https://img.shields.io/badge/version-5.4.12-blue.svg)
 ![License](https://img.shields.io/badge/license-MIT-green.svg)
 ![Firebase](https://img.shields.io/badge/firebase-enabled-orange.svg)
 ![Platform](https://img.shields.io/badge/platform-web%20%7C%20mobile-lightgrey.svg)
@@ -9,13 +9,13 @@
 
 A comprehensive dark-themed personal finance app with login/register, cross-device sync via Firebase, and tabbed sections for complete financial management.
 
-**v5.4.11 - Dynamic Notifications & Enhanced Insights**: Added dynamic notification system with 7 smart triggers (Budget, Goals, Insurance, Expenses, Net Worth, Tax, Gifts), badge counter, popup panel with Clear All, click-outside-close, and daily reset. Enhanced insights engine with 11 recommendation types (5 positive, 7 suggestion, 3 warning) and display limit increased from 4 to 6. Rebalanced Financial Health Score weights (Emergency Fund 15pts, Debt 20pts, Savings & Investment 25pts, Insurance 15pts, Net Worth 15pts with diversification bonus, Goals 10pts with goal-defined bonus). Modern dark theme with indigo/slate color palette (#6366f1). Redesigned loading spinner with logo inside rotating ring. Refreshed tags/badges for dark/light mode consistency. Changed tax deductions chart to horizontal bar chart. Added sample test data (tests/sampledata.json).
+**v5.4.12 - Dynamic Notifications & Enhanced Insights**: Added dynamic notification system with 7 smart triggers (Budget, Goals, Insurance, Expenses, Net Worth, Tax, Gifts), badge counter, popup panel with Clear All, click-outside-close, and daily reset. Enhanced insights engine with 11 recommendation types (5 positive, 7 suggestion, 3 warning) and display limit increased from 4 to 6. Rebalanced Financial Health Score weights (Emergency Fund 15pts, Debt 20pts, Savings & Investment 25pts, Insurance 15pts, Net Worth 15pts with diversification bonus, Goals 10pts with goal-defined bonus). Modern dark theme with indigo/slate color palette (#6366f1). Redesigned loading spinner with logo inside rotating ring. Refreshed tags/badges for dark/light mode consistency. Changed tax deductions chart to horizontal bar chart. Added sample test data (tests/sampledata.json).
 
-**v5.4.11 - Error Handling & Network Status Improvements**: Added network status indicator, enhanced Firebase error handling with specific user notifications, automatic retry logic for network errors, and browser online/offline detection.
+**v5.4.12 - Error Handling & Network Status Improvements**: Added network status indicator, enhanced Firebase error handling with specific user notifications, automatic retry logic for network errors, and browser online/offline detection.
 
-**v5.4.11 - Dashboard Enhancements & Bug Fixes**: Enhanced 6-month trend chart, improved spending breakdown, added variable expenses display, and fixed Chart.js canvas errors.
+**v5.4.12 - Dashboard Enhancements & Bug Fixes**: Enhanced 6-month trend chart, improved spending breakdown, added variable expenses display, and fixed Chart.js canvas errors.
 
-**v5.4.11 - Major Architecture Redesign**: Platform-independent business logic modules, fully tested, ready for web and mobile deployment.
+**v5.4.12 - Major Architecture Redesign**: Platform-independent business logic modules, fully tested, ready for web and mobile deployment.
 
 ## 📋 Table of Contents
 
@@ -43,7 +43,7 @@ A comprehensive dark-themed personal finance app with login/register, cross-devi
 - 🎁 **Gifts & Donations**: Track charitable giving
 - 💸 **Expense Tracking**: Category-wise expense tracking with visual breakdowns
 
-## 🚀 What's New in v5.4.11
+## 🚀 What's New in v5.4.12
 
 ### 🔔 Dynamic Notification System
 - **Bell Icon with Badge Counter**: Shows unread alert count in header
@@ -84,7 +84,7 @@ A comprehensive dark-themed personal finance app with login/register, cross-devi
 - **Horizontal Layout**: Changed to horizontal bar chart for better label readability
 - **Grouped by Section**: Deductions organized by tax section (80C, 80D, etc.)
 
-## 🚀 What's New in v5.4.11
+## 🚀 What's New in v5.4.12
 
 ### 🔧 Error Handling & Network Status
 - **Network Status Indicator**: Visual indicator in user bar showing Firebase save status
@@ -98,7 +98,7 @@ A comprehensive dark-themed personal finance app with login/register, cross-devi
   - Connection loss: Status indicator shows error state
 - **Browser Detection**: Automatic online/offline detection with status updates
 
-## 🚀 What's New in v5.4.11
+## 🚀 What's New in v5.4.12
 
 ### 📊 Dashboard Enhancements
 - **6-Month Trend Chart**: Now displays all 5 categories (Income, Saving, Expenditure, Investment, Liability) with modern styling
@@ -119,7 +119,7 @@ A comprehensive dark-themed personal finance app with login/register, cross-devi
 
 ---
 
-## 🚀 What's New in v5.4.11
+## 🚀 What's New in v5.4.12
 
 ### 🎉 Major Architecture Redesign
 - **Modular Business Logic**: All business logic extracted into 14 platform-independent modules (3,200+ lines)
@@ -161,14 +161,14 @@ const summary = BudgetCalculator.calculateMonthlySummary(monthData, outflows, ac
 Logger.success('BUDGET', 'Calculation completed');
 ```
 
-### Previous update: v5.4.11 — UI Improvements
+### Previous update: v5.4.12 — UI Improvements
 - **Unified professional UI**: streamlined context headers remove repeated page titles while keeping month navigation and actions together.
 - **Improved visual hierarchy**: Accounts, Gifts, Budget and Expense Tracking use responsive segmented summaries with clean dividers.
 - **Expense category icons**: every expense type now has a compact, consistent icon in both the grouped list and edit table.
 - **Chart polish**: expense, annual, and gift visualizations now share the same professional chart containers and spacing.
 - **Consistent navigation**: compact tab icons and responsive action bars align desktop and mobile behavior.
 
-### Previous update: v5.4.11 — New features
+### Previous update: v5.4.12 — New features
 - **✨ Expense Tracking Tab**: Complete expense tracking system with category-wise breakdown
   - Month-by-month expense tracking with calendar navigation
   - 11 predefined expense categories (Food & Dining, Transportation, Shopping, etc.)
@@ -264,69 +264,69 @@ This project is licensed under the MIT License - see the LICENSE file for detail
 
 ## 📜 Version History
 
-### v5.4.11 - UI System Refresh (Current)
+### v5.4.12 - UI System Refresh (Current)
 - Unified header, navigation, list, form, card, and chart treatment across the app
 - Added semantic icons to every expense category and corrected the Expense Tracking summary target
 
-### v5.4.11 - Major Feature Release
+### v5.4.12 - Major Feature Release
 - Expense Tracking Tab with category-wise breakdown
 - Dashboard responsive improvements
 - Mobile-friendly tooltips
 
-### v5.4.11 - Tax Data Load Bug Fix
+### v5.4.12 - Tax Data Load Bug Fix
 - Fixed tax data loading from Firestore
 - Fixed Firestore data loading to include taxData
 
-### v5.4.11 - Tax Data Import/Export Fix
+### v5.4.12 - Tax Data Import/Export Fix
 - Fixed tax data inclusion in import/export
 - Added taxData to normalizeAppDataModel
 
-### v5.4.11 - Tax Saving Banner Style Update
+### v5.4.12 - Tax Saving Banner Style Update
 - Changed to border color instead of background gradient
 - Improved readability with lighter design
 
-### v5.4.11 - Tax Plan Auto-Save Fix
+### v5.4.12 - Tax Plan Auto-Save Fix
 - Fixed "saveData is not defined" error
 - Changed to use scheduleSave() function
 
-### v5.4.11 - Financial Year Date Filtering
+### v5.4.12 - Financial Year Date Filtering
 - Investments now respect financial year dates
 - One-time investments filtered by start date
 - Monthly investments pro-rated based on months in FY
 
-### v5.4.11 - Comprehensive Tax Planning for ITR-2
+### v5.4.12 - Comprehensive Tax Planning for ITR-2
 - Salary Details Section with HRA exemption
 - House Property Income tracking
 - Section 24(b), 80TTA deductions
 - Enhanced tax-saving banner with regime comparison
 
-### v5.4.11 - Expense Tracking Tab
+### v5.4.12 - Expense Tracking Tab
 - New expense tracking with 50+ categories
 - Auto-validation with budget comparison
 - Visual insights and category breakdown
 
-### v5.4.11 - Dashboard Layout Adjustment
+### v5.4.12 - Dashboard Layout Adjustment
 - Improved dashboard layout and spacing
 
-### v5.4.11 - Financial Health Score Accuracy
+### v5.4.12 - Financial Health Score Accuracy
 - Fixed scoring calculations
 - Improved accuracy across all components
 
-### v5.4.11 - Emergency Fund Calculator
+### v5.4.12 - Emergency Fund Calculator
 - Added ideal emergency fund calculation
 - Based on monthly commitments and expenses
 
-### v5.4.11 - Net Worth Tab
+### v5.4.12 - Net Worth Tab
 - Complete net worth tracking
 - Assets and liabilities breakdown
 - Net worth over time chart
 
-### v5.4.11 - Firebase Integration
+### v5.4.12 - Firebase Integration
 - Cross-device sync via Firebase
 - User authentication
 - Cloud data persistence
 
-### v5.4.11 - Initial Release
+### v5.4.12 - Initial Release
 - Basic financial planning features
 - Budget tracking
 - Investment tracking
@@ -336,15 +336,15 @@ This project is licensed under the MIT License - see the LICENSE file for detail
 - **Variable Expenditure Display**: Shows auto-calculated variable expenditure from budget
 - **More Accurate Scores**: All Financial Health components now use correct data sources
 
-## Previous Update - v5.4.11 - Dashboard Metric Update 📊
+## Previous Update - v5.4.12 - Dashboard Metric Update 📊
 
-## Previous Update - v5.4.11 - Fixed Debt Management Calculation 🔧
+## Previous Update - v5.4.12 - Fixed Debt Management Calculation 🔧
 
 - **Critical Bug Fix**: Monthly commitments now correctly exclude Savings and Investments
 - **More Accurate Scores**: Debt Management score now reflects only mandatory obligations
 - **Better Financial Health**: Your score will likely improve significantly if you have savings/investments
 
-## Previous Update - v5.4.11 - Enhanced Mobile Compatibility 📱
+## Previous Update - v5.4.12 - Enhanced Mobile Compatibility 📱
 
 - **Touch/Swipe Support**: Swipe left/right to navigate alerts on mobile
 - **Keyboard Navigation**: Use arrow keys on desktop for accessibility
@@ -352,14 +352,14 @@ This project is licensed under the MIT License - see the LICENSE file for detail
 - **Universal Compatibility**: Works perfectly on web and mobile devices
 - **Documented Standards**: Comprehensive mobile/web compatibility guidelines in APP_SPEC.md
 
-## Previous Update - v5.4.11 - Carousel Alerts 🎠
+## Previous Update - v5.4.12 - Carousel Alerts 🎠
 
 - **Carousel Alerts**: One alert at a time with left/right arrow navigation
 - **Circular Rotation**: Loops back to first alert after last (infinite scroll)
 - **Dot Indicators**: Click dots to jump to any alert instantly
 - **Smooth Animations**: Beautiful slide transitions between alerts
 
-## v5.4.11 - Major Dashboard Enhancement 🎉
+## v5.4.12 - Major Dashboard Enhancement 🎉
 
 ### P1 Features (High Priority)
 - **⚡ Alerts & Notifications**: Real-time alerts for over-budget categories, low emergency fund, goals behind schedule, insurance gaps, and high credit card usage
@@ -377,13 +377,13 @@ This project is licensed under the MIT License - see the LICENSE file for detail
 - Fully responsive design (mobile, tablet, desktop)
 - Performance optimized with no additional API calls
 
-## Previous Updates (v5.4.11)
+## Previous Updates (v5.4.12)
 
 - **Location Enhancement**: Added "Other" option to location dropdown for custom cities (assumed non-metro for insurance calculations)
 - **Dashboard Layout**: Improved card distribution across all screen sizes with responsive grid system
 - **Development Process**: Added comprehensive development process documentation in APP_SPEC.md
 
-## Previous Updates (v5.4.11)
+## Previous Updates (v5.4.12)
 
 - **Dashboard Enhancements**: 
   - Mobile-responsive bar chart (numbers hidden on mobile for better readability)
