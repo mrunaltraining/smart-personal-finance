@@ -5,6 +5,74 @@ All notable changes to SmartFin will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [5.5.0] - 2026-08-22 - Email Infrastructure & Professional Pages
+
+### Added
+- **EmailJS Integration**: Complete email service abstraction using EmailJS for transactional emails
+  - EmailService module with rate limiting, retry logic, and error handling
+  - Dashboard Report email functionality (send to user's registered email)
+  - Bug Report email with auto-incremented bug IDs (DEF-XXX format)
+  - Automatic log collection and sanitization for bug reports
+  - Support for up to 2 screenshot attachments (max 5MB each)
+  - Configuration: service ID (smart_personal_finance), public key (testkey), template (smartfin_contact_us)
+  - Rate limiting: 1 minute between dashboard reports, 2 minutes between bug reports
+  - Security: No sensitive credentials exposed, admin recipient fixed (mrunaltemp01@gmail.com)
+- **Professional Legal Pages**: Added comprehensive legal documentation
+  - Privacy Policy covering data collection, usage, storage, and user rights
+  - Terms & Conditions with complete terms of service and user responsibilities
+  - Disclaimer with important warnings about financial advice and data accuracy
+  - About Us with company information, mission, and technology stack
+  - Contact Us with support information and bug reporting guidance
+  - Modal-based display with modern styling matching existing UI
+  - Accessible from footer and auth screen
+- **HTML Entity Handling**: Comprehensive XSS prevention system
+  - HTML utilities module with escape/unescape functions
+  - Automatic sanitization of user input before storage
+  - Proper data preparation for safe storage and display
+  - Integration with Firebase data handling
+- **Duplicate Detection System**: Smart duplicate detection for expense imports
+  - Transaction fingerprinting based on date, category, amount, and payment method
+  - Configurable tolerance for amount matching (1% or ₹1)
+  - Pre-import duplicate checking to prevent duplicate entries
+  - Clear duplicate reporting in import results
+- **Contact & Support Updates**: Updated contact information and help section
+  - Support email: mrunaltemp01@gmail.com
+  - Enhanced bug reporting guidance in help section
+  - Integration with email service for bug reports
+
+### Changed
+- **Mobile Optimizations**: Improved financial year overview display for mobile devices
+  - More compact layout with better spacing
+  - Optimized font sizes and responsive breakpoints
+- **Light Mode Improvements**: Enhanced light theme with better contrast and visual hierarchy
+  - Updated color palette for improved readability
+  - Better card backgrounds and border definitions
+- **Alert System Enhancement**: Notifications now re-evaluate on every login
+  - Forced trigger check on authentication state change
+  - Prevents stale alert information
+- **Bug Report UI**: Redesigned to match existing modern design
+  - Professional styling with proper form validation
+  - Enhanced error handling and user feedback
+
+### Fixed
+- **Syntax Errors**: Fixed JavaScript syntax errors in legal content (removed apostrophes from template strings)
+- **HTML Entity Issues**: Fixed special character conversion in input fields
+  - Proper handling of quotes, apostrophes, and special characters
+  - XSS prevention for all user inputs
+- **Duplicate Declarations**: Fixed duplicate function declarations causing JavaScript errors
+
+### Technical
+- **Enhanced Logging**: Added comprehensive logging to all email-related functions
+  - Initialization success/failure logging
+  - Rate limiting warnings
+  - Email send attempts and results
+  - Bug report submission tracking
+  - Attachment validation logging
+- **Error Handling**: Improved error handling throughout email systems
+  - User-friendly error messages
+  - Automatic retry with exponential backoff
+  - Graceful degradation on service failures
+
 ## [5.3.0] - 2026-06-20 - Dynamic Notifications & Enhanced Insights
 
 ## [v5.3.2] - 2026-08-17 - Build Update

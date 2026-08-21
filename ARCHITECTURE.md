@@ -1,9 +1,10 @@
 # SmartFin – Architecture Document
 
-> Version 5.3.0 | August 2026
+> Version 5.5.0 | August 2026
 
 ## Version History
 
+- **v5.5.0** (Aug 2026): Email Infrastructure with EmailJS integration for transactional emails (Dashboard Report, Bug Report with auto-incremented DEF-XXX IDs), professional legal pages (Privacy Policy, Terms & Conditions, Disclaimer, About Us, Contact Us), HTML entity handling utilities for XSS prevention, duplicate detection system for expense imports, mobile optimizations for financial year overview, enhanced light mode, alert system re-evaluation on login, comprehensive logging and error handling throughout email systems
 - **v5.3.0** (Aug 2026): Dynamic Notification System with 7 triggers (Budget, Goals, Insurance, Expenses, Net Worth, Tax, Gifts), badge counter, Clear All action, click-outside-to-close popup, and daily state reset; Enhanced Insights engine covering 11 recommendation types (positive/suggestion/warning) with display limit raised from 4 to 6; Financial Health Score rebalanced (Emergency Fund 15 pts, Debt 20 pts, Savings & Investment 25 pts, Insurance 15 pts, Net Worth 15 pts with diversification bonus, Goals 10 pts with goal-defined bonus); Modern Dark Theme with indigo/slate palette (`--primary: #6366f1`); redesigned loading spinner (logo inside a rotating ring with counter-rotation); refreshed tags/badges for dark/light consistency (indigo, rose, emerald, amber, violet, cyan); horizontal bar chart for Tax Deductions; added `tests/sampledata.json` sample test dataset
 - **v4.0.1** (Aug 2026): Major architecture redesign with modular business logic - 13 platform-independent modules (2,780 lines), 64 comprehensive tests, enhanced maintainability and testability, foundation for mobile app development
 - **v2.4.0** (Aug 2026): Added Expense Tracking tab with category-wise breakdown, pie charts, budget comparison, mobile-friendly tooltips, responsive design improvements, dashboard layout reorganization

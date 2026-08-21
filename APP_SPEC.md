@@ -1,4 +1,4 @@
-# SmartFin – Application Specification (v5.4.13)
+# SmartFin – Application Specification (v5.5.0)
 
 > **Purpose**: Single source of truth for the app's architecture, data models, business logic, and UI structure.
 > Use this file as context when making future modifications. Update it after every significant change.
@@ -24,7 +24,39 @@
 > - Verify smooth performance on lower-end mobile devices
 > - Use passive event listeners for scroll/touch events to improve performance
 >
-> **Version 5.3.0 Updates - Dynamic Notifications, Enhanced Insights & Modern Dark Theme**:
+> **Version 5.5.0 Updates - Email Infrastructure & Professional Pages**:
+> - **EmailJS Integration**: Complete email service abstraction using EmailJS for transactional emails
+>   - EmailService module with rate limiting, retry logic, and error handling
+>   - Dashboard Report email functionality (send to user's registered email)
+>   - Bug Report email with auto-incremented bug IDs (DEF-XXX format)
+>   - Automatic log collection and sanitization for bug reports
+>   - Support for up to 2 screenshot attachments (max 5MB each)
+>   - Configuration via EMAIL_CONFIG (service ID: smart_personal_finance, public key: testkey, template: smartfin_contact_us)
+>   - Rate limiting: 1 minute between dashboard reports, 2 minutes between bug reports
+>   - Security: No sensitive credentials exposed, admin recipient fixed (mrunaltemp01@gmail.com)
+> - **Professional Legal Pages**: Added Privacy Policy, Terms & Conditions, Disclaimer, About Us, and Contact Us pages
+>   - Accessible from footer and auth screen
+>   - Modal-based display with modern styling
+>   - Comprehensive legal content covering data collection, usage, security, and user rights
+> - **Contact & Support Updates**: Updated contact information to use mrunaltemp01@gmail.com as support email
+>   - Integrated bug report functionality with email service
+>   - Enhanced help section with bug reporting guidance
+> - **Mobile Optimizations**: Improved financial year overview display for mobile devices
+>   - More compact layout with better spacing
+>   - Optimized font sizes and responsive breakpoints
+> - **Alert System Enhancement**: Notifications now re-evaluate on every login to ensure fresh data
+>   - Forced trigger check on authentication state change
+>   - Prevents stale alert information
+> - **Light Mode Improvements**: Enhanced light theme with better contrast and visual hierarchy
+>   - Updated color palette for improved readability
+>   - Better card backgrounds and border definitions
+> - **Duplicate Detection System**: Implemented smart duplicate detection for expense imports
+>   - Transaction fingerprinting based on date, category, amount, and payment method
+>   - Configurable tolerance for amount matching (1% or ₹1)
+>   - Pre-import duplicate checking to prevent duplicate entries
+>   - Clear duplicate reporting in import results
+>
+> **Version 5.4.11 Updates - Dynamic Notifications, Enhanced Insights & Modern Dark Theme**:
 > - **Dynamic Notification System**: Bell icon with live badge counter driven by 7 registered triggers (Budget, Goals, Insurance, Expenses/Recurring Outflows, Net Worth, Tax, Gifts)
 >   - Popup panel lists all active alerts with icon, message, and quick-navigation action
 >   - "Clear All" button dismisses all alerts for the day (`clearNotifications()`)
@@ -169,7 +201,7 @@ element.addEventListener('mousedown', handleStart);
 
 ---
 
-## 2. Architecture & Modular Design (v5.4.13)
+## 2. Architecture & Modular Design (v5.4.11)
 
 ### Core Business Logic Modules
 
@@ -477,7 +509,7 @@ Every entry has:
 
 **Auto-deductions:** EPF, PPF, NPS, Insurance premiums auto-pulled from Outflow and Investments.
 
-**Tax Deductions Chart (v5.4.13):** `renderTaxDeductionsChart()` renders deductions grouped by section as a **horizontal bar chart** (Chart.js `indexAxis: 'y'`) for improved label readability, replacing the previous vertical bar layout. Falls back to an empty-state message when no deductions exist.
+**Tax Deductions Chart (v5.4.11):** `renderTaxDeductionsChart()` renders deductions grouped by section as a **horizontal bar chart** (Chart.js `indexAxis: 'y'`) for improved label readability, replacing the previous vertical bar layout. Falls back to an empty-state message when no deductions exist.
 
 ### gifts
 
@@ -711,7 +743,7 @@ When a Budget month is closed:
 - `isExpenseEditMode` - Edit mode toggle (boolean)
 - `expensePieChart` - Chart.js instance for pie chart
 
-### New Features in v5.4.13
+### New Features in v5.4.11
 
 #### CSV/Bank Statement Import
 - **File Format**: CSV with columns: Date, Category, Amount, Payment Method (optional)
@@ -799,7 +831,7 @@ When a Budget month is closed:
 
 ---
 
-## 5.8. Dynamic Notification System (NEW in v5.4.13)
+## 5.8. Dynamic Notification System (NEW in v5.4.11)
 
 ### Overview
 A bell-icon notification center in the header that surfaces actionable alerts sourced from live app data, without duplicating any calculations (reuses existing budget/goal/insurance/net worth/tax/gifts logic).
@@ -828,7 +860,7 @@ Registered via `registerNotificationTrigger(triggerFn)` in `app.js`, each return
 
 ---
 
-## 5.9. Enhanced Dashboard Insights & Financial Health Score (v5.4.13)
+## 5.9. Enhanced Dashboard Insights & Financial Health Score (v5.4.11)
 
 ### Insights Engine (`generateInsights()`)
 Evaluates account/budget/goal/insurance/net-worth/tax data and returns up to **11 possible recommendation types**, capped at **6 displayed** (`insights.slice(0, 6)`, increased from the previous limit of 4):
@@ -842,7 +874,7 @@ Evaluates account/budget/goal/insurance/net-worth/tax data and returns up to **1
 Each insight has `{ type, icon, message }` and is rendered on the Dashboard beneath the summary cards.
 
 ### Financial Health Score (`calculateFinancialHealthScore()`)
-Score out of 100, rebalanced in v5.4.13 to weight wealth-building more heavily:
+Score out of 100, rebalanced in v5.4.11 to weight wealth-building more heavily:
 
 | Component | Max Points | Scoring Basis |
 |-----------|-----------|---------------|
@@ -1030,8 +1062,8 @@ previewMap = {
 
 - CSS variables on `:root` and `[data-theme="light"]`
 - Key variables: `--bg`, `--surf1`, `--surf2`, `--text`, `--dim`, `--muted`, `--border`, `--border2`, `--accent`, `--shadow`
-- **Modern Dark Theme (v5.4.13)**: Indigo/slate color palette; `--primary` and `--investment` set to `#6366f1` (indigo), `--primary-hover: #4f46e5`, `--liability: #f43f5e` (rose). Semantic badges/tags (`.semantic-investment`, `.policy-badge`, `.premium-badge`/`.no-premium-badge`, tab pills) restyled with a modern accent set — indigo, rose, emerald, amber, violet, cyan — tuned separately for `[data-theme="light"]` to keep contrast/readability consistent between dark and light modes
-- **Loading Spinner (v5.4.13)**: `.sf-spinner` — a rotating ring (`border-top-color: var(--primary)`, `sf-spin` keyframe) containing `.sf-spinner-logo`, the app logo, which counter-rotates (`sf-spin-reverse` keyframe) so it appears stationary while the ring spins around it. Both animations are disabled under `prefers-reduced-motion`
+- **Modern Dark Theme (v5.4.11)**: Indigo/slate color palette; `--primary` and `--investment` set to `#6366f1` (indigo), `--primary-hover: #4f46e5`, `--liability: #f43f5e` (rose). Semantic badges/tags (`.semantic-investment`, `.policy-badge`, `.premium-badge`/`.no-premium-badge`, tab pills) restyled with a modern accent set — indigo, rose, emerald, amber, violet, cyan — tuned separately for `[data-theme="light"]` to keep contrast/readability consistent between dark and light modes
+- **Loading Spinner (v5.4.11)**: `.sf-spinner` — a rotating ring (`border-top-color: var(--primary)`, `sf-spin` keyframe) containing `.sf-spinner-logo`, the app logo, which counter-rotates (`sf-spin-reverse` keyframe) so it appears stationary while the ring spins around it. Both animations are disabled under `prefers-reduced-motion`
 
 ### Key CSS Classes
 
@@ -1179,10 +1211,10 @@ render()
 
 ```js
 APP_VERSION = { major: 1, minor: 0, build: 73 }
-getAppVersion() → "v5.4.13"
+getAppVersion() → "v5.4.11"
 ```
 
-- Displayed in footer: "SmartFin v5.4.13" (via `#appVersionDisplay`)
+- Displayed in footer: "SmartFin v5.4.11" (via `#appVersionDisplay`)
 - Hover tooltip shows: "Major: 1 | Minor: 0 | Build: 73"
 - Also used in data export payload (`version` field)
 - **Versioning scheme**: `v{MAJOR}.{MINOR}.{BUILD}`
@@ -1238,7 +1270,7 @@ When implementing changes to SmartFin, follow this systematic approach:
 ```
 tests/
 ├── tax-calculation.test.js    # Tax calculation logic tests
-├── sampledata.json             # NEW in v5.4.13 - representative sample dataset for
+├── sampledata.json             # NEW in v5.4.11 - representative sample dataset for
 │                                #   manually/automatically exercising dashboard,
 │                                #   budget, insights, and health-score logic
 ├── [future-test-files].test.js
@@ -1305,6 +1337,6 @@ When modifying the app, check these areas:
 
 ---
 
-*Last updated: v5.4.13 — Dynamic Notification System (7 triggers, badge counter, Clear All, click-outside-close, daily reset), Enhanced Insights (11 recommendation types, limit 4→6), rebalanced Financial Health Score weights, Modern Dark Theme (indigo/slate palette), redesigned Loading Spinner, refreshed Tags/Badges, horizontal Tax Deductions chart, and tests/sampledata.json.*
+*Last updated: v5.4.11 — Dynamic Notification System (7 triggers, badge counter, Clear All, click-outside-close, daily reset), Enhanced Insights (11 recommendation types, limit 4→6), rebalanced Financial Health Score weights, Modern Dark Theme (indigo/slate palette), redesigned Loading Spinner, refreshed Tags/Badges, horizontal Tax Deductions chart, and tests/sampledata.json.*
 
-*Previous update: 2026-08-05 (v5.4.13 — Tax data persistence fix: Added taxData to default appData structure and Firestore loading, ensures persistence after refresh)*
+*Previous update: 2026-08-05 (v5.4.11 — Tax data persistence fix: Added taxData to default appData structure and Firestore loading, ensures persistence after refresh)*

@@ -19,6 +19,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="assets/css/styles.css?v=1785884544">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+<script type="text/javascript" src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
 <title>₹ SmartFin – Financial Planning</title>
 </head>
 <body>
@@ -98,6 +99,11 @@
         <div class="auth-switch">
             <span id="authSwitchText">Don't have an account?</span>
             <button type="button" id="authToggleBtn" class="btn-link">Register</button>
+        </div>
+        <div class="auth-legal-links">
+            <a href="#" class="auth-legal-link" data-modal="privacy">Privacy Policy</a>
+            <span class="auth-legal-separator">•</span>
+            <a href="#" class="auth-legal-link" data-modal="terms">Terms & Conditions</a>
         </div>
     </div>
 </div>
@@ -1578,6 +1584,13 @@
         </div>
         <div class="settings-action-row">
             <div>
+                <div class="settings-row-label">Email Dashboard Report</div>
+                <div class="settings-row-sub">Send dashboard report to your registered email address</div>
+            </div>
+            <button type="button" id="emailDashboardBtn" class="btn-settings-action">Send to My Email</button>
+        </div>
+        <div class="settings-action-row">
+            <div>
                 <div class="settings-row-label">Export All Data</div>
                 <div class="settings-row-sub">Download a backup of all your financial data</div>
             </div>
@@ -1599,6 +1612,13 @@
                 <div class="settings-row-sub">View application logs and debug information</div>
             </div>
             <button type="button" id="logsBtn" class="btn-settings-action">View Logs</button>
+        </div>
+        <div class="settings-action-row">
+            <div>
+                <div class="settings-row-label">Report a Bug</div>
+                <div class="settings-row-sub">Submit a bug report or issue to the development team</div>
+            </div>
+            <button type="button" id="reportBugBtn" class="btn-settings-action">Report Bug</button>
         </div>
     </div>
 
@@ -1640,8 +1660,8 @@
             <summary class="help-section-title">Quick Start Guide</summary>
             <div class="help-body">
                 <ol>
-                    <li><strong>Accounts</strong> — Add a <em>Primary (Expenditure)</em> + <em>Salary</em> account to unlock all tabs</li>
-                    <li><strong>Accounts</strong> — Optionally add Saving &amp; Investment accounts</li>
+                    <li><strong>Primary Accounts</strong> — Add a <em>Primary (Expenditure)</em> + <em>Salary</em> account to unlock all tabs</li>
+                    <li><strong>Optional Accounts</strong> — Optionally add Saving &amp; Investment accounts</li>
                     <li><strong>Outflow</strong> — Add ALL fixed deductions (EMIs, rent, insurance, savings, investments)</li>
                     <li><strong>Budget</strong> — Enter Primary Income → Review breakdown → Execute Transfer</li>
                     <li><strong>Mid-month</strong> — Quick Update: enter current expenditure balance + CC spending</li>
@@ -1861,19 +1881,34 @@
                 <div style="margin-top: 16px;">
                     <div style="margin-bottom: 12px;">
                         <strong>Email:</strong>
-                        <p style="margin-top: 4px; color: var(--muted);">support@smartfin.example.com</p>
+                        <p style="margin-top: 4px; color: var(--muted);"><a href="mailto:mrunaltemp01@gmail.com" style="color: var(--primary);">mrunaltemp01@gmail.com</a></p>
                     </div>
                     <div style="margin-bottom: 12px;">
-                        <strong>Phone:</strong>
-                        <p style="margin-top: 4px; color: var(--muted);">+91 96638 65026</p>
+                        <strong>Report a Bug:</strong>
+                        <p style="margin-top: 4px; color: var(--muted);">Use the <strong>Report Bug</strong> button in Settings to submit bug reports with automatic system information and logs.</p>
                     </div>
                     <div style="margin-bottom: 12px;">
-                        <strong>Support Hours:</strong>
-                        <p style="margin-top: 4px; color: var(--muted);">Monday - Friday, 9:00 AM - 6:00 PM IST</p>
+                        <strong>Response Time:</strong>
+                        <p style="margin-top: 4px; color: var(--muted);">We typically respond within 24-48 hours, excluding weekends and holidays.</p>
                     </div>
                 </div>
                 <div class="help-warning" style="margin-top: 16px;">
-                    📧 For bug reports or feature requests, please include your browser version and a detailed description of the issue.
+                    📧 For bug reports or feature requests, please use the <strong>Report Bug</strong> button in Settings for automatic system information collection.
+                </div>
+            </div>
+        </details>
+
+        <!-- Legal Information -->
+        <details class="help-section">
+            <summary class="help-section-title">Legal Information</summary>
+            <div class="help-body">
+                <p>Please review our legal documents:</p>
+                <div style="margin-top: 16px; display: flex; flex-direction: column; gap: 12px;">
+                    <a href="#" class="footer-link" data-modal="privacy" style="color: var(--primary);">Privacy Policy</a>
+                    <a href="#" class="footer-link" data-modal="terms" style="color: var(--primary);">Terms & Conditions</a>
+                    <a href="#" class="footer-link" data-modal="disclaimer" style="color: var(--primary);">Disclaimer</a>
+                    <a href="#" class="footer-link" data-modal="about" style="color: var(--primary);">About Us</a>
+                    <a href="#" class="footer-link" data-modal="contact" style="color: var(--primary);">Contact Us</a>
                 </div>
             </div>
         </details>
@@ -1967,6 +2002,79 @@
     </div>
 </div>
 
+<!-- ── BUG REPORT MODAL ──────────────────────────────────── -->
+<div id="bugReportOverlay" class="settings-overlay" hidden></div>
+<div id="bugReportPanel" class="settings-panel help-panel" aria-hidden="true">
+    <div class="settings-header">
+        <h2>Report a Bug</h2>
+        <button type="button" id="closeBugReportBtn" class="btn-icon-only" aria-label="Close bug report">
+            <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="6" y1="6" x2="18" y2="18"/><line x1="18" y1="6" x2="6" y2="18"/></svg>
+        </button>
+    </div>
+    <div class="help-content">
+        <form id="bugReportForm" class="bug-report-form">
+            <div class="field">
+                <label for="bugTitle">Bug Title <span class="required-mark">*</span></label>
+                <input type="text" id="bugTitle" class="settings-input" placeholder="Brief description of the issue" required>
+            </div>
+            
+            <div class="field">
+                <label for="bugDescription">Description <span class="required-mark">*</span></label>
+                <textarea id="bugDescription" class="settings-textarea" placeholder="Detailed description of the bug" required rows="4"></textarea>
+            </div>
+            
+            <div class="field">
+                <label for="bugSteps">Steps to Reproduce</label>
+                <textarea id="bugSteps" class="settings-textarea" placeholder="1. Go to...&#10;2. Click on...&#10;3. See error..." rows="4"></textarea>
+            </div>
+            
+            <div class="field">
+                <label for="bugExpected">Expected Behavior</label>
+                <textarea id="bugExpected" class="settings-textarea" placeholder="What should happen?" rows="2"></textarea>
+            </div>
+            
+            <div class="field">
+                <label for="bugActual">Actual Behavior</label>
+                <textarea id="bugActual" class="settings-textarea" placeholder="What actually happens?" rows="2"></textarea>
+            </div>
+            
+            <div class="field">
+                <label for="bugScreenshot">Screenshots (optional, max 2)</label>
+                <input type="file" id="bugScreenshot" class="settings-file-input" accept="image/*,.pdf" multiple>
+                <div class="field-hint">Max 5MB per file. Supported: PNG, JPEG, GIF, PDF. You can upload up to 2 screenshots.</div>
+            </div>
+            
+            <div class="form-actions">
+                <button type="button" id="cancelBugReportBtn" class="btn-ghost">Cancel</button>
+                <button type="submit" id="submitBugReportBtn" class="btn-primary">Submit Bug Report</button>
+            </div>
+        </form>
+        
+        <div id="bugReportSuccess" class="success-message" style="display: none;">
+            <div class="success-icon">✅</div>
+            <h3>Bug Report Submitted!</h3>
+            <p>Your issue has been submitted successfully.</p>
+            <p class="bug-id-display">Reference ID: <span id="bugReportId"></span></p>
+            <p class="success-hint">We'll review your report and get back to you if we need more information.</p>
+            <button type="button" id="closeBugReportSuccessBtn" class="btn-primary">Close</button>
+        </div>
+    </div>
+</div>
+
+<!-- ── LEGAL MODALS ───────────────────────────────────────── -->
+<div id="legalModalOverlay" class="settings-overlay" hidden></div>
+<div id="legalModalPanel" class="settings-panel help-panel legal-panel" aria-hidden="true">
+    <div class="settings-header">
+        <h2 id="legalModalTitle">Legal Information</h2>
+        <button type="button" id="closeLegalModalBtn" class="btn-icon-only" aria-label="Close">
+            <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="6" y1="6" x2="18" y2="18"/><line x1="18" y1="6" x2="6" y2="18"/></svg>
+        </button>
+    </div>
+    <div class="help-content legal-content" id="legalModalContent">
+        <!-- Content will be dynamically loaded -->
+    </div>
+</div>
+
 <!-- ── FOOTER ───────────────────────────────────────────── -->
 <footer class="app-footer">
     <div class="footer-content">
@@ -1982,6 +2090,8 @@
 <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-check-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore-compat.js"></script>
+<!-- EmailJS SDK -->
+<script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
 <!-- SheetJS + Chart.js are lazy-loaded on demand (see app.js loadScript) -->
 <script src="assets/js/firebase-config.js?v=1785884544"></script>
 <script type="module" src="assets/js/app.js?v=1785897000"></script>

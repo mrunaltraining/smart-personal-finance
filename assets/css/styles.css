@@ -65,24 +65,29 @@
     --safe-bottom: env(safe-area-inset-bottom, 0px);
 }
 
-/* Light Theme */
+/* Light Theme - Enhanced for better contrast and visual hierarchy */
 [data-theme="light"] {
     --bg:      #ffffff;
-    --surf1:   #f8f9fa;
-    --surf2:   #e9ecef;
-    --surf3:   #dee2e6;
-    --border:  #dee2e6;
-    --border2: #ced4da;
-    --text:    #212529;
-    --muted:   #6c757d;
-    --dim:     #adb5bd;
+    --surf1:   #f8fafc;
+    --surf2:   #f1f5f9;
+    --surf3:   #e2e8f0;
+    --border:  #e2e8f0;
+    --border2: #cbd5e1;
+    --text:    #0f172a;
+    --muted:   #64748b;
+    --dim:     #94a3b8;
     --white:   #000;
     --shadow:  0 8px 40px rgba(0,0,0,.15);
     --icon-surface: rgba(15, 23, 42, 0.04);
     --icon-surface-strong: rgba(15, 23, 42, 0.08);
     --icon-border: rgba(15, 23, 42, 0.12);
-    --icon-color: #111827;
+    --icon-color: #0f172a;
     --icon-muted: rgba(55, 65, 81, 0.72);
+    --card: rgba(255, 255, 255, 0.95);
+    --card-strong: rgba(255, 255, 255, 0.98);
+    --card-border: rgba(148, 163, 184, 0.2);
+    --text-secondary: #475569;
+    --surface-highlight: rgba(59, 130, 246, 0.08);
 }
 
 html { font-size: 14px; -webkit-text-size-adjust: 100%; overflow-x: hidden; }
@@ -4261,10 +4266,11 @@ td.amount {
     .goal-summary-item strong,
     .annual-summary-item strong  { font-size: 1rem; }
 
-    /* Annual breakdown months */
-    .annual-month-item           { flex-direction: column; align-items: flex-start; gap: 8px; padding: 12px; }
-    .annual-month-details        { flex-direction: column; gap: 6px; }
-    .annual-month-detail         { font-size: 0.82rem; }
+    /* Annual breakdown months - optimized for mobile */
+    .annual-month-item           { flex-direction: column; align-items: flex-start; gap: 6px; padding: 10px; }
+    .annual-month-details        { flex-direction: column; gap: 4px; }
+    .annual-month-detail         { font-size: 0.75rem; display: flex; justify-content: space-between; width: 100%; }
+    .annual-month-detail strong  { font-weight: 600; }
 
     /* Section headers */
     .goal-header, .month-nav     { padding: var(--space-md) var(--space-lg); }
@@ -4564,6 +4570,267 @@ td.amount {
 .settings-input:focus {
     outline: none;
     border-color: var(--primary);
+}
+/* Applies to all <input type="file"> elements in your application */
+input[type="file"]::file-selector-button {
+    background: transparent;
+    border: 1px solid var(--border2);
+    color: var(--text);
+    border-radius: 6px;
+    font-size: 0.78rem;
+    font-family: inherit;
+    padding: 6px 12px;
+    margin-right: 12px;
+    cursor: pointer;
+    white-space: nowrap;
+    line-height: 1;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+input[type="file"]::file-selector-button:hover {
+    border-color: var(--muted);
+    background: var(--surf1);
+}
+
+[data-theme='light'] input[type="file"]::file-selector-button {
+    border-color: rgba(148, 163, 184, 0.3);
+}
+
+[data-theme='light'] input[type="file"]::file-selector-button:hover {
+    border-color: #64748b;
+    background: rgba(148, 163, 184, 0.08);
+}
+
+/* Bug Report Form Styling */
+.bug-report-form {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-lg);
+    padding: var(--space-lg);
+}
+
+.bug-report-form .field {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-sm);
+}
+
+.bug-report-form label {
+    font-size: var(--font-sm);
+    font-weight: 500;
+    color: var(--text);
+}
+
+.bug-report-form .required-mark {
+    color: var(--red);
+    margin-left: 2px;
+}
+
+.settings-textarea {
+    background: var(--surf1);
+    border: 1px solid var(--border2);
+    color: var(--text);
+    padding: 10px 12px;
+    border-radius: 6px;
+    font-size: 0.9rem;
+    width: 100%;
+    resize: vertical;
+    font-family: inherit;
+    line-height: 1.5;
+}
+
+[data-theme='light'] .settings-textarea {
+    background: rgba(255, 255, 255, 0.9);
+    border-color: rgba(148, 163, 184, 0.2);
+    color: #334155;
+}
+
+.settings-textarea:focus {
+    outline: none;
+    border-color: var(--primary);
+}
+
+.settings-file-input {
+    background: var(--surf1);
+    border: 1px solid var(--border2);
+    color: var(--text);
+    padding: 8px 12px;
+    border-radius: 6px;
+    font-size: 0.9rem;
+    width: 100%;
+    cursor: pointer;
+}
+
+[data-theme='light'] .settings-file-input {
+    background: rgba(255, 255, 255, 0.9);
+    border-color: rgba(148, 163, 184, 0.2);
+    color: #334155;
+}
+
+.settings-file-input:focus {
+    outline: none;
+    border-color: var(--primary);
+}
+
+.field-hint {
+    font-size: var(--font-xs);
+    color: var(--dim);
+    margin-top: 2px;
+}
+
+.form-actions {
+    display: flex;
+    gap: var(--space-md);
+    justify-content: flex-end;
+    margin-top: var(--space-md);
+}
+
+.success-message {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    padding: var(--space-xl);
+    gap: var(--space-md);
+}
+
+.success-icon {
+    font-size: 3rem;
+    margin-bottom: var(--space-sm);
+}
+
+.success-message h3 {
+    font-size: var(--font-lg);
+    font-weight: 600;
+    color: var(--text);
+    margin: 0;
+}
+
+.success-message p {
+    font-size: var(--font-sm);
+    color: var(--muted);
+    margin: 0;
+}
+
+.bug-id-display {
+    font-weight: 600;
+    color: var(--primary);
+    font-size: var(--font-base);
+}
+
+.success-hint {
+    font-size: var(--font-xs);
+    color: var(--dim);
+    margin-top: var(--space-sm);
+}
+
+/* Legal Modal Styling */
+.legal-panel {
+    width: 520px;
+}
+
+@media (max-width: 600px) {
+    .legal-panel {
+        width: 100vw;
+    }
+}
+
+.legal-content {
+    padding: 0 24px 16px;
+    line-height: 1.6;
+}
+
+.legal-content ul {
+    margin: var(--space-sm) 0 var(--space-md) var(--space-lg);
+    padding-left: 20px;
+}
+
+.legal-content li {
+    font-size: var(--font-sm);
+    color: var(--muted);
+    margin-bottom: var(--space-xs);
+    list-style-position: outside;
+    list-style-type: disc;
+}
+
+.legal-content h3 {
+    font-size: var(--font-base);
+    font-weight: 600;
+    color: var(--text);
+    margin: var(--space-lg) 0 var(--space-sm) 0;
+}
+
+.legal-content h3:first-child {
+    margin-top: 0;
+}
+
+.legal-content p {
+    font-size: var(--font-sm);
+    color: var(--muted);
+    margin-bottom: var(--space-md);
+}
+
+.legal-content a {
+    color: var(--primary);
+    text-decoration: none;
+}
+
+.legal-content a:hover {
+    text-decoration: underline;
+}
+
+.legal-section {
+    border-bottom: 1px solid var(--border2);
+    padding-bottom: var(--space-lg);
+    margin-bottom: var(--space-lg);
+}
+
+.legal-section:last-child {
+    border-bottom: none;
+    margin-bottom: 0;
+}
+
+.legal-updated {
+    font-size: var(--font-xs);
+    color: var(--dim);
+    font-style: italic;
+    margin-top: var(--space-md);
+}
+
+.contact-email {
+    font-size: var(--font-base);
+    font-weight: 600;
+    color: var(--primary);
+    margin: var(--space-sm) 0;
+}
+
+.contact-social {
+    color: var(--muted);
+    font-style: italic;
+}
+
+/* Auth Legal Links */
+.auth-legal-links {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--space-sm);
+    margin-top: var(--space-lg);
+    font-size: var(--font-xs);
+}
+
+.auth-legal-link {
+    color: var(--dim);
+    text-decoration: none;
+    transition: color 0.2s ease;
+}
+
+.auth-legal-link:hover {
+    color: var(--primary);
+}
+
+.auth-legal-separator {
+    color: var(--dim);
 }
 
 .btn-danger-action {
@@ -6959,8 +7226,8 @@ input:invalid:not(:placeholder-shown) {
     }
     .dash-fy-kpis { 
         grid-template-columns: repeat(2, minmax(0, 1fr)); 
-        gap: 8px;
-        padding: 8px;
+        gap: 6px;
+        padding: 6px;
         background: var(--surf2);
         border-radius: 8px;
     }
@@ -6969,11 +7236,18 @@ input:invalid:not(:placeholder-shown) {
         border-top: 0 !important;
         background: var(--surf1);
         border-radius: 6px;
-        padding: 10px 12px;
+        padding: 8px 10px;
     }
     .dash-fy-kpis > div:last-child { 
         grid-column: 1 / -1; 
         text-align: center;
+    }
+    .dash-fy-kpis span {
+        font-size: 0.65rem;
+        letter-spacing: 0.05em;
+    }
+    .dash-fy-kpis strong {
+        font-size: 0.95rem;
     }
     .dash-fy-separator { display: none; }
     

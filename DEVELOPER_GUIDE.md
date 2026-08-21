@@ -1,4 +1,4 @@
-# SmartFin - Developer Guide (v4.0.1)
+# SmartFin - Developer Guide (v5.5.0)
 
 > Quick reference for developers working with SmartFin's modular architecture.
 
@@ -23,6 +23,58 @@ All business logic is in `src/core/` - platform-independent, tested, and documen
 - **TaxCalculator** - Tax planning
 - **ExpenseAnalyzer** - Expense tracking
 - **DashboardCalculator** - Dashboard aggregation
+
+### UI Modules (6 modules)
+- **EmailService** - Email service abstraction using EmailJS
+- **EmailConfig** - Email configuration and constants
+- **LegalContent** - Legal page content (Privacy, Terms, etc.)
+- **HtmlUtils** - HTML entity handling and XSS prevention
+- **Modal** - Custom modal/toast system
+- **Icons** - SVG icon library
+- **Dashboard** - Dashboard rendering logic
+- **Constants** - Application constants
+
+## 📧 Email Infrastructure
+
+### EmailService Module
+The EmailService module provides a clean abstraction for sending emails via EmailJS:
+
+```javascript
+import emailService from './modules/EmailService.js';
+
+// Initialize (called automatically on first use)
+await emailService.initialize();
+
+// Send dashboard report
+await emailService.sendDashboardReport({
+    userEmail: 'user@example.com',
+    userName: 'John Doe',
+    reportPeriod: 'August 2026',
+    reportData: 'Report content...'
+});
+
+// Send bug report
+await emailService.sendBugReport({
+    userEmail: 'user@example.com',
+    title: 'Bug title',
+    description: 'Bug description',
+    // ... other parameters
+});
+```
+
+### Configuration
+Email configuration is in `assets/js/modules/email-config.js`:
+- Service ID: `smart_personal_finance`
+- Public Key: `testkey`
+- Template ID: `smartfin_contact_us`
+- Admin Recipient: `mrunaltemp01@gmail.com`
+
+### Security Features
+- Rate limiting (1 min between dashboard reports, 2 min between bug reports)
+- Automatic retry with exponential backoff
+- XSS prevention for all user inputs
+- Log sanitization before sending
+- No sensitive credentials exposed to frontend
 
 ## 🎨 Design System
 

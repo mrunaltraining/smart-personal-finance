@@ -1195,9 +1195,6 @@ export function renderDashboard(appData, netWorthSummary = {}) {
                     <button onclick="switchToTab('inflow'); return false;" class="dash-card-action-btn" title="View Investments">
                         ${iconSvg('trendingUp', 'dash-action-icon')}
                     </button>
-                    <button onclick="switchToTab('gifts'); return false;" class="dash-card-action-btn" title="View Gifts">
-                        ${iconSvg('star', 'dash-action-icon')}
-                    </button>
                 </div>
             </div>
             ${ongoingGoals.length > 0 ? `

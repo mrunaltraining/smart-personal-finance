@@ -1,6 +1,6 @@
-// ── SmartFin v5.3.0 ──────────────────────────────────────────────────────────
-// Major Architecture Redesign: Modular business logic, platform-independent code
-// v5.3.0: Dynamic notification system, modern dark theme, enhanced insights & triggers
+// ── SmartFin v5.5.0 ──────────────────────────────────────────────────────────
+// Email Infrastructure & Professional Pages
+// v5.5.0: EmailJS integration, legal pages, mobile optimizations, duplicate detection
 //
 // VERSION MANAGEMENT:
 // APP_VERSION below is the SINGLE SOURCE OF TRUTH for version across the entire app.
@@ -22,6 +22,266 @@ import {
 } from './modules/constants.js';
 import { iconSvg } from './modules/icons.js';
 import { getMonthlyBudgetDistribution } from './modules/budget-distribution.js';
+import emailService from './modules/EmailService.js';
+
+// Legal Content (inline to avoid module loading issues)
+const LEGAL_CONTENT = {
+    privacy: {
+        title: 'Privacy Policy',
+        content: `
+            <div class="legal-section">
+                <h3>1. Information We Collect</h3>
+                <p>SmartFin collects information you provide directly, including:</p>
+                <ul>
+                    <li><strong>Account Information:</strong> Name, email address, and location when you create an account</li>
+                    <li><strong>Financial Data:</strong> Account balances, income, expenses, investments, insurance, goals, and other financial information you enter</li>
+                    <li><strong>Usage Data:</strong> App usage patterns, feature interactions, and technical diagnostics</li>
+                </ul>
+            </div>
+            
+            <div class="legal-section">
+                <h3>2. How We Use Your Information</h3>
+                <p>We use your information to:</p>
+                <ul>
+                    <li>Provide and improve our financial planning services</li>
+                    <li>Sync your data across devices using Firebase</li>
+                    <li>Send important notifications about your account</li>
+                    <li>Respond to your support requests and bug reports</li>
+                    <li>Analyze usage patterns to improve the app</li>
+                </ul>
+            </div>
+            
+            <div class="legal-section">
+                <h3>3. Data Storage & Security</h3>
+                <p>Your data is stored securely using Firebase Firestore, which provides:</p>
+                <ul>
+                    <li>Encryption in transit and at rest</li>
+                    <li>Secure authentication via Firebase Auth</li>
+                    <li>Regular security updates and monitoring</li>
+                </ul>
+                <p>We never sell your personal or financial data to third parties.</p>
+            </div>
+            
+            <div class="legal-section">
+                <h3>4. Data Retention</h3>
+                <p>Your data is retained as long as your account is active. You can delete your account and all associated data at any time through the app settings.</p>
+            </div>
+            
+            <div class="legal-section">
+                <h3>5. Your Rights</h3>
+                <p>You have the right to:</p>
+                <ul>
+                    <li>Access your personal data</li>
+                    <li>Correct inaccurate data</li>
+                    <li>Delete your account and data</li>
+                    <li>Export your data in JSON format</li>
+                    <li>Opt out of non-essential communications</li>
+                </ul>
+            </div>
+            
+            <div class="legal-section">
+                <p class="legal-updated">Last updated: August 2026</p>
+            </div>
+        `
+    },
+    terms: {
+        title: 'Terms & Conditions',
+        content: `
+            <div class="legal-section">
+                <h3>1. Acceptance of Terms</h3>
+                <p>By using SmartFin, you agree to these Terms & Conditions. If you do not agree, please do not use the app.</p>
+            </div>
+            
+            <div class="legal-section">
+                <h3>2. Account Responsibilities</h3>
+                <p>You are responsible for:</p>
+                <ul>
+                    <li>Maintaining the confidentiality of your account credentials</li>
+                    <li>All activities that occur under your account</li>
+                    <li>Notifying us immediately of unauthorized access</li>
+                    <li>Providing accurate and complete information</li>
+                </ul>
+            </div>
+            
+            <div class="legal-section">
+                <h3>3. Permitted Use</h3>
+                <p>You may use SmartFin for personal financial planning. You may not:</p>
+                <ul>
+                    <li>Use the app for illegal purposes</li>
+                    <li>Reverse engineer or attempt to extract source code</li>
+                    <li>Interfere with the app operation or security</li>
+                    <li>Use automated systems to access the app without permission</li>
+                </ul>
+            </div>
+            
+            <div class="legal-section">
+                <h3>4. Disclaimer</h3>
+                <p>SmartFin is provided "as is" without warranties of any kind. We do not guarantee:</p>
+                <ul>
+                    <li>Accuracy of financial calculations or projections</li>
+                    <li>Uninterrupted or error-free operation</li>
+                    <li>Security of data transmission (though we use industry-standard encryption)</li>
+                </ul>
+            </div>
+            
+            <div class="legal-section">
+                <h3>5. Limitation of Liability</h3>
+                <p>In no event shall SmartFin or its developers be liable for any indirect, incidental, special, or consequential damages arising from use of the app.</p>
+            </div>
+            
+            <div class="legal-section">
+                <p class="legal-updated">Last updated: August 2026</p>
+            </div>
+        `
+    },
+    disclaimer: {
+        title: 'Disclaimer',
+        content: `
+            <div class="legal-section">
+                <h3>Financial Advice Disclaimer</h3>
+                <p>SmartFin is a financial planning tool, not a financial advisor. The information and calculations provided are for educational and informational purposes only.</p>
+            </div>
+            
+            <div class="legal-section">
+                <h3>No Professional Advice</h3>
+                <p>Nothing in SmartFin constitutes professional financial, tax, legal, or investment advice. You should consult with qualified professionals before making important financial decisions.</p>
+            </div>
+            
+            <div class="legal-section">
+                <h3>Accuracy of Information</h3>
+                <p>While we strive for accuracy, we cannot guarantee that all calculations, projections, or recommendations are error-free. You should verify all important calculations independently.</p>
+            </div>
+            
+            <div class="legal-section">
+                <h3>Investment Risks</h3>
+                <p>All investments carry risk. Past performance is not indicative of future results. SmartFin projections are estimates based on assumptions and should not be taken as guarantees.</p>
+            </div>
+            
+            <div class="legal-section">
+                <h3>Data Security</h3>
+                <p>While we use industry-standard security measures, no system is completely secure. You are responsible for protecting your account credentials and device.</p>
+            </div>
+            
+            <div class="legal-section">
+                <p class="legal-updated">Last updated: August 2026</p>
+            </div>
+        `
+    },
+    about: {
+        title: 'About Us',
+        content: `
+            <div class="legal-section">
+                <h3>Mission</h3>
+                <p>SmartFin aims to simplify personal financial planning for everyone. We believe that effective financial management should be accessible, intuitive, and empowering.</p>
+            </div>
+            
+            <div class="legal-section">
+                <h3>Technology Stack</h3>
+                <p>SmartFin is built with modern web technologies:</p>
+                <ul>
+                    <li><strong>Frontend:</strong> Vanilla JavaScript (ES2022), HTML5, CSS3</li>
+                    <li><strong>Backend:</strong> Firebase (Authentication, Firestore)</li>
+                    <li><strong>Charts:</strong> Chart.js for data visualization</li>
+                    <li><strong>Export:</strong> SheetJS for Excel exports</li>
+                    <li><strong>Email:</strong> EmailJS for transactional emails</li>
+                </ul>
+            </div>
+            
+            <div class="legal-section">
+                <h3>Features</h3>
+                <p>SmartFin provides comprehensive financial management tools:</p>
+                <ul>
+                    <li>Budget planning and tracking</li>
+                    <li>Investment portfolio management</li>
+                    <li>Financial goal setting and tracking</li>
+                    <li>Insurance coverage analysis</li>
+                    <li>Tax planning for ITR-2</li>
+                    <li>Net worth tracking and projections</li>
+                    <li>Expense tracking with category breakdowns</li>
+                </ul>
+            </div>
+            
+            <div class="legal-section">
+                <h3>Privacy & Security</h3>
+                <p>Your data is encrypted and stored securely in Firebase. We never sell your data to third parties. See our Privacy Policy for details.</p>
+            </div>
+            
+            <div class="legal-section">
+                <h3>Version</h3>
+                <p>Current version: <span id="aboutAppVersion">5.5.0</span></p>
+            </div>
+            
+            <div class="legal-section">
+                <p class="legal-updated">Last updated: August 2026</p>
+            </div>
+        `
+    },
+    contact: {
+        title: 'Contact Us',
+        content: `
+            <div class="legal-section">
+                <h3>Email Support</h3>
+                <p>For general inquiries, support, and feedback:</p>
+                <p class="contact-email"><a href="mailto:mrunaltemp01@gmail.com">mrunaltemp01@gmail.com</a></p>
+            </div>
+            
+            <div class="legal-section">
+                <h3>Bug Reports</h3>
+                <p>Found a bug? Use the built-in bug report feature in the app (Settings → Report a Bug) to automatically include system information and logs. This helps us diagnose and fix issues faster.</p>
+            </div>
+            
+            <div class="legal-section">
+                <h3>Feature Requests</h3>
+                <p>Have an idea for improving SmartFin? We welcome feature requests! Email us with your suggestions, and we'll consider them for future updates.</p>
+            </div>
+            
+            <div class="legal-section">
+                <h3>Response Time</h3>
+                <p>We typically respond to emails within 24-48 hours, excluding weekends and holidays. Bug reports are prioritized and may receive faster responses.</p>
+            </div>
+            
+            <div class="legal-section">
+                <h3>Information to Include</h3>
+                <p>When contacting us, please include:</p>
+                <ul>
+                    <li>Your name and email address</li>
+                    <li>A detailed description of your question or issue</li>
+                    <li>Steps to reproduce any bugs</li>
+                    <li>Screenshots if applicable</li>
+                    <li>SmartFin version (found in Settings)</li>
+                </ul>
+            </div>
+            
+            <div class="legal-section">
+                <h3>Privacy</h3>
+                <p>Your contact information will only be used to respond to your inquiry and will not be shared with third parties. See our Privacy Policy for more details.</p>
+            </div>
+            
+            <div class="legal-section">
+                <h3>Social Media</h3>
+                <p>Follow us for updates, tips, and financial insights:</p>
+                <p class="contact-social">Coming soon!</p>
+            </div>
+            
+            <div class="legal-section">
+                <p class="legal-updated">Last updated: August 2026</p>
+            </div>
+        `
+    }
+};
+
+// HTML utilities functions (carefully used only for HTML rendering to prevent XSS)
+function escapeHtml(text) {
+    if (text === null || text === undefined) return '';
+    const div = document.createElement('div');
+    div.textContent = text;
+    return div.innerHTML;
+}
+
+// Only use these when rendering user input as HTML, not for data storage or input values
+function safeHtmlRender(text) {
+    return escapeHtml(text);
+}
 
 // ── Lazy-Load Helpers (P2: lazy-load SheetJS + Chart.js) ─────────────────────
 const _loadedScripts = {};
@@ -412,20 +672,20 @@ function renderLogs(logs) {
         const timestamp = new Date(log.timestamp).toLocaleString();
         const contextStr = log.context ? JSON.stringify(log.context, null, 2) : '';
         
-        const deviceLabel = log.deviceId ? `<span class="log-entry-device">Device: ${log.deviceId.substring(0, 15)}...</span>` : '';
+        const deviceLabel = log.deviceId ? '<span class="log-entry-device">Device: ' + log.deviceId.substring(0, 15) + '...</span>' : '';
+        const userLabel = log.userId ? '<span class="log-entry-user">User: ' + log.userId.substring(0, 8) + '...</span>' : '';
+        const contextLabel = contextStr ? '<div class="log-entry-context">' + escapeHtml(contextStr) + '</div>' : '';
 
-        return `
-            <div class="log-entry ${log.level}">
-                <div class="log-entry-header">
-                    <span class="log-entry-level ${log.level}">${log.level}</span>
-                    <span class="log-entry-timestamp">${timestamp}</span>
-                    ${log.userId ? `<span class="log-entry-user">User: ${log.userId.substring(0, 8)}...</span>` : ''}
-                    ${deviceLabel}
-                </div>
-                <div class="log-entry-message">${escapeHtml(log.message)}</div>
-                ${contextStr ? `<div class="log-entry-context">${escapeHtml(contextStr)}</div>` : ''}
-            </div>
-        `;
+        return '<div class="log-entry ' + log.level + '">' +
+            '<div class="log-entry-header">' +
+            '<span class="log-entry-level ' + log.level + '">' + log.level + '</span>' +
+            '<span class="log-entry-timestamp">' + timestamp + '</span>' +
+            userLabel +
+            deviceLabel +
+            '</div>' +
+            '<div class="log-entry-message">' + escapeHtml(log.message) + '</div>' +
+            contextLabel +
+            '</div>';
     }).join('');
     
     logsTable.innerHTML = html;
@@ -446,12 +706,6 @@ function updateLogsStats(logs) {
     document.getElementById('logsInfoCount').textContent = `Info: ${info}`;
     document.getElementById('logsWarningCount').textContent = `Warning: ${warning}`;
     document.getElementById('logsErrorCount').textContent = `Error: ${error}`;
-}
-
-function escapeHtml(text) {
-    const div = document.createElement('div');
-    div.textContent = text;
-    return div.innerHTML;
 }
 
 function exportLogs() {
@@ -545,6 +799,209 @@ if (logsOverlay) {
     logsOverlay.addEventListener('click', closeLogsPanel);
 }
 
+// ── Bug Report Modal ──────────────────────────────────────────────────────────
+const reportBugBtn = document.getElementById('reportBugBtn');
+const closeBugReportBtn = document.getElementById('closeBugReportBtn');
+const cancelBugReportBtn = document.getElementById('cancelBugReportBtn');
+const bugReportForm = document.getElementById('bugReportForm');
+const bugReportPanel = document.getElementById('bugReportPanel');
+const bugReportOverlay = document.getElementById('bugReportOverlay');
+const bugReportSuccess = document.getElementById('bugReportSuccess');
+const closeBugReportSuccessBtn = document.getElementById('closeBugReportSuccessBtn');
+
+function openBugReportPanel() {
+    if (bugReportPanel && bugReportOverlay) {
+        bugReportOverlay.hidden = false;
+        bugReportPanel.setAttribute('aria-hidden', 'false');
+        bugReportPanel.style.transform = 'translateX(0)';
+        
+        // Reset form
+        if (bugReportForm) {
+            bugReportForm.reset();
+            bugReportForm.style.display = 'flex';
+        }
+        if (bugReportSuccess) {
+            bugReportSuccess.style.display = 'none';
+        }
+    }
+}
+
+function closeBugReportPanel() {
+    if (bugReportPanel && bugReportOverlay) {
+        bugReportPanel.style.transform = 'translateX(100%)';
+        setTimeout(() => {
+            bugReportPanel.setAttribute('aria-hidden', 'true');
+            bugReportOverlay.hidden = true;
+        }, PANEL_CLOSE_ANIMATION_MS);
+    }
+}
+
+if (reportBugBtn) {
+    reportBugBtn.addEventListener('click', (e) => {
+        e.preventDefault();
+        openBugReportPanel();
+    });
+}
+
+if (closeBugReportBtn) {
+    closeBugReportBtn.addEventListener('click', closeBugReportPanel);
+}
+
+if (cancelBugReportBtn) {
+    cancelBugReportBtn.addEventListener('click', closeBugReportPanel);
+}
+
+if (closeBugReportSuccessBtn) {
+    closeBugReportSuccessBtn.addEventListener('click', closeBugReportPanel);
+}
+
+if (bugReportOverlay) {
+    bugReportOverlay.addEventListener('click', closeBugReportPanel);
+}
+
+// ── Legal Modal ─────────────────────────────────────────────────────────────
+const legalModalOverlay = document.getElementById('legalModalOverlay');
+const legalModalPanel = document.getElementById('legalModalPanel');
+const closeLegalModalBtn = document.getElementById('closeLegalModalBtn');
+const legalModalTitle = document.getElementById('legalModalTitle');
+const legalModalContent = document.getElementById('legalModalContent');
+
+function openLegalModal(modalType) {
+    if (legalModalPanel && legalModalOverlay && LEGAL_CONTENT[modalType]) {
+        const content = LEGAL_CONTENT[modalType];
+        
+        legalModalTitle.textContent = content.title;
+        legalModalContent.innerHTML = content.content;
+        
+        // Update app version in About section
+        if (modalType === 'about') {
+            const versionElement = document.getElementById('aboutAppVersion');
+            if (versionElement) {
+                versionElement.textContent = typeof getAppVersion === 'function' ? getAppVersion() : '5.4.11';
+            }
+        }
+        
+        legalModalOverlay.hidden = false;
+        legalModalPanel.setAttribute('aria-hidden', 'false');
+        legalModalPanel.style.transform = 'translateX(0)';
+    }
+}
+
+function closeLegalModal() {
+    if (legalModalPanel && legalModalOverlay) {
+        legalModalPanel.style.transform = 'translateX(100%)';
+        setTimeout(() => {
+            legalModalPanel.setAttribute('aria-hidden', 'true');
+            legalModalOverlay.hidden = true;
+        }, PANEL_CLOSE_ANIMATION_MS);
+    }
+}
+
+if (closeLegalModalBtn) {
+    closeLegalModalBtn.addEventListener('click', closeLegalModal);
+}
+
+if (legalModalOverlay) {
+    legalModalOverlay.addEventListener('click', closeLegalModal);
+}
+
+// Handle auth legal links
+const authLegalLinks = document.querySelectorAll('.auth-legal-link');
+authLegalLinks.forEach(link => {
+    link.addEventListener('click', (e) => {
+        e.preventDefault();
+        const modalType = link.getAttribute('data-modal');
+        if (modalType) {
+            openLegalModal(modalType);
+        }
+    });
+});
+
+// Handle help panel legal links
+const helpLegalLinks = document.querySelectorAll('.help-section .footer-link');
+helpLegalLinks.forEach(link => {
+    link.addEventListener('click', (e) => {
+        e.preventDefault();
+        const modalType = link.getAttribute('data-modal');
+        if (modalType) {
+            openLegalModal(modalType);
+        }
+    });
+});
+
+if (bugReportForm) {
+    bugReportForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+
+        if (!currentUser) {
+            showToast('Please sign in to submit a bug report', { variant: 'error' });
+            return;
+        }
+
+        try {
+            // Initialize email service
+            await emailService.initialize();
+
+            // Get form values
+            const title = document.getElementById('bugTitle').value.trim();
+            const description = document.getElementById('bugDescription').value.trim();
+            const stepsToReproduce = document.getElementById('bugSteps').value.trim();
+            const expectedBehavior = document.getElementById('bugExpected').value.trim();
+            const actualBehavior = document.getElementById('bugActual').value.trim();
+            const screenshotInput = document.getElementById('bugScreenshot');
+            const screenshot = screenshotInput.files[0] || null;
+
+            // Validate required fields
+            if (!title || !description) {
+                showToast('Please fill in all required fields', { variant: 'error' });
+                return;
+            }
+
+            // Get browser and app info
+            const browserInfo = `${navigator.userAgent}`;
+            const appVersion = typeof getAppVersion === 'function' ? getAppVersion() : '5.4.11';
+            const userEmail = currentUser.email;
+
+            showToast('Submitting bug report...', { variant: 'info' });
+
+            // Send bug report
+            const result = await emailService.sendBugReport({
+                userEmail,
+                title,
+                description,
+                stepsToReproduce,
+                expectedBehavior,
+                actualBehavior,
+                browserInfo,
+                appVersion,
+                screenshot
+            });
+
+            if (result.success) {
+                // Show success message with bug ID
+                if (bugReportForm) bugReportForm.style.display = 'none';
+                if (bugReportSuccess) {
+                    bugReportSuccess.style.display = 'block';
+                    const bugIdElement = document.getElementById('bugReportId');
+                    if (bugIdElement) {
+                        bugIdElement.textContent = result.bugId;
+                    }
+                }
+                
+                logger.info('Bug report submitted', { bugId: result.bugId, title });
+                showToast(`Bug report submitted successfully! Reference ID: ${result.bugId}`, { variant: 'success', duration: 5000 });
+            } else {
+                showToast(result.message || 'Failed to submit bug report. Please try again.', { variant: 'error', duration: 5000 });
+                logger.error('Bug report submission failed', { error: result.message });
+            }
+        } catch (err) {
+            console.error('Bug report submission error:', err);
+            logger.error('Bug report submission failed', { error: err.message });
+            showToast('Failed to submit bug report. Please try again.', { variant: 'error' });
+        }
+    });
+}
+
 // ── Theme-based favicon switching ─────────────────────────────────────────────
 function updateFaviconForTheme() {
     const isLight = document.documentElement.getAttribute('data-theme') === 'light';
@@ -601,7 +1058,7 @@ function semanticBadgeStyle(value, paid = false) {
 }
 
 // ── Version Info ──────────────────────────────────────────────────────────────
-const APP_VERSION = { major: 5, minor: 4, build: 13 };
+const APP_VERSION = { major: 5, minor: 5, build: 0 };
 function getAppVersion() {
     return `v${APP_VERSION.major}.${APP_VERSION.minor}.${APP_VERSION.build}`;
 }
@@ -2042,7 +2499,11 @@ function showNotificationsOnLogin() {
 // Call on auth state change
 auth.onAuthStateChanged((user) => {
     if (user) {
-        setTimeout(showNotificationsOnLogin, 1000);
+        // Force re-evaluate notification triggers on login to ensure fresh data
+        setTimeout(() => {
+            triggerNotificationCheck({ forceShow: false, isUserAction: false });
+            showNotificationsOnLogin();
+        }, 1000);
     }
 });
 
@@ -2454,6 +2915,55 @@ if (downloadDashboardBtn) {
     });
 }
 
+// Email Dashboard Report
+const emailDashboardBtn = document.getElementById('emailDashboardBtn');
+if (emailDashboardBtn) {
+    emailDashboardBtn.addEventListener("click", async () => {
+        if (!currentUser) {
+            showToast('Please sign in to send dashboard report', { variant: 'error' });
+            return;
+        }
+
+        try {
+            // Initialize email service
+            await emailService.initialize();
+
+            showToast('Sending report to your email...', { variant: 'info' });
+
+            // Get user email and name
+            const userEmail = currentUser.email;
+            const userName = appData.userName || 'User';
+
+            // Generate report period (current month)
+            const now = new Date();
+            const reportPeriod = now.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
+
+            // Generate simplified report data
+            const reportData = generateDashboardReportText();
+
+            // Send email
+            const result = await emailService.sendDashboardReport({
+                userEmail,
+                userName,
+                reportPeriod,
+                reportData
+            });
+
+            if (result.success) {
+                showToast(`Report sent successfully to ${userEmail}`, { variant: 'success', duration: 5000 });
+                logger.info('Dashboard report emailed', { email: userEmail, period: reportPeriod });
+            } else {
+                showToast(result.message || 'Failed to send report. Please try again.', { variant: 'error', duration: 5000 });
+                logger.error('Dashboard report email failed', { error: result.message });
+            }
+        } catch (err) {
+            console.error('Dashboard report email error:', err);
+            logger.error('Dashboard report email failed', { error: err.message });
+            showToast('Failed to send report. Please try again.', { variant: 'error' });
+        }
+    });
+}
+
 // Account Settings - Edit Name
 const editNameBtn = document.getElementById('editNameBtn');
 const saveNameBtn = document.getElementById('saveNameBtn');
@@ -2619,6 +3129,95 @@ if (cancelCustomLocationBtn) {
         editCustomLocationInput.value = '';
         editLocationInput.value = '';
     });
+}
+
+// Helper function to generate dashboard report text for email
+function generateDashboardReportText() {
+    const fmt = (num) => `₹${num.toLocaleString('en-IN', { maximumFractionDigits: 0 })}`;
+    
+    let report = `SmartFin Dashboard Report\n`;
+    report += `Generated: ${new Date().toLocaleString('en-IN')}\n`;
+    report += `User: ${appData.userName || 'User'}\n`;
+    report += `\n${'='.repeat(50)}\n\n`;
+
+    // Financial Health Score
+    try {
+        const healthScore = calculateFinancialHealthScore();
+        report += `FINANCIAL HEALTH SCORE\n`;
+        report += `Overall Score: ${healthScore.score}/100 (${healthScore.level})\n\n`;
+    } catch (err) {
+        console.error('Error calculating health score:', err);
+    }
+
+    // Accounts Summary
+    const accounts = appData.tabData.cards || [];
+    if (accounts.length > 0) {
+        report += `ACCOUNTS SUMMARY\n`;
+        let totalBalance = 0;
+        accounts.forEach(acc => {
+            const balance = parseFloat(acc.balance) || 0;
+            totalBalance += balance;
+            report += `  ${acc.bankName}: ${fmt(balance)}\n`;
+        });
+        report += `  Total Balance: ${fmt(totalBalance)}\n\n`;
+    }
+
+    // Current Month Budget
+    const currentMonthKey = getCurrentMonthKey();
+    const monthData = appData.monthlyBudgetData?.[currentMonthKey];
+    if (monthData) {
+        report += `CURRENT MONTH BUDGET (${currentMonthKey})\n`;
+        const inflow = monthData.inflow || {};
+        const outflow = monthData.outflow || {};
+        
+        const totalInflow = Object.keys(inflow).reduce((sum, key) => {
+            return sum + (parseFloat(inflow[key]) || 0);
+        }, 0);
+        
+        const totalOutflow = Object.keys(outflow).filter(k => !k.includes('Desc')).reduce((sum, key) => {
+            return sum + (parseFloat(outflow[key]) || 0);
+        }, 0);
+        
+        report += `  Total Inflow: ${fmt(totalInflow)}\n`;
+        report += `  Total Outflow: ${fmt(totalOutflow)}\n`;
+        report += `  Balance: ${fmt(totalInflow - totalOutflow)}\n\n`;
+    }
+
+    // Investments Summary
+    const investments = appData.tabData.inflow || [];
+    if (investments.length > 0) {
+        report += `INVESTMENTS SUMMARY\n`;
+        let totalInvested = 0;
+        let totalCurrent = 0;
+        investments.forEach(inv => {
+            const invested = parseFloat(inv.amount) || 0;
+            const current = parseFloat(inv.currentValue) || invested;
+            totalInvested += invested;
+            totalCurrent += current;
+        });
+        report += `  Total Invested: ${fmt(totalInvested)}\n`;
+        report += `  Current Value: ${fmt(totalCurrent)}\n`;
+        report += `  Gain/Loss: ${fmt(totalCurrent - totalInvested)}\n\n`;
+    }
+
+    // Goals Summary
+    const goals = appData.tabData.financialGoal || [];
+    if (goals.length > 0) {
+        report += `FINANCIAL GOALS\n`;
+        goals.forEach(goal => {
+            const needed = parseFloat(goal.amountNeeded) || 0;
+            const accumulated = parseFloat(goal.amountAccumulated) || 0;
+            const progress = needed > 0 ? ((accumulated / needed) * 100).toFixed(1) : 0;
+            report += `  ${goal.name}: ${progress}% complete (${fmt(accumulated)} / ${fmt(needed)})\n`;
+        });
+        report += `\n`;
+    }
+
+    report += `${'='.repeat(50)}\n`;
+    report += `\nThis is an automated report from SmartFin.\n`;
+    report += `For detailed analysis, please visit the SmartFin dashboard.\n`;
+
+    return report;
 }
 
 // Helper function to generate dashboard HTML content
@@ -4990,6 +5589,144 @@ if (expenseForm) {
     });
 }
 
+// Duplicate Detection System for Expenses
+class DuplicateDetector {
+    constructor() {
+        this.tolerancePercent = 0.01; // 1% tolerance for amount matching
+        this.toleranceAmount = 1; // ₹1 tolerance for small amounts
+    }
+
+    /**
+     * Generate transaction fingerprint
+     * @param {object} expense - Expense object
+     * @returns {string} - Fingerprint hash
+     */
+    generateFingerprint(expense) {
+        const key = `${expense.date}_${expense.category}_${expense.amount}_${expense.paymentMethod || 'UPI'}`;
+        // Simple hash function
+        let hash = 0;
+        for (let i = 0; i < key.length; i++) {
+            const char = key.charCodeAt(i);
+            hash = ((hash << 5) - hash) + char;
+            hash = hash & hash; // Convert to 32bit integer
+        }
+        return Math.abs(hash).toString(36);
+    }
+
+    /**
+     * Check if two expenses are duplicates
+     * @param {object} expense1 - First expense
+     * @param {object} expense2 - Second expense
+     * @returns {boolean} - True if duplicates
+     */
+    isDuplicate(expense1, expense2) {
+        // Check date match
+        if (expense1.date !== expense2.date) return false;
+
+        // Check category match (case-insensitive)
+        if (expense1.category.toLowerCase() !== expense2.category.toLowerCase()) return false;
+
+        // Check amount with tolerance
+        const amountDiff = Math.abs(expense1.amount - expense2.amount);
+        const tolerance = Math.max(
+            expense1.amount * this.tolerancePercent,
+            this.toleranceAmount
+        );
+        if (amountDiff > tolerance) return false;
+
+        // Check payment method match (optional)
+        if (expense1.paymentMethod && expense2.paymentMethod) {
+            if (expense1.paymentMethod.toLowerCase() !== expense2.paymentMethod.toLowerCase()) {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    /**
+     * Find duplicates in existing expenses
+     * @param {object} newExpense - New expense to check
+     * @param {array} existingExpenses - Array of existing expenses
+     * @returns {array} - Array of duplicate expenses
+     */
+    findDuplicates(newExpense, existingExpenses) {
+        return existingExpenses.filter(existing => this.isDuplicate(newExpense, existing));
+    }
+
+    /**
+     * Find all duplicates within an array
+     * @param {array} expenses - Array of expenses
+     * @returns {object} - Object with duplicate groups
+     */
+    findAllDuplicates(expenses) {
+        const duplicates = {};
+        const processed = new Set();
+
+        for (let i = 0; i < expenses.length; i++) {
+            if (processed.has(i)) continue;
+
+            const current = expenses[i];
+            const currentDuplicates = [i];
+
+            for (let j = i + 1; j < expenses.length; j++) {
+                if (processed.has(j)) continue;
+
+                if (this.isDuplicate(current, expenses[j])) {
+                    currentDuplicates.push(j);
+                    processed.add(j);
+                }
+            }
+
+            if (currentDuplicates.length > 1) {
+                const fingerprint = this.generateFingerprint(current);
+                duplicates[fingerprint] = currentDuplicates.map(idx => expenses[idx]);
+            }
+
+            processed.add(i);
+        }
+
+        return duplicates;
+    }
+
+    /**
+     * Filter out duplicates from import
+     * @param {array} newExpenses - Array of new expenses to import
+     * @param {array} existingExpenses - Array of existing expenses
+     * @returns {object} - Object with unique and duplicate expenses
+     */
+    filterDuplicates(newExpenses, existingExpenses) {
+        const unique = [];
+        const duplicates = [];
+
+        newExpenses.forEach(newExpense => {
+            const existingDuplicates = this.findDuplicates(newExpense, existingExpenses);
+            if (existingDuplicates.length > 0) {
+                duplicates.push({
+                    expense: newExpense,
+                    matches: existingDuplicates
+                });
+            } else {
+                // Also check against other new expenses
+                const newDuplicates = this.findDuplicates(newExpense, unique);
+                if (newDuplicates.length > 0) {
+                    duplicates.push({
+                        expense: newExpense,
+                        matches: newDuplicates
+                    });
+                } else {
+                    unique.push(newExpense);
+                }
+            }
+        });
+
+        return { unique, duplicates };
+    }
+}
+
+// Create global duplicate detector instance
+const duplicateDetector = new DuplicateDetector();
+
 // CSV Import functionality
 window.downloadExpenseTemplate = function() {
     const csvContent = `Date,Category,Amount,Payment Method,TransactionType,Merchant,Description
@@ -5055,6 +5792,7 @@ if (expenseImportBtn && expenseFileImport) {
             const monthData = getExpenseMonthData(monthKey);
             let imported = 0;
             let errors = [];
+            let duplicateCount = 0;
             
             // Calculate first and last day of current month for validation
             const firstDay = new Date(currentExpenseMonth.getFullYear(), currentExpenseMonth.getMonth(), 1);
@@ -5066,6 +5804,8 @@ if (expenseImportBtn && expenseFileImport) {
             
             progressDiv.style.display = 'block';
             
+            // First pass: collect all valid expenses
+            const validExpenses = [];
             for (let i = 1; i < rows.length; i++) {
                 try {
                     const row = rows[i];
@@ -5109,23 +5849,44 @@ if (expenseImportBtn && expenseFileImport) {
                         importedFromCSV: true
                     };
                     
-                    monthData.expenses.push(expense);
-                    imported++;
+                    validExpenses.push(expense);
                     
-                    importedCountSpan.textContent = imported;
+                    importedCountSpan.textContent = validExpenses.length;
                     progressBar.style.width = ((i / (rows.length - 1)) * 100) + '%';
                 } catch (err) {
                     errors.push(`Row ${i + 1}: ${err.message}`);
                 }
             }
             
+            // Second pass: filter duplicates
+            const existingExpenses = monthData.expenses || [];
+            const { unique, duplicates } = duplicateDetector.filterDuplicates(validExpenses, existingExpenses);
+            
+            // Add unique expenses to month data
+            unique.forEach(expense => {
+                monthData.expenses.push(expense);
+                imported++;
+            });
+            
+            // Track duplicate count
+            duplicateCount = duplicates.length;
+            
+            // Add duplicate information to errors
+            duplicates.forEach((dup, idx) => {
+                const expense = dup.expense;
+                errors.push(`Duplicate detected: ${expense.date} - ${expense.category} - ₹${expense.amount} (matches ${dup.matches.length} existing expense${dup.matches.length > 1 ? 's' : ''})`);
+            });
+            
             scheduleSave();
             progressDiv.style.display = 'none';
             expenseFileImport.value = '';
             
             let message = `Imported ${imported} expense${imported !== 1 ? 's' : ''}`;
-            if (errors.length > 0) {
-                message += ` (${errors.length} skipped)`;
+            if (duplicateCount > 0) {
+                message += ` (${duplicateCount} duplicate${duplicateCount > 1 ? 's' : ''} skipped)`;
+            }
+            if (errors.length > duplicateCount) {
+                message += ` (${errors.length - duplicateCount} error${errors.length - duplicateCount > 1 ? 's' : ''})`;
             }
             
             showToast(message, { variant: imported > 0 ? 'success' : 'error' });
