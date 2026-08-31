@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [5.5.0] - 2026-08-22 - Email Infrastructure & Professional Pages
 
+## [v5.5.3] - 2026-08-31 - Build Update
+
+### Changed
+- Bumped build number to 3
+
+
 ## [v5.5.2] - 2026-08-31 - Build Update
 
 ### Changed
