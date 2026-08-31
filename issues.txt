@@ -1,3 +1,17 @@
 issues
 =======
 
+In accounts list debit card oresent or not is not shown
+Also as this is a flag which mostlikely yes or no can it be represented any better
+
+
+When i closed the budget of aug on 30gh aug in budget page it was showing me october instead of september
+
+Also after filling the primary income i got option to execute transfer on budget page which is correct but why on edit budget page it is still visible. It should be hidden on edit budget page
+
+
+Find where is untracked income 3051 is coming from
+
+
+Also when i clicked on settle from saving it does not work. It because spetember is not yet come as it is 31st aug today. 
+
