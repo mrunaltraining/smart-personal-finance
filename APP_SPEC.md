@@ -1,4 +1,4 @@
-# SmartFin – Application Specification (v5.5.3)
+# SmartFin – Application Specification (v5.5.4)
 
 > **Purpose**: Single source of truth for the app's architecture, data models, business logic, and UI structure.
 > Use this file as context when making future modifications. Update it after every significant change.
@@ -201,7 +201,7 @@ element.addEventListener('mousedown', handleStart);
 
 ---
 
-## 2. Architecture & Modular Design (v5.5.3)
+## 2. Architecture & Modular Design (v5.5.4)
 
 ### Core Business Logic Modules
 
@@ -509,7 +509,7 @@ Every entry has:
 
 **Auto-deductions:** EPF, PPF, NPS, Insurance premiums auto-pulled from Outflow and Investments.
 
-**Tax Deductions Chart (v5.5.2):** `renderTaxDeductionsChart()` renders deductions grouped by section as a **horizontal bar chart** (Chart.js `indexAxis: 'y'`) for improved label readability, replacing the previous vertical bar layout. Falls back to an empty-state message when no deductions exist.
+**Tax Deductions Chart (v5.5.4):** `renderTaxDeductionsChart()` renders deductions grouped by section as a **horizontal bar chart** (Chart.js `indexAxis: 'y'`) for improved label readability, replacing the previous vertical bar layout. Falls back to an empty-state message when no deductions exist.
 
 ### gifts
 
@@ -743,7 +743,7 @@ When a Budget month is closed:
 - `isExpenseEditMode` - Edit mode toggle (boolean)
 - `expensePieChart` - Chart.js instance for pie chart
 
-### New Features in v5.5.3
+### New Features in v5.5.4
 
 #### CSV/Bank Statement Import
 - **File Format**: CSV with columns: Date, Category, Amount, Payment Method (optional)
@@ -831,7 +831,7 @@ When a Budget month is closed:
 
 ---
 
-## 5.8. Dynamic Notification System (NEW in v5.5.2)
+## 5.8. Dynamic Notification System (NEW in v5.5.4)
 
 ### Overview
 A bell-icon notification center in the header that surfaces actionable alerts sourced from live app data, without duplicating any calculations (reuses existing budget/goal/insurance/net worth/tax/gifts logic).
@@ -860,7 +860,7 @@ Registered via `registerNotificationTrigger(triggerFn)` in `app.js`, each return
 
 ---
 
-## 5.9. Enhanced Dashboard Insights & Financial Health Score (v5.5.2)
+## 5.9. Enhanced Dashboard Insights & Financial Health Score (v5.5.4)
 
 ### Insights Engine (`generateInsights()`)
 Evaluates account/budget/goal/insurance/net-worth/tax data and returns up to **11 possible recommendation types**, capped at **6 displayed** (`insights.slice(0, 6)`, increased from the previous limit of 4):
@@ -874,7 +874,7 @@ Evaluates account/budget/goal/insurance/net-worth/tax data and returns up to **1
 Each insight has `{ type, icon, message }` and is rendered on the Dashboard beneath the summary cards.
 
 ### Financial Health Score (`calculateFinancialHealthScore()`)
-Score out of 100, rebalanced in v5.5.2 to weight wealth-building more heavily:
+Score out of 100, rebalanced in v5.5.4 to weight wealth-building more heavily:
 
 | Component | Max Points | Scoring Basis |
 |-----------|-----------|---------------|
@@ -1062,8 +1062,8 @@ previewMap = {
 
 - CSS variables on `:root` and `[data-theme="light"]`
 - Key variables: `--bg`, `--surf1`, `--surf2`, `--text`, `--dim`, `--muted`, `--border`, `--border2`, `--accent`, `--shadow`
-- **Modern Dark Theme (v5.5.2)**: Indigo/slate color palette; `--primary` and `--investment` set to `#6366f1` (indigo), `--primary-hover: #4f46e5`, `--liability: #f43f5e` (rose). Semantic badges/tags (`.semantic-investment`, `.policy-badge`, `.premium-badge`/`.no-premium-badge`, tab pills) restyled with a modern accent set — indigo, rose, emerald, amber, violet, cyan — tuned separately for `[data-theme="light"]` to keep contrast/readability consistent between dark and light modes
-- **Loading Spinner (v5.5.2)**: `.sf-spinner` — a rotating ring (`border-top-color: var(--primary)`, `sf-spin` keyframe) containing `.sf-spinner-logo`, the app logo, which counter-rotates (`sf-spin-reverse` keyframe) so it appears stationary while the ring spins around it. Both animations are disabled under `prefers-reduced-motion`
+- **Modern Dark Theme (v5.5.4)**: Indigo/slate color palette; `--primary` and `--investment` set to `#6366f1` (indigo), `--primary-hover: #4f46e5`, `--liability: #f43f5e` (rose). Semantic badges/tags (`.semantic-investment`, `.policy-badge`, `.premium-badge`/`.no-premium-badge`, tab pills) restyled with a modern accent set — indigo, rose, emerald, amber, violet, cyan — tuned separately for `[data-theme="light"]` to keep contrast/readability consistent between dark and light modes
+- **Loading Spinner (v5.5.4)**: `.sf-spinner` — a rotating ring (`border-top-color: var(--primary)`, `sf-spin` keyframe) containing `.sf-spinner-logo`, the app logo, which counter-rotates (`sf-spin-reverse` keyframe) so it appears stationary while the ring spins around it. Both animations are disabled under `prefers-reduced-motion`
 
 ### Key CSS Classes
 
@@ -1211,10 +1211,10 @@ render()
 
 ```js
 APP_VERSION = { major: 1, minor: 0, build: 73 }
-getAppVersion() → "v5.5.3"
+getAppVersion() → "v5.5.4"
 ```
 
-- Displayed in footer: "SmartFin v5.5.3" (via `#appVersionDisplay`)
+- Displayed in footer: "SmartFin v5.5.4" (via `#appVersionDisplay`)
 - Hover tooltip shows: "Major: 1 | Minor: 0 | Build: 73"
 - Also used in data export payload (`version` field)
 - **Versioning scheme**: `v{MAJOR}.{MINOR}.{BUILD}`
@@ -1270,7 +1270,7 @@ When implementing changes to SmartFin, follow this systematic approach:
 ```
 tests/
 ├── tax-calculation.test.js    # Tax calculation logic tests
-├── sampledata.json             # NEW in v5.5.2 - representative sample dataset for
+├── sampledata.json             # NEW in v5.5.4 - representative sample dataset for
 │                                #   manually/automatically exercising dashboard,
 │                                #   budget, insights, and health-score logic
 ├── [future-test-files].test.js
@@ -1337,6 +1337,6 @@ When modifying the app, check these areas:
 
 ---
 
-*Last updated: v5.5.3 — Fixed "Settle from Saving" bug where previous month CC bill (unpaid) was not updating due to applyMonthlyAutoValues() skipping non-current/future months. Added explicit disclaimer for settling future month CC bills. Cache-busting updated to force fresh downloads of app.js and styles.css.*
+*Last updated: v5.5.4 — Fixed "Settle from Saving" bug where previous month CC bill (unpaid) was not updating due to applyMonthlyAutoValues() skipping non-current/future months. Added explicit disclaimer for settling future month CC bills. Cache-busting updated to force fresh downloads of app.js and styles.css.*
 
-*Previous update: 2026-08-31 (v5.5.2 — Email Infrastructure & Professional Pages)*
+*Previous update: 2026-08-31 (v5.5.4 — Email Infrastructure & Professional Pages)*
