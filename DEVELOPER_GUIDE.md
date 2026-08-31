@@ -1,4 +1,4 @@
-# SmartFin - Developer Guide (v5.5.0)
+# SmartFin - Developer Guide (v5.5.3)
 
 > Quick reference for developers working with SmartFin's modular architecture.
 

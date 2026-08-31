@@ -1,6 +1,6 @@
 # SmartFin – Architecture Document
 
-> Version 5.5.0 | August 2026
+> Version 5.5.3 | August 2026
 
 ## Version History
 

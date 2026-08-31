@@ -1530,14 +1530,17 @@ let activeTabId    = "dashboard";
 let appData        = { tabData: {}, customTabs: [], userName: "", monthlyBudgetData: {}, expenseTrackingData: {}, taxData: {} };
 let firestoreUnsub = null;
 let saveTimer      = null;
-let currentMonth    = new Date(); // For monthly budget navigation
-let currentExpenseMonth = new Date(); // For expense tracking navigation
+// Helper: return a Date set to the first of the given date's month.
+// Using day=1 avoids setMonth() overflow bugs (e.g. Aug 31 + 1 month → Oct 1 because Sep 31 doesn't exist).
+function firstOfMonth(d = new Date()) { return new Date(d.getFullYear(), d.getMonth(), 1); }
+let currentMonth    = firstOfMonth(); // For monthly budget navigation (normalized to 1st of month)
+let currentExpenseMonth = firstOfMonth(); // For expense tracking navigation (normalized to 1st of month)
 // Ensure expense tracking month is not in the future and not before onboarding date
 const today = new Date();
 const currentMonthKey = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}`;
 const expenseMonthKey = `${currentExpenseMonth.getFullYear()}-${String(currentExpenseMonth.getMonth() + 1).padStart(2, '0')}`;
 if (expenseMonthKey > currentMonthKey) {
-    currentExpenseMonth = new Date(); // Reset to current month if it's in the future
+    currentExpenseMonth = firstOfMonth(); // Reset to current month if it's in the future
 }
 // Check onboarding date after appData is loaded
 const od = appData.onboardingDate;
@@ -3162,25 +3165,30 @@ function generateDashboardReportText() {
         report += `  Total Balance: ${fmt(totalBalance)}\n\n`;
     }
 
-    // Current Month Budget
-    const currentMonthKey = getCurrentMonthKey();
+    // Current Month Budget (use the same calculated values the Dashboard displays)
+    const currentMonthKey = getMonthKey(new Date());
     const monthData = appData.monthlyBudgetData?.[currentMonthKey];
     if (monthData) {
         report += `CURRENT MONTH BUDGET (${currentMonthKey})\n`;
         const inflow = monthData.inflow || {};
         const outflow = monthData.outflow || {};
-        
-        const totalInflow = Object.keys(inflow).reduce((sum, key) => {
+
+        const totalInflow = Number(monthData._calculatedTotalIncome || Object.keys(inflow).reduce((sum, key) => {
             return sum + (parseFloat(inflow[key]) || 0);
-        }, 0);
-        
-        const totalOutflow = Object.keys(outflow).filter(k => !k.includes('Desc')).reduce((sum, key) => {
+        }, 0));
+
+        const totalOutflow = Number(monthData._calculatedTotalOutflow || Object.keys(outflow).filter(k => !k.includes('Desc')).reduce((sum, key) => {
             return sum + (parseFloat(outflow[key]) || 0);
-        }, 0);
-        
+        }, 0));
+
+        // Prefer the Dashboard's calculated budget balance for consistency
+        const balance = monthData._calculatedBudgetBalance != null
+            ? Number(monthData._calculatedBudgetBalance)
+            : (totalInflow - totalOutflow);
+
         report += `  Total Inflow: ${fmt(totalInflow)}\n`;
         report += `  Total Outflow: ${fmt(totalOutflow)}\n`;
-        report += `  Balance: ${fmt(totalInflow - totalOutflow)}\n\n`;
+        report += `  Balance: ${fmt(balance)}\n\n`;
     }
 
     // Investments Summary
@@ -3241,21 +3249,23 @@ function generateDashboardHTML() {
     const monthKey = getMonthKey(now);
     const monthData = (appData.monthlyBudgetData || {})[monthKey] || {};
 
-    // Use Budget page calculated values instead of recalculating
+    // Use Budget page calculated values instead of recalculating (single source of truth,
+    // same values the Dashboard displays via monthData._calculated*)
     const totalIncome = Number(monthData._calculatedTotalIncome || sumCategoryNumericValues(monthData.inflow));
     const totalOutflow = Number(monthData._calculatedTotalOutflow || sumCategoryNumericValues(monthData.outflow));
     const monthlyCommitments = Number(monthData._calculatedMonthlyCommitments || 0);
     const spendable = Number(monthData._calculatedSpendable || 0);
     const untracked = Number(monthData._calculatedUntracked || 0);
     const budgetBalance = Number(monthData._calculatedBudgetBalance || 0);
+    // "Available Funds" mirrors the Dashboard's primary "available after recurring commitments"
+    const availableFunds = spendable;
 
-    // Net Worth
-    const netWorthEntries = tabData.netWorth || [];
-    const assets = netWorthEntries.filter(e => e.type === "Asset");
-    const liabilities = netWorthEntries.filter(e => e.type === "Liability");
-    const totalAssets = assets.reduce((s, a) => s + Number(a.value || 0), 0);
-    const totalLiabilities = liabilities.reduce((s, l) => s + Number(l.value || 0), 0);
-    const netWorthValue = totalAssets - totalLiabilities;
+    // Net Worth — use the SAME shared summary the Dashboard/Net Worth tab use so the report
+    // matches exactly (includes auto-imported account balances and outflow liabilities).
+    const netWorthSummary = getDashboardNetWorthSummary();
+    const totalAssets = Number(netWorthSummary.totalAssets || 0);
+    const totalLiabilities = Number(netWorthSummary.totalLiabilities || 0);
+    const netWorthValue = Number(netWorthSummary.netWorth || 0);
     const debtToAssetRatio = totalAssets > 0 ? Math.round((totalLiabilities / totalAssets) * 100) : 0;
     
     // Accounts
@@ -7076,10 +7086,11 @@ function renderCardPreviewCards(entries) {
         item.className = "card-item" + (card.isPrimary === "Yes" ? " card-item-primary" : "");
 
         const accountClass  = card.accountPresent?.toLowerCase()  === "yes" ? "yes" : "no";
+        const debitCardClass = card.debitCardPresent?.toLowerCase() === "yes" ? "yes" : "no";
         const creditCardClass = card.creditCardPresent?.toLowerCase() === "yes" ? "yes" : "no";
         const kycClass      = card.kycUpdated?.toLowerCase()      === "yes" ? "yes" : "no";
         const nomineeClass  = card.nomineeAdded?.toLowerCase()    === "yes" ? "yes" : "no";
-        const displayPurpose = card.purpose === "Others" && card.purposeOther ? card.purposeOther : (card.purpose || "—");
+        const flagMark = cls => cls === "yes" ? "✓" : "✗";
         const primaryBadge  = card.isPrimary === "Yes"
             ? `<span class="card-item-badge semantic-expenditure">PRIMARY</span>` : "";
         const purposeBadge = card.purpose && card.purpose !== "Others"
@@ -7098,11 +7109,11 @@ function renderCardPreviewCards(entries) {
                     </div>
                 </div>
                 <div class="card-item-details">
-                    <span class="card-item-badge ${accountClass} ${accountClass === "yes" ? "semantic-saving" : "semantic-liability"}">Account: ${esc(card.accountPresent || "No")}</span>
-                    <span class="card-item-badge ${creditCardClass} ${creditCardClass === "yes" ? "semantic-liability" : "semantic-saving"}">Credit Card: ${esc(card.creditCardPresent || "No")}</span>
-                    <span class="card-item-badge ${kycClass} ${kycClass === "yes" ? "semantic-saving" : "semantic-insurance"}">KYC: ${esc(card.kycUpdated || "No")}</span>
-                    <span class="card-item-badge ${nomineeClass} ${nomineeClass === "yes" ? "semantic-saving" : "semantic-insurance"}">Nominee: ${esc(card.nomineeAdded || "No")}</span><br>
-                    ${esc(displayPurpose)}
+                    <span class="card-item-badge ${accountClass}">${flagMark(accountClass)} Account</span>
+                    <span class="card-item-badge ${debitCardClass}">${flagMark(debitCardClass)} Debit Card</span>
+                    <span class="card-item-badge ${creditCardClass}">${flagMark(creditCardClass)} Credit Card</span>
+                    <span class="card-item-badge ${kycClass}">${flagMark(kycClass)} KYC</span>
+                    <span class="card-item-badge ${nomineeClass}">${flagMark(nomineeClass)} Nominee</span>
                 </div>
             </div>
             <div class="card-item-amounts">
@@ -9548,6 +9559,18 @@ function showAutoCalcPopup(anchor, fieldLabel, breakdown) {
                 </div>
             `;
         }
+
+        // Disclaimer: if the viewed month has not started yet, settlement isn't available.
+        const isFutureViewedMonth = getMonthKey(currentMonth) > getMonthKey(new Date());
+        if (isFutureViewedMonth && displayTotal > 0) {
+            const monthLabel = currentMonth.toLocaleDateString("en-IN", { month: "long", year: "numeric" });
+            formulaHtml += `
+                <div class="auto-calc-popup-formula" style="background: rgba(234, 179, 8, 0.12);">
+                    <span class="formula-label">Note:</span>
+                    <span class="formula-expression" style="color: ${COLOR_WARNING};">This bill can only be settled once ${monthLabel} begins. "Settle from Saving" is unavailable until then.</span>
+                </div>
+            `;
+        }
     }
     
     const popup = document.createElement("div");
@@ -9772,9 +9795,24 @@ async function settleCreditCardFromSaving() {
         logger.warning('No month data found for CC settlement', { monthKey });
         return;
     }
-    const outstanding = Number(monthData.outflow?.creditCardOutstanding || 0);
+    // Block settlement for a month that has not started yet. Even if the month is unlocked
+    // (because the previous month was closed early), the carried CC bill only becomes payable
+    // once that month actually begins — settling now from current savings isn't allowed.
+    const todayMonthKey = getMonthKey(new Date());
+    if (monthKey > todayMonthKey) {
+        const monthLabel = currentMonth.toLocaleDateString("en-IN", { month: "long", year: "numeric" });
+        logger.info('CC settlement blocked for future month', { monthKey, todayMonthKey });
+        showAlert(`Settlement for ${monthLabel} isn't available yet.\n\nThis credit card bill can only be settled once ${monthLabel} begins. Please come back at the start of ${monthLabel}.`, { variant: 'warning', title: 'Not available yet' });
+        return;
+    }
+    // Total settleable CC = previous month's carried unpaid bill + this month's CC spending.
+    // Including the current month's spending lets the user settle now without waiting for
+    // the next month (when this month's spending would otherwise become the carried bill).
+    const carriedOutstanding = Number(monthData.outflow?.creditCardOutstanding || 0);
+    const currentMonthCC = Number(monthData.outflow?.midMonthCCOutstanding || 0);
+    const outstanding = carriedOutstanding + currentMonthCC;
     if (outstanding <= 0) {
-        logger.warning('No outstanding CC bill to settle', { outstanding });
+        logger.warning('No outstanding CC bill to settle', { carriedOutstanding, currentMonthCC });
         showAlert('No outstanding credit card bill to settle.', { variant: 'info' });
         return;
     }
@@ -9787,8 +9825,14 @@ async function settleCreditCardFromSaving() {
     
     // Ask user for settlement amount (default to full settlement or available balance, whichever is less)
     const maxSettleAmount = Math.min(outstanding, savingBalance);
+    let breakdownLine = "";
+    if (carriedOutstanding > 0 && currentMonthCC > 0) {
+        breakdownLine = `  • Previous month (unpaid): ${formatMoney(carriedOutstanding)}\n` +
+                        `  • This month's CC spending: ${formatMoney(currentMonthCC)}\n`;
+    }
     const userInput = await showPrompt(
         `Outstanding CC Bill: ${formatMoney(outstanding)}\n` +
+        breakdownLine +
         `Saving Balance: ${formatMoney(savingBalance)}\n` +
         `Max you can settle: ${formatMoney(maxSettleAmount)}\n\n` +
         `Enter amount (or leave blank to settle maximum):`,
@@ -9826,27 +9870,29 @@ async function settleCreditCardFromSaving() {
         return;
     }
 
-    // Track the settlement amount for auto-calculation
-    // The actual creditCardOutstanding will be calculated by applyMonthlyAutoValues
     if (!monthData._ccSettlementAmount) {
         monthData._ccSettlementAmount = 0;
     }
-    
-    // Cap the total settlement at the outstanding amount to prevent negative values
-    const currentOutstanding = Number(monthData.outflow?.creditCardOutstanding || 0);
-    const totalSettlement = monthData._ccSettlementAmount + settleAmount;
-    const effectiveSettlement = Math.min(totalSettlement, Math.max(currentOutstanding, outstanding));
-    
-    // If the effective settlement is less than the intended settlement (due to cap), adjust
-    if (effectiveSettlement < totalSettlement) {
-        logger.warning('Settlement amount capped at outstanding amount', { 
-            intendedSettlement: settleAmount, 
-            effectiveSettlement: effectiveSettlement - monthData._ccSettlementAmount,
-            outstanding: Math.max(currentOutstanding, outstanding)
-        });
-        monthData._ccSettlementAmount = effectiveSettlement;
-    } else {
-        monthData._ccSettlementAmount += settleAmount;
+
+    // Apply the settlement to the carried-over bill first (tracked via _ccSettlementAmount,
+    // which applyMonthlyAutoValues subtracts from creditCardOutstanding). Any remainder pays
+    // down this month's CC spending directly, reducing what carries into next month.
+    const settleAgainstCarried = Math.min(settleAmount, carriedOutstanding);
+    const settleAgainstCurrent = settleAmount - settleAgainstCarried;
+
+    if (settleAgainstCarried > 0) {
+        monthData._ccSettlementAmount += settleAgainstCarried;
+    }
+    if (settleAgainstCurrent > 0) {
+        const newCurrentCC = Math.max(0, currentMonthCC - settleAgainstCurrent);
+        monthData.outflow.midMonthCCOutstanding = newCurrentCC;
+        monthData.autoLinkedFields = monthData.autoLinkedFields || {};
+        monthData.autoLinkedFields["outflow.midMonthCCOutstanding"] = true;
+        monthData.autoLinkedBreakdown = monthData.autoLinkedBreakdown || {};
+        monthData.autoLinkedBreakdown["outflow.midMonthCCOutstanding"] = [
+            { name: "Current Month CC Spending", amount: currentMonthCC, source: "Quick Update (Mid-Month)" },
+            { name: "Less: Settled from Savings", amount: -settleAgainstCurrent, source: "Current Month Settlement" }
+        ];
     }
 
     // Update saving account balance
@@ -9855,8 +9901,11 @@ async function settleCreditCardFromSaving() {
     if (!appData.tabData) appData.tabData = {};
     appData.tabData.cards = updatedCards;
 
-    // Re-apply auto values to recalculate creditCardOutstanding with the new settlement amount
-    applyMonthlyAutoValues(monthKey, monthData);
+    // Re-apply auto values to recalculate creditCardOutstanding with the new settlement amount.
+    // forceApply=true ensures "Previous Month CC Bill (Unpaid)" is recomputed even when the
+    // settled month is not classified as current/future (e.g. current month already closed and
+    // the next month has not yet arrived) — otherwise the auto-value guard would skip the update.
+    applyMonthlyAutoValues(monthKey, monthData, true);
 
     logger.info('CC settlement successful', { 
         monthKey, 
@@ -10922,9 +10971,9 @@ nextMonthBtn.addEventListener("click", () => {
     proposed.setMonth(proposed.getMonth() + step);
     
     // Block navigation beyond next month (or next FY)
-    const maxDate = new Date();
+    // Set date to 1 BEFORE changing month to avoid overflow (e.g. Aug 31 → Oct 1)
+    const maxDate = firstOfMonth();
     maxDate.setMonth(maxDate.getMonth() + 1); // next month from today
-    maxDate.setDate(1);
 
     if (!isAnnualBudgetView) {
         // Allow viewing next month if the current viewed month is closed
@@ -11209,42 +11258,10 @@ if (btnRecalcTransfer) btnRecalcTransfer.addEventListener("click", async () => {
     showToast('Transfer recalculated. Variable expenditure has been corrected.', { variant: 'success' });
 });
 
-// ── Reconcile button ─────────────────────────────────────────────────────────
-const btnReconcile = document.getElementById("btnReconcile");
-if (btnReconcile) btnReconcile.addEventListener("click", () => {
-    const input = document.getElementById("currentExpAccBalanceInput");
-    const actualBalance = Number(input?.value || 0);
-    const transferDone = budgetState.transferDone || 0;
-    const trackedExp = budgetState.trackedExpenses || 0;
-    // Previous month carryforward adds to expected starting balance
-    const prevMonth = new Date(currentMonth);
-    prevMonth.setMonth(prevMonth.getMonth() - 1);
-    const prevMonthData = (appData.monthlyBudgetData || {})[getMonthKey(prevMonth)];
-    const prevCarryForward = Number(prevMonthData?._carryForwardDone || 0);
-    const expectedBalance = prevCarryForward + transferDone - trackedExp;
-    const untracked = Math.max(0, expectedBalance - actualBalance);
-
-    const grid = document.getElementById("reconciliationGrid");
-    if (grid) grid.hidden = false;
-    const el1 = document.getElementById("expectedExpBalance");
-    const el2 = document.getElementById("actualExpBalance");
-    const el3 = document.getElementById("reconciledUntracked");
-    if (el1) el1.textContent = formatMoney(expectedBalance);
-    if (el2) el2.textContent = formatMoney(actualBalance);
-    if (el3) {
-        el3.textContent = formatMoney(untracked);
-        el3.style.color = untracked > 0 ? COLOR_WARNING : COLOR_POSITIVE;
-    }
-
-    // Also update expenditure account balance in Accounts
-    const exp = budgetState.expAccount;
-    if (exp) {
-        exp.balance = actualBalance;
-        const cards = (appData.tabData || {}).cards || [];
-        appData.tabData.cards = cards.map(c => c.id === exp.id ? exp : c);
-        scheduleSave();
-    }
-});
+// Note: The standalone "Reconcile" UI was merged into the Quick Update flow.
+// Reconciliation now happens via calcVariableExpenditure() when the expenditure
+// balance is updated in Quick Update, using the current data structure
+// (_transferDone, _carryForwardDone, _initialBalance, expAccount.balance).
 
 // ── Close Current Month Budget button ─────────────────────────────────────────
 const btnCarryForward = document.getElementById("btnCarryForward");

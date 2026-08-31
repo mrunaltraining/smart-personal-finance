@@ -17,7 +17,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="assets/css/styles.css?v=1785884544">
+<link rel="stylesheet" href="assets/css/styles.css?v=1788200001">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
 <title>₹ SmartFin – Financial Planning</title>
@@ -506,61 +506,7 @@
                     </div>
                 </div>
 
-                <!-- Monthly Transfer & Reconciliation Section -->
-                <div class="expense-transfer-section" id="transferBreakdownSection">
-                    <h3>Monthly Transfer Breakdown</h3>
-                    <div class="expense-transfer-grid">
-                        <div class="expense-transfer-item">
-                            <span class="expense-transfer-label">Primary Income This Month</span>
-                            <strong id="transferPrimaryIncome">₹0</strong>
-                        </div>
-                        <div class="expense-transfer-item">
-                            <span class="expense-transfer-label">Auto-deducted Fixed Outflow</span>
-                            <strong id="transferFixedExpenses">₹0</strong>
-                        </div>
-                        <div class="auto-debit-breakdown-container">
-                            <span class="expense-transfer-label" style="font-size:0.78rem;color:var(--dim)">Breakdown by destination:</span>
-                            <div id="autoDebitBreakdown" class="auto-debit-breakdown"></div>
-                        </div>
-                        <div class="expense-transfer-item highlight-transfer">
-                            <span class="expense-transfer-label">Remaining → Transfer to Primary (Expenditure)</span>
-                            <strong id="transferAmount">₹0</strong>
-                        </div>
-                    </div>
-                    <div class="transfer-action-row">
-                        <div class="transfer-warning" style="background:rgba(234,179,8,0.10);border:1px solid rgba(234,179,8,0.3);border-radius:8px;padding:10px 14px;margin-bottom:8px;font-size:0.82rem;color:#eab308;">
-                            <strong>Warning:</strong> Add ALL outflow items before Execute Transfer. Items added after won't be deducted from salary.
-                        </div>
-                        <button type="button" id="btnDoTransfer" class="btn-do-transfer">Execute Transfer</button>
-                        <small class="transfer-note">Deducts all obligations from Salary, credits Expenditure/Saving/Investment accounts.</small>
-                    </div>
-                </div>
-
-                <!-- Transfer Mismatch Warning (outflows changed after transfer) -->
-                <div class="expense-transfer-section" id="transferMismatchWarning" hidden style="border-color:#ef4444">
-                    <h3 style="color:#ef4444">Transfer Mismatch Detected</h3>
-                    <div style="font-size:0.85rem;color:var(--dim);margin-bottom:0.5rem">
-                        Outflow items were added or changed <strong>after</strong> Execute Transfer. The transfer amount and variable expenditure are incorrect.
-                    </div>
-                    <div class="expense-transfer-grid">
-                        <div class="expense-transfer-item">
-                            <span class="expense-transfer-label">Transfer Used (old outflows)</span>
-                            <strong id="mismatchOldTransfer" style="color:#ef4444">₹0</strong>
-                        </div>
-                        <div class="expense-transfer-item">
-                            <span class="expense-transfer-label">Correct Transfer (current outflows)</span>
-                            <strong id="mismatchNewTransfer" style="color:#22c55e">₹0</strong>
-                        </div>
-                        <div class="expense-transfer-item">
-                            <span class="expense-transfer-label">Difference</span>
-                            <strong id="mismatchDifference" style="color:#eab308">₹0</strong>
-                        </div>
-                    </div>
-                    <div class="transfer-action-row">
-                        <button type="button" id="btnRecalcTransfer" class="btn-do-transfer" style="background:#ef4444">Recalculate Transfer</button>
-                        <small class="transfer-note">Corrects _transferDone and _initialBalance to match current outflows. Does not change account balances.</small>
-                    </div>
-                </div>
+                <!-- Transfer breakdown & Execute Transfer live only in Preview mode (see #budgetPreview) -->
 
                 <!-- Reconciliation merged into Quick Update above -->
             </div><!-- end budgetEdit -->
@@ -2093,7 +2039,7 @@
 <!-- EmailJS SDK -->
 <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
 <!-- SheetJS + Chart.js are lazy-loaded on demand (see app.js loadScript) -->
-<script src="assets/js/firebase-config.js?v=1785884544"></script>
-<script type="module" src="assets/js/app.js?v=1785897000"></script>
+<script src="assets/js/firebase-config.js?v=1788200001"></script>
+<script type="module" src="assets/js/app.js?v=1788200001"></script>
 </body>
 </html>

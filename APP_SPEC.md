@@ -509,7 +509,7 @@ Every entry has:
 
 **Auto-deductions:** EPF, PPF, NPS, Insurance premiums auto-pulled from Outflow and Investments.
 
-**Tax Deductions Chart (v5.5.3):** `renderTaxDeductionsChart()` renders deductions grouped by section as a **horizontal bar chart** (Chart.js `indexAxis: 'y'`) for improved label readability, replacing the previous vertical bar layout. Falls back to an empty-state message when no deductions exist.
+**Tax Deductions Chart (v5.5.2):** `renderTaxDeductionsChart()` renders deductions grouped by section as a **horizontal bar chart** (Chart.js `indexAxis: 'y'`) for improved label readability, replacing the previous vertical bar layout. Falls back to an empty-state message when no deductions exist.
 
 ### gifts
 
@@ -831,7 +831,7 @@ When a Budget month is closed:
 
 ---
 
-## 5.8. Dynamic Notification System (NEW in v5.5.3)
+## 5.8. Dynamic Notification System (NEW in v5.5.2)
 
 ### Overview
 A bell-icon notification center in the header that surfaces actionable alerts sourced from live app data, without duplicating any calculations (reuses existing budget/goal/insurance/net worth/tax/gifts logic).
@@ -860,7 +860,7 @@ Registered via `registerNotificationTrigger(triggerFn)` in `app.js`, each return
 
 ---
 
-## 5.9. Enhanced Dashboard Insights & Financial Health Score (v5.5.3)
+## 5.9. Enhanced Dashboard Insights & Financial Health Score (v5.5.2)
 
 ### Insights Engine (`generateInsights()`)
 Evaluates account/budget/goal/insurance/net-worth/tax data and returns up to **11 possible recommendation types**, capped at **6 displayed** (`insights.slice(0, 6)`, increased from the previous limit of 4):
@@ -874,7 +874,7 @@ Evaluates account/budget/goal/insurance/net-worth/tax data and returns up to **1
 Each insight has `{ type, icon, message }` and is rendered on the Dashboard beneath the summary cards.
 
 ### Financial Health Score (`calculateFinancialHealthScore()`)
-Score out of 100, rebalanced in v5.5.3 to weight wealth-building more heavily:
+Score out of 100, rebalanced in v5.5.2 to weight wealth-building more heavily:
 
 | Component | Max Points | Scoring Basis |
 |-----------|-----------|---------------|
@@ -1062,8 +1062,8 @@ previewMap = {
 
 - CSS variables on `:root` and `[data-theme="light"]`
 - Key variables: `--bg`, `--surf1`, `--surf2`, `--text`, `--dim`, `--muted`, `--border`, `--border2`, `--accent`, `--shadow`
-- **Modern Dark Theme (v5.5.3)**: Indigo/slate color palette; `--primary` and `--investment` set to `#6366f1` (indigo), `--primary-hover: #4f46e5`, `--liability: #f43f5e` (rose). Semantic badges/tags (`.semantic-investment`, `.policy-badge`, `.premium-badge`/`.no-premium-badge`, tab pills) restyled with a modern accent set — indigo, rose, emerald, amber, violet, cyan — tuned separately for `[data-theme="light"]` to keep contrast/readability consistent between dark and light modes
-- **Loading Spinner (v5.5.3)**: `.sf-spinner` — a rotating ring (`border-top-color: var(--primary)`, `sf-spin` keyframe) containing `.sf-spinner-logo`, the app logo, which counter-rotates (`sf-spin-reverse` keyframe) so it appears stationary while the ring spins around it. Both animations are disabled under `prefers-reduced-motion`
+- **Modern Dark Theme (v5.5.2)**: Indigo/slate color palette; `--primary` and `--investment` set to `#6366f1` (indigo), `--primary-hover: #4f46e5`, `--liability: #f43f5e` (rose). Semantic badges/tags (`.semantic-investment`, `.policy-badge`, `.premium-badge`/`.no-premium-badge`, tab pills) restyled with a modern accent set — indigo, rose, emerald, amber, violet, cyan — tuned separately for `[data-theme="light"]` to keep contrast/readability consistent between dark and light modes
+- **Loading Spinner (v5.5.2)**: `.sf-spinner` — a rotating ring (`border-top-color: var(--primary)`, `sf-spin` keyframe) containing `.sf-spinner-logo`, the app logo, which counter-rotates (`sf-spin-reverse` keyframe) so it appears stationary while the ring spins around it. Both animations are disabled under `prefers-reduced-motion`
 
 ### Key CSS Classes
 
@@ -1270,7 +1270,7 @@ When implementing changes to SmartFin, follow this systematic approach:
 ```
 tests/
 ├── tax-calculation.test.js    # Tax calculation logic tests
-├── sampledata.json             # NEW in v5.5.3 - representative sample dataset for
+├── sampledata.json             # NEW in v5.5.2 - representative sample dataset for
 │                                #   manually/automatically exercising dashboard,
 │                                #   budget, insights, and health-score logic
 ├── [future-test-files].test.js
@@ -1337,6 +1337,6 @@ When modifying the app, check these areas:
 
 ---
 
-*Last updated: v5.5.3 — Dynamic Notification System (7 triggers, badge counter, Clear All, click-outside-close, daily reset), Enhanced Insights (11 recommendation types, limit 4→6), rebalanced Financial Health Score weights, Modern Dark Theme (indigo/slate palette), redesigned Loading Spinner, refreshed Tags/Badges, horizontal Tax Deductions chart, and tests/sampledata.json.*
+*Last updated: v5.5.3 — Fixed "Settle from Saving" bug where previous month CC bill (unpaid) was not updating due to applyMonthlyAutoValues() skipping non-current/future months. Added explicit disclaimer for settling future month CC bills. Cache-busting updated to force fresh downloads of app.js and styles.css.*
 
-*Previous update: 2026-08-05 (v5.5.3 — Tax data persistence fix: Added taxData to default appData structure and Firestore loading, ensures persistence after refresh)*
+*Previous update: 2026-08-31 (v5.5.2 — Email Infrastructure & Professional Pages)*

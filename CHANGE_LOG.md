@@ -5,25 +5,14 @@ All notable changes to SmartFin will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [v5.5.3] - 2026-08-31 - Bug Fixes & Cache Busting
+
+### Fixed
+- **Settle from Saving**: Fixed bug where "Previous Month CC Bill (Unpaid)" was not updating when settling from savings. The issue was caused by `applyMonthlyAutoValues()` skipping recomputation for non-current/future months. Updated to `forceApply=true` to ensure all months are recalculated.
+- **Settle from Saving**: Added explicit disclaimer in breakdown popup when settling future month CC bills, making the behavior clear to users.
+- **Cache Busting**: Updated all cache-busting version strings in `index.html` to `?v=1788200001` to force fresh downloads of `app.js` and `styles.css`, ensuring all fixes are reflected after hard-reload.
+
 ## [5.5.0] - 2026-08-22 - Email Infrastructure & Professional Pages
-
-## [v5.5.3] - 2026-08-31 - Build Update
-
-### Changed
-- Bumped build number to 3
-
-
-## [v5.5.2] - 2026-08-31 - Build Update
-
-### Changed
-- Bumped build number to 2
-
-
-## [v5.5.1] - 2026-08-21 - Build Update
-
-### Changed
-- Bumped build number to 1
-
 
 ### Added
 - **EmailJS Integration**: Complete email service abstraction using EmailJS for transactional emails

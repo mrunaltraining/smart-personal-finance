@@ -9,8 +9,8 @@
 ### Source of Truth
 
 ```javascript
-// assets/js/app.js (line 807)
-const APP_VERSION = { major: 5, minor: 5, build: 0 };
+// assets/js/app.js (line 1061)
+const APP_VERSION = { major: 5, minor: 5, build: 3 };
 function getAppVersion() {
     return `v${APP_VERSION.major}.${APP_VERSION.minor}.${APP_VERSION.build}`;
 }

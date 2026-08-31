@@ -4733,16 +4733,27 @@ input[type="file"]::file-selector-button:hover {
     .legal-panel {
         width: 100vw;
     }
+    .legal-panel .legal-content,
+    .legal-content {
+        padding: 14px 16px 20px;
+    }
+    .legal-content ul {
+        padding-left: 20px;
+    }
 }
 
+/* Higher specificity (.legal-panel .legal-content) so the horizontal padding is not
+   overridden by the later-defined .help-content rule (both classes are on the same element). */
+.legal-panel .legal-content,
 .legal-content {
-    padding: 0 24px 16px;
+    padding: 16px 24px 24px;
     line-height: 1.6;
+    overflow-y: auto;
 }
 
 .legal-content ul {
-    margin: var(--space-sm) 0 var(--space-md) var(--space-lg);
-    padding-left: 20px;
+    margin: var(--space-sm) 0 var(--space-md) 0;
+    padding-left: 22px;
 }
 
 .legal-content li {
