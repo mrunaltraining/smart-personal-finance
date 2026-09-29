@@ -4062,6 +4062,10 @@ td.amount {
     height: 280px;
 }
 
+.annual-pie-section {
+    min-width: 0;
+}
+
 @media (max-width: 900px) {
     .annual-bottom-row { grid-template-columns: 1fr; }
 }
@@ -4164,7 +4168,7 @@ td.amount {
     .annual-summary              { grid-template-columns: repeat(2, 1fr); }
 
     .annual-month-item           { flex-direction: column; align-items: flex-start; gap: 8px; }
-    .annual-month-details        { flex-wrap: wrap; gap: 10px; }
+    .annual-month-details        { flex-wrap: wrap; gap: 10px; padding-left: 8px; border-left: 2px solid var(--border2); margin-left: 4px; }
 
     .insurance-summary,
     .card-summary,
@@ -4268,8 +4272,10 @@ td.amount {
 
     /* Annual breakdown months - optimized for mobile */
     .annual-month-item           { flex-direction: column; align-items: flex-start; gap: 6px; padding: 10px; }
-    .annual-month-details        { flex-direction: column; gap: 4px; }
-    .annual-month-detail         { font-size: 0.75rem; display: flex; justify-content: space-between; width: 100%; }
+    .annual-month-details        { flex-direction: column; gap: 4px; width: 100%; padding-left: 10px; border-left: 2px solid var(--border2); margin-left: 4px; }
+    .annual-pie-section          { padding: 14px 16px 18px; }
+    .annual-pie-section .chart-wrapper { height: 300px; }
+    .annual-month-detail         { font-size: 0.75rem; display: flex; justify-content: space-between; width: 100%; padding-left: 2px; }
     .annual-month-detail strong  { font-weight: 600; }
 
     /* Section headers */
@@ -8007,7 +8013,7 @@ input:invalid:not(:placeholder-shown) {
     .chart-section, .chart-container, .gifts-chart-container { padding: 16px !important; border-radius: 16px; }
     .chart-wrapper { height: 240px; }
     .chart-container canvas { max-height: 270px; }
-    .annual-pie-section .chart-wrapper { height: 240px; }
+    .annual-pie-section .chart-wrapper { height: 280px; }
     #dashboardTrendChart { height: 230px !important; }
 
     .table-wrap, .expense-table-container { position: relative; overscroll-behavior-x: contain; -webkit-overflow-scrolling: touch; }
@@ -8041,7 +8047,8 @@ input:invalid:not(:placeholder-shown) {
     .budget-header .month-nav, .expense-tracking-ui .month-nav { gap: 2px; }
     .budget-header .month-nav .btn-nav, .expense-tracking-ui .month-nav .btn-nav { min-width: 0; padding: 8px 7px; font-size: .7rem; }
     .month-display { font-size: .78rem; }
-    .chart-wrapper, .annual-pie-section .chart-wrapper { height: 210px; }
+    .chart-wrapper { height: 210px; }
+    .annual-pie-section .chart-wrapper { height: 250px; }
     #dashboardTrendChart { height: 205px !important; }
     .table-wrap::after, .expense-table-container::after { font-size: .6rem; }
     

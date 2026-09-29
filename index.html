@@ -441,6 +441,25 @@
 
                 <!-- Reconciliation merged into Quick Update above -->
 
+                <!-- Settle CC Bill from Savings -->
+                <div class="expense-transfer-section" id="settleSavingSection" hidden style="border-color:#6366f1">
+                    <h3>Settle Credit Card Bill from Savings</h3>
+                    <div class="expense-transfer-grid">
+                        <div class="expense-transfer-item">
+                            <span class="expense-transfer-label">CC Outstanding (carried + this month)</span>
+                            <strong id="settleSavingOutstanding">₹0</strong>
+                        </div>
+                        <div class="expense-transfer-item">
+                            <span class="expense-transfer-label">Saving Account Balance</span>
+                            <strong id="settleSavingBalance">₹0</strong>
+                        </div>
+                    </div>
+                    <div class="transfer-action-row">
+                        <button type="button" id="btnSettleFromSaving" class="btn-do-transfer" style="background:#6366f1">Settle from Saving</button>
+                        <small class="transfer-note">Deducts the CC bill from your Saving account balance. You choose the exact amount.</small>
+                    </div>
+                </div>
+
                 <!-- Close Current Month Budget -->
                 <div class="expense-transfer-section" id="carryforwardSection" hidden>
                     <h3>Close Current Month Budget</h3>

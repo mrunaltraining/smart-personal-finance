@@ -9405,13 +9405,13 @@ function calculateAnnualSummary() {
                         fixedMonthlyOutflow += monthlyAmt;
                     });
                     // Exclude borrowing from spendable as it's not new income
-                    const borrowing = Number(monthData.inflow?.borrowing || 0);
+                    const borrowing = Number(storedMd.inflow?.borrowing || 0);
                     const inflowWithoutBorrowing = month.income - borrowing;
                     const spendable = inflowWithoutBorrowing - fixedMonthlyOutflow;
                     // Calculate actual variable expenditure and CC outstanding
-                    const actualVariableExp = Number(monthData.outflow?.variableExpenditure || 0);
-                    const actualCCOutstanding = Number(monthData.outflow?.creditCardOutstanding || 0) + Number(monthData.outflow?.midMonthCCOutstanding || 0);
-                    const totalOndemand = Number(monthData.investing?.onetimeSaving || 0) + Number(monthData.investing?.onetimeInvestment || 0) + Number(monthData.investing?.ondemandExpenditure || 0) + Number(monthData.investing?.ondemandLiability || 0);
+                    const actualVariableExp = Number(storedMd.outflow?.variableExpenditure || 0);
+                    const actualCCOutstanding = Number(storedMd.outflow?.creditCardOutstanding || 0) + Number(storedMd.outflow?.midMonthCCOutstanding || 0);
+                    const totalOndemand = Number(storedMd.investing?.onetimeSaving || 0) + Number(storedMd.investing?.onetimeInvestment || 0) + Number(storedMd.investing?.ondemandExpenditure || 0) + Number(storedMd.investing?.ondemandLiability || 0);
                     budgetBalance = spendable - (actualVariableExp + actualCCOutstanding + totalOndemand);
                 }
                 
@@ -9480,7 +9480,9 @@ function renderAnnualPieChart(totals) {
                     labels: {
                         color: getChartThemeColors().text,
                         font: { size: 12 },
-                        padding: 16,
+                        boxWidth: 12,
+                        boxHeight: 12,
+                        padding: 12,
                         generateLabels: (chart) => {
                             const ds = chart.data.datasets[0];
                             const total = ds.data.reduce((a, b) => a + b, 0);
@@ -9493,7 +9495,7 @@ function renderAnnualPieChart(totals) {
                                 color: textColor,
                                 hidden: false,
                                 index: i
-                            }));
+                            })).filter((item, i) => Number(ds.data[i] || 0) > 0);
                         }
                     }
                 },
@@ -9560,16 +9562,24 @@ function showAutoCalcPopup(anchor, fieldLabel, breakdown) {
             `;
         }
 
-        // Disclaimer: if the viewed month has not started yet, settlement isn't available.
-        const isFutureViewedMonth = getMonthKey(currentMonth) > getMonthKey(new Date());
+        // Disclaimer: if the viewed month has not started yet, settlement may not be available.
+        const _todayNow = new Date();
+        const isFutureViewedMonth = getMonthKey(currentMonth) > getMonthKey(_todayNow);
         if (isFutureViewedMonth && displayTotal > 0) {
             const monthLabel = currentMonth.toLocaleDateString("en-IN", { month: "long", year: "numeric" });
-            formulaHtml += `
-                <div class="auto-calc-popup-formula" style="background: rgba(234, 179, 8, 0.12);">
-                    <span class="formula-label">Note:</span>
-                    <span class="formula-expression" style="color: ${COLOR_WARNING};">This bill can only be settled once ${monthLabel} begins. "Settle from Saving" is unavailable until then.</span>
-                </div>
-            `;
+            // Check if today is the last day of the month and this is exactly next month (settlement allowed)
+            const _lastDayOfCurrentMonth = new Date(_todayNow.getFullYear(), _todayNow.getMonth() + 1, 0).getDate();
+            const _isLastDayOfMonth = _todayNow.getDate() === _lastDayOfCurrentMonth;
+            const _nextMonthKey = getMonthKey(new Date(_todayNow.getFullYear(), _todayNow.getMonth() + 1, 1));
+            const _isNextMonth = getMonthKey(currentMonth) === _nextMonthKey;
+            if (!(_isLastDayOfMonth && _isNextMonth)) {
+                formulaHtml += `
+                    <div class="auto-calc-popup-formula" style="background: rgba(234, 179, 8, 0.12);">
+                        <span class="formula-label">Note:</span>
+                        <span class="formula-expression" style="color: ${COLOR_WARNING};">This bill can only be settled once ${monthLabel} begins. "Settle from Saving" is unavailable until then.</span>
+                    </div>
+                `;
+            }
         }
     }
     
@@ -9750,17 +9760,6 @@ function renderCategoryFields(container, fields, data, autoLinkedFields = {}, au
         
         div.appendChild(input);
 
-        // Add "Settle from Saving" button for credit card outstanding field
-        if (field.id === "creditCardOutstanding") {
-            const settleBtn = document.createElement("button");
-            settleBtn.type = "button";
-            settleBtn.className = "btn-settle-saving";
-            settleBtn.textContent = "Settle from Saving";
-            settleBtn.title = "Move credit card outstanding to the Saving account balance";
-            settleBtn.addEventListener("click", () => settleCreditCardFromSaving());
-            div.appendChild(settleBtn);
-        }
-
         // Add description text input for on-demand fields
         if (field.hasDescription) {
             const descInput = document.createElement("input");
@@ -9798,12 +9797,25 @@ async function settleCreditCardFromSaving() {
     // Block settlement for a month that has not started yet. Even if the month is unlocked
     // (because the previous month was closed early), the carried CC bill only becomes payable
     // once that month actually begins — settling now from current savings isn't allowed.
-    const todayMonthKey = getMonthKey(new Date());
+    // Exception: allow settlement on the last day of the current month for the immediately
+    // next month, since the CC bill is already known and the user is about to start that month.
+    const todayNow = new Date();
+    const todayMonthKey = getMonthKey(todayNow);
     if (monthKey > todayMonthKey) {
-        const monthLabel = currentMonth.toLocaleDateString("en-IN", { month: "long", year: "numeric" });
-        logger.info('CC settlement blocked for future month', { monthKey, todayMonthKey });
-        showAlert(`Settlement for ${monthLabel} isn't available yet.\n\nThis credit card bill can only be settled once ${monthLabel} begins. Please come back at the start of ${monthLabel}.`, { variant: 'warning', title: 'Not available yet' });
-        return;
+        // Check if today is the last day of the current month and the viewed month is exactly next month
+        const lastDayOfCurrentMonth = new Date(todayNow.getFullYear(), todayNow.getMonth() + 1, 0).getDate();
+        const isLastDayOfMonth = todayNow.getDate() === lastDayOfCurrentMonth;
+        // Build next month key from today
+        const nextMonthDate = new Date(todayNow.getFullYear(), todayNow.getMonth() + 1, 1);
+        const nextMonthKey = getMonthKey(nextMonthDate);
+        const isNextMonth = monthKey === nextMonthKey;
+        if (!isLastDayOfMonth || !isNextMonth) {
+            const monthLabel = currentMonth.toLocaleDateString("en-IN", { month: "long", year: "numeric" });
+            logger.info('CC settlement blocked for future month', { monthKey, todayMonthKey });
+            showAlert(`Settlement for ${monthLabel} isn't available yet.\n\nThis credit card bill can only be settled once ${monthLabel} begins. Please come back at the start of ${monthLabel}.`, { variant: 'warning', title: 'Not available yet' });
+            return;
+        }
+        logger.info('CC settlement allowed on last day of month for next month', { monthKey, todayMonthKey });
     }
     // Total settleable CC = previous month's carried unpaid bill + this month's CC spending.
     // Including the current month's spending lets the user settle now without waiting for
@@ -9906,11 +9918,21 @@ async function settleCreditCardFromSaving() {
     // settled month is not classified as current/future (e.g. current month already closed and
     // the next month has not yet arrived) — otherwise the auto-value guard would skip the update.
     applyMonthlyAutoValues(monthKey, monthData, true);
+    const recalculatedCarried = Number(monthData.outflow?.creditCardOutstanding || 0);
+    const recalculatedCurrent = Number(monthData.outflow?.midMonthCCOutstanding || 0);
+    const recalculatedOutstanding = recalculatedCarried + recalculatedCurrent;
+    const settleOutstandingEl = document.getElementById("settleSavingOutstanding");
+    const settleBalanceEl = document.getElementById("settleSavingBalance");
+    if (settleOutstandingEl) settleOutstandingEl.textContent = formatMoney(recalculatedOutstanding);
+    if (settleBalanceEl) settleBalanceEl.textContent = formatMoney(savingAccount.balance);
 
     logger.info('CC settlement successful', { 
         monthKey, 
         settleAmount, 
         totalSettled: monthData._ccSettlementAmount,
+        recalculatedCarried,
+        recalculatedCurrent,
+        recalculatedOutstanding,
         previousBalance: savingBalance,
         newBalance: savingBalance - settleAmount
     });
@@ -10229,6 +10251,32 @@ function calculateAndDisplaySummary(monthData) {
             if (cfBalEl) cfBalEl.textContent = formatMoney(expBalance);
         } else {
             carrySection.hidden = true;
+        }
+    }
+
+    // Settle from Saving section — show when there's a CC outstanding and a Saving account exists
+    const settleSection = document.getElementById("settleSavingSection");
+    if (settleSection) {
+        const cards = getCardEntries ? getCardEntries() : [];
+        const savingAccount = cards.find(c => c.purpose === "Savings" || c.purpose === "Saving");
+        const carriedCC = Number(monthData.outflow?.creditCardOutstanding || 0);
+        const currentCC  = Number(monthData.outflow?.midMonthCCOutstanding || 0);
+        const totalCC    = carriedCC + currentCC;
+        // Allow for current month, past months, and next-month on last day of current month
+        const todayNow       = new Date();
+        const todayMonthKey  = getMonthKey(todayNow);
+        const lastDayOfMonth = new Date(todayNow.getFullYear(), todayNow.getMonth() + 1, 0).getDate();
+        const isLastDay      = todayNow.getDate() === lastDayOfMonth;
+        const nextMK         = getMonthKey(new Date(todayNow.getFullYear(), todayNow.getMonth() + 1, 1));
+        const isSettleable   = monthKey <= todayMonthKey || (isLastDay && monthKey === nextMK);
+        if (savingAccount && totalCC > 0 && isSettleable && !isMonthClosed) {
+            settleSection.hidden = false;
+            const outEl = document.getElementById("settleSavingOutstanding");
+            const balEl = document.getElementById("settleSavingBalance");
+            if (outEl) outEl.textContent = formatMoney(totalCC);
+            if (balEl) balEl.textContent = formatMoney(Number(savingAccount.balance || 0));
+        } else {
+            settleSection.hidden = true;
         }
     }
 }
@@ -11011,6 +11059,8 @@ toggleBudgetView.addEventListener("click", () => {
     // Hide edit and close buttons in annual view
     if (toggleBudgetEdit) toggleBudgetEdit.hidden = isAnnualBudgetView;
     if (btnCarryForward) btnCarryForward.hidden = isAnnualBudgetView;
+    const _settleSec = document.getElementById("settleSavingSection");
+    if (_settleSec && isAnnualBudgetView) _settleSec.hidden = true;
     
     renderMonthlyBudget();
 });
@@ -11264,6 +11314,9 @@ if (btnRecalcTransfer) btnRecalcTransfer.addEventListener("click", async () => {
 // (_transferDone, _carryForwardDone, _initialBalance, expAccount.balance).
 
 // ── Close Current Month Budget button ─────────────────────────────────────────
+const btnSettleFromSaving = document.getElementById("btnSettleFromSaving");
+if (btnSettleFromSaving) btnSettleFromSaving.addEventListener("click", () => settleCreditCardFromSaving());
+
 const btnCarryForward = document.getElementById("btnCarryForward");
 if (btnCarryForward) btnCarryForward.addEventListener("click", async () => {
     const exp = budgetState.expAccount;

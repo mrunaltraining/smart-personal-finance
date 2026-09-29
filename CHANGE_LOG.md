@@ -5,9 +5,13 @@ All notable changes to SmartFin will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [v5.5.3] - 2026-08-31 - Bug Fixes & Cache Busting
+## [v5.5.5] - 2026-08-31 - Mobile UI & Settle from Saving Fixes
 
 ### Fixed
+- **Annual Budget - Mobile Monthly Breakdown**: Fixed incorrect indentation in the "Monthly Breakdown" section on mobile. Detail rows (income, expenditure, savings, etc.) now visually indent under the month name with a left border accent, making it clear they belong to the selected month. Applied at both `≤860px` and `≤520px` breakpoints.
+- **Settle from Saving - Last Day of Month**: Fixed "Settle from Saving" being blocked on the last day of the current month when viewing the next month's budget. Previously, the check `monthKey > todayMonthKey` always blocked settlement for any future month. Now, if today is the last day of the current month and the viewed month is exactly the next calendar month, the settlement is allowed (the CC bill is already known at this point). The warning note in the CC outstanding breakdown popup is similarly suppressed in this case.
+
+
 - **Settle from Saving**: Fixed bug where "Previous Month CC Bill (Unpaid)" was not updating when settling from savings. The issue was caused by `applyMonthlyAutoValues()` skipping recomputation for non-current/future months. Updated to `forceApply=true` to ensure all months are recalculated.
 - **Settle from Saving**: Added explicit disclaimer in breakdown popup when settling future month CC bills, making the behavior clear to users.
 - **Cache Busting**: Updated all cache-busting version strings in `index.html` to `?v=1788200001` to force fresh downloads of `app.js` and `styles.css`, ensuring all fixes are reflected after hard-reload.

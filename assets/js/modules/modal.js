@@ -2,6 +2,7 @@
 // Replaces native alert(), confirm(), prompt() with styled async modals
 
 let _modalContainer = null;
+let _closeTimer = null;  // Tracks pending closeModal setTimeout
 
 function getContainer() {
     if (_modalContainer) return _modalContainer;
@@ -18,6 +19,8 @@ function getContainer() {
 
 function renderModal(html) {
     const container = getContainer();
+    // Cancel any pending closeModal timeout to prevent wiping a newly-rendered modal
+    if (_closeTimer) { clearTimeout(_closeTimer); _closeTimer = null; }
     container.innerHTML = html;
     container.hidden = false;
     container.classList.add('sf-modal-open');
@@ -33,9 +36,11 @@ function closeModal() {
     const container = getContainer();
     container.classList.remove('sf-modal-open');
     document.body.classList.remove('sf-modal-active');
-    setTimeout(() => {
+    if (_closeTimer) clearTimeout(_closeTimer);
+    _closeTimer = setTimeout(() => {
         container.hidden = true;
         container.innerHTML = '';
+        _closeTimer = null;
     }, 200);
 }
 
